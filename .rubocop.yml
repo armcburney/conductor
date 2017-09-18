@@ -1,0 +1,35 @@
+AllCops:
+  TargetRubyVersion: 2.4
+
+Documentation:
+  Enabled: false
+
+Metrics/ModuleLength:
+  Exclude:
+    - ./**/*_spec.rb
+
+Metrics/BlockLength:
+  Exclude:
+    - ./**/*_spec.rb
+
+Metrics/LineLength:
+  Max: 120
+
+Rails:
+  Enabled: true
+
+Style/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    '%i': ()
+    '%w': ()
+
+Style/MutableConstant:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+  ConsistentQuotesInMultiline: true
+  Enabled: true

@@ -1,5 +1,5 @@
 # Conductor
-📻 SE 464 Group Project &mdash; Andrew Codispoti, Adam Klen, Andrew McBurney, Dave Pagurek Van Mossel
+📻 Written by &mdash; Andrew Codispoti, Adam Klen, Andrew McBurney, Dave Pagurek Van Mossel
 ___
 
 ### Development Setup

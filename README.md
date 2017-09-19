@@ -7,7 +7,7 @@ ___
 #### Mac Setup
 
 1. Intstall brew
-```
+```shell
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
@@ -16,36 +16,60 @@ ___
 brew install rbenv
 ```
 
-3. Install Ruby 2.4.1
+#### Ubuntu 16.04 Setup
+
+1. Update apt-get
+```shell
+sudo apt-get update
+```
+
+2. Install dependencies for rbenv
+```shell
+sudo apt-get install autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev
+```
+
+3. Install rbenv
+```shell
+git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+```
+
+4. Add `~/.rbenv/bin` to your `$PATH`
+```shell
+echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(rbenv init -)"' >> ~/.bashrc
+```
+
+5. Install ruby-build for `rbenv install` command
+```shell
+git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+```
+
+#### General Setup
+
+1. Install Ruby 2.4.1
 ```shell
 rbenv install 2.4.1
 rbenv shell 2.4.1
 rbenv rehash
 ```
 
-4. Install bundler (package manager), and rubocop (linter)
+2. Install bundler (package manager), and rubocop (linter)
 ```shell
 gem install bundler
 gem install rubocop
 ```
 
-#### Linux Setup
-
-1.
-
-#### General Setup
-
-1. Install all dependencies
+3. Install all dependencies
 ```shell
 bundle install
 ```
 
-2. Create development and test databases
+4. Create development and test databases
 ```shell
 rake db:create
 ```
 
-3. Start the server on http://localhost:5000/
+5. Start the server on http://localhost:5000/
 ```shell
 foreman start
 ```
@@ -53,12 +77,12 @@ foreman start
 ### Production Deploys
 
 1. Add the heroku remote
-```
+```shell
 heroku git:remote -a conductor-se464
 ```
 
 2. Push your branch
-```
+```shell
 git push heroku your_branch:master
 ```
 

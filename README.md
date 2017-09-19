@@ -1,9 +1,10 @@
 # Conductor
+📻 SE 464 Group Project &mdash; Andrew Codispoti, Adam Klen, Andrew McBurney, Dave Pagurek Van Mossel
+___
 
-## Development Setup
+### Development Setup
 
-### Mac Setup
-_Skip if not on Mac_
+#### Mac Setup
 
 1. Intstall brew
 ```
@@ -28,12 +29,11 @@ gem install bundler
 gem install rubocop
 ```
 
-### Linux Setup
-_Skip if not on Linux_
+#### Linux Setup
 
 1.
 
-### General Setup
+#### General Setup
 
 1. Install all dependencies
 ```shell
@@ -45,10 +45,22 @@ bundle install
 rake db:create
 ```
 
-3. Start the server on port 5000
+3. Start the server on http://localhost:5000/
 ```shell
 foreman start
 ```
 
-## Program Output Server-Side
+### Production Deploys
+
+1. Add the heroku remote
+```
+heroku git:remote -a conductor-se464
+```
+
+2. Push your branch
+```
+git push heroku your_branch:master
+```
+
+### Program Output Server-Side
 ![Program Output](https://github.com/AndrewMcBurney/conductor/blob/master/app/assets/images/readme/flow.png)

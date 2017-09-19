@@ -66,7 +66,7 @@ bundle install
 
 4. Create development and test databases
 ```shell
-rake db:create
+bin/rails db:create
 ```
 
 5. Start the server on http://localhost:5000/

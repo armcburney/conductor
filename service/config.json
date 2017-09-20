@@ -1,0 +1,24 @@
+// sample configuration file
+
+{
+    // current working directory
+    cwd : "",
+
+    // the main executable to run
+    main_executable : "",
+
+    // arguments to pass to the command
+    command_line_args : [
+    ],
+
+    // streams to send back to master
+    send_back_stdout:true,
+    send_back_stderr:true,
+
+    // timeout in ms to try running job
+    timeout: 1000,
+
+    // cleanup log files for this process  from the wrapper
+    cleanup_after: false
+
+}

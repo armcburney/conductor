@@ -1,0 +1,21 @@
+p#notice = notice
+
+p
+  strong Event receiver:
+  = @event_action.event_receiver
+p
+  strong Job type:
+  = @event_action.job_type
+p
+  strong Email address:
+  = @event_action.email_address
+p
+  strong Webhook url:
+  = @event_action.webhook_url
+p
+  strong Webhook body:
+  = @event_action.webhook_body
+
+= link_to 'Edit', edit_event_action_path(@event_action)
+'  |
+= link_to 'Back', event_actions_path

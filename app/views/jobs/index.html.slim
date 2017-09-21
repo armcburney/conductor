@@ -1,0 +1,31 @@
+h1 Listing jobs
+
+table
+  thead
+    tr
+      th Stdout
+      th Stderr
+      th Status
+      th Return code
+      th Worker
+      th Job type
+      th
+      th
+      th
+
+  tbody
+    - @jobs.each do |job|
+      tr
+        td = job.stdout
+        td = job.stderr
+        td = job.status
+        td = job.return_code
+        td = job.worker
+        td = job.job_type
+        td = link_to 'Show', job
+        td = link_to 'Edit', edit_job_path(job)
+        td = link_to 'Destroy', job, data: { confirm: 'Are you sure?' }, method: :delete
+
+br
+
+= link_to 'New Job', new_job_path

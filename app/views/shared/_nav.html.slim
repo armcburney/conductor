@@ -1,0 +1,13 @@
+.row.header
+  .section
+    nav
+      label#menu-toggle-label for="menu-toggle"
+      input#menu-toggle type="checkbox"
+      .logo
+
+      .icon-menu
+      ul.menu
+          li = link_to "Workers", workers_path
+          li = link_to "Jobs", jobs_path
+          li = link_to "Event Actions", event_actions_path
+          li = link_to "Event Receivers", event_receivers_path

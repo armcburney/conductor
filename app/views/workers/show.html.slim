@@ -1,0 +1,18 @@
+p#notice = notice
+
+p
+  strong User:
+  = @worker.user
+p
+  strong Address:
+  = @worker.address
+p
+  strong Last heartbeat:
+  = @worker.last_heartbeat
+p
+  strong Job:
+  = @worker.job
+
+= link_to 'Edit', edit_worker_path(@worker)
+'  |
+= link_to 'Back', workers_path

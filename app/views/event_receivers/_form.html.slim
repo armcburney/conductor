@@ -1,0 +1,21 @@
+= form_for @event_receiver do |f|
+  - if @event_receiver.errors.any?
+    #error_explanation
+      h2 = "#{pluralize(@event_receiver.errors.count, "error")} prohibited this event_receiver from being saved:"
+      ul
+        - @event_receiver.errors.full_messages.each do |message|
+          li = message
+
+  .field
+    = f.label :start_time
+    = f.datetime_select :start_time
+  .field
+    = f.label :interval
+    = f.number_field :interval
+  .field
+    = f.label :job_type
+    = f.text_field :job_type
+  .field
+    = f.label :action
+    = f.text_field :action
+  .actions = f.submit

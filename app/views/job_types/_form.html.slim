@@ -1,0 +1,27 @@
+= form_for @job_type do |f|
+  - if @job_type.errors.any?
+    #error_explanation
+      h2 = "#{pluralize(@job_type.errors.count, "error")} prohibited this job_type from being saved:"
+      ul
+        - @job_type.errors.full_messages.each do |message|
+          li = message
+
+  .field
+    = f.label :script
+    = f.text_area :script
+  .field
+    = f.label :working_directory
+    = f.text_field :working_directory
+  .field
+    = f.label :environment_variables
+    = f.text_area :environment_variables
+  .field
+    = f.label :timeout
+    = f.number_field :timeout
+  .field
+    = f.label :name
+    = f.text_field :name
+  .field
+    = f.label :user
+    = f.text_field :user
+  .actions = f.submit

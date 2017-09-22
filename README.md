@@ -11,9 +11,17 @@ ___
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-2. Install rbenv
+2. Install rbenv and other dependencies
 ```shell
 brew install rbenv
+brew install postgres
+brew install redis
+```
+
+3. Start Postgres and Redis
+```shell
+brew services start postgresql
+brew services start redis
 ```
 
 #### Ubuntu 16.04 Setup

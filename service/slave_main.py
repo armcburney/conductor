@@ -12,6 +12,9 @@ import websockets
 import subprocess
 import psutil
 
+logging.basicConfig()
+logger = logging.getLogger("Slave Main")
+logger.setLevel(logging.DEBUG)
 
 class ServerHealth:
     """
@@ -22,13 +25,13 @@ class ServerHealth:
         self.cpu_count = psutil.cpu_count()
         self.cpu_freq = psutil.cpu_freq()
         self.cpu_util = psutil.cpu_times_percent()
-        self.disk_usage = psutil.disk_usage()
+        # self.disk_usage = psutil.disk_usage()
         self.network_usage = psutil.net_io_counters()
         self.virtual_memory = psutil.virtual_memory()
         self.swap_memory = psutil.swap_memory()
 
 
-class HealthCheckThread(threading.Thread):
+class HealthCheckCoroutine():
     """
     Periodically poll the system and send stats to the master.
     """
@@ -40,15 +43,15 @@ class HealthCheckThread(threading.Thread):
         return ServerHealth()
 
     def send_stats(self, health):
-        print (health)
-        print ("TODO: implement")
+        logger.debug("Logging node health")
 
-    def run():
+    async def run(self, websocket):
+        logger.debug("Starting health check coroutine.")
         while(True):
             self.send_stats(self.get_server_health())
 
             # sleep for some timeout
-            time.sleep(self.interval)
+            await time.sleep(self.interval)
 
 class SlaveManager():
     """
@@ -68,40 +71,49 @@ class SlaveManager():
         self.service_port = service_port
         self.api_token = api_token
 
-        # Create thread to be used for checking health of our server
-        self._health_check_thread = threading.Thread()
-
-    async def process_command(self):
-        pass
+    async def process_command(self, websocket):
+        # keep on processing commands while available
+        command = await websocket.recv()
+        logger.debug("Processing command: {}".format(command))
 
     def spawn_worker_wrapper(self,):
         """
         Get a command to spawn a worker process.
         """
-        pass
+        logging.debug("Spawning wrapper")
 
     async def initiate_connection(self, websocket):
         await websocket.send("000:{}".format(self.hostname))
         response = await websocket.recv()
-
         # TODO: handle the error code and possibly recover
 
     async def run(self):
 
-        # Start thread to send periodic health checks to the Conductor service
-        self._health_check_thread.start()
-
         # connects to websocket on host
         async with websockets.connect(self.service_host) as websocket:
+            # associate this node with the main server
+            logger.debug("Initiating connection")
             await self.initiate_connection(websocket)
 
+            # schedule the reporter coroutine
+            self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine().run(websocket))
+
             while (True):
-                # keep on processing commands while available
-                command = await websocket.recv()
-                logging.debug("Processing command: {}".format(command))
-                await self.process_command(command)
+                await asyncio.ensure_future(self.process_command(websocket))
 
 if __name__ == "__main__":
+
+    slave_manager = SlaveManager(
+        hostname="host",
+        api_token="",
+        service_host="ws://localhost:8765",
+        service_port="port",
+    )
+
+    logger.debug("Starting event loop")
+    asyncio.get_event_loop().run_until_complete(slave_manager.run())
+    asyncio.get_event_loop().run_forever()
+    logger.debug("Done event loop")
 
     parser = ArgumentParser("Main communication endpoint on server. Spawn to communicate with Conductor service.")
 

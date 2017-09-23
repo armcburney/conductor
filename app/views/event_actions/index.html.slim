@@ -1,0 +1,29 @@
+h1 Listing event_actions
+
+table
+  thead
+    tr
+      th Event receiver
+      th Job type
+      th Email address
+      th Webhook url
+      th Webhook body
+      th
+      th
+      th
+
+  tbody
+    - @event_actions.each do |event_action|
+      tr
+        td = event_action.event_receiver
+        td = event_action.job_type
+        td = event_action.email_address
+        td = event_action.webhook_url
+        td = event_action.webhook_body
+        td = link_to 'Show', event_action
+        td = link_to 'Edit', edit_event_action_path(event_action)
+        td = link_to 'Destroy', event_action, data: { confirm: 'Are you sure?' }, method: :delete
+
+br
+
+= link_to 'New Event action', new_event_action_path

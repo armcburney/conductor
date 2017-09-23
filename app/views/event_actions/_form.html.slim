@@ -1,0 +1,24 @@
+= form_for @event_action do |f|
+  - if @event_action.errors.any?
+    #error_explanation
+      h2 = "#{pluralize(@event_action.errors.count, "error")} prohibited this event_action from being saved:"
+      ul
+        - @event_action.errors.full_messages.each do |message|
+          li = message
+
+  .field
+    = f.label :event_receiver
+    = f.text_field :event_receiver
+  .field
+    = f.label :job_type
+    = f.text_field :job_type
+  .field
+    = f.label :email_address
+    = f.text_field :email_address
+  .field
+    = f.label :webhook_url
+    = f.text_field :webhook_url
+  .field
+    = f.label :webhook_body
+    = f.text_area :webhook_body
+  .actions = f.submit

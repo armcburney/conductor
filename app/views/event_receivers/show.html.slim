@@ -1,0 +1,18 @@
+p#notice = notice
+
+p
+  strong Start time:
+  = @event_receiver.start_time
+p
+  strong Interval:
+  = @event_receiver.interval
+p
+  strong Job type:
+  = @event_receiver.job_type
+p
+  strong Action:
+  = @event_receiver.action
+
+= link_to 'Edit', edit_event_receiver_path(@event_receiver)
+'  |
+= link_to 'Back', event_receivers_path

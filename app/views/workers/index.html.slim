@@ -1,0 +1,27 @@
+h1 Listing workers
+
+table
+  thead
+    tr
+      th User
+      th Address
+      th Last heartbeat
+      th Job
+      th
+      th
+      th
+
+  tbody
+    - @workers.each do |worker|
+      tr
+        td = worker.user
+        td = worker.address
+        td = worker.last_heartbeat
+        td = worker.job
+        td = link_to 'Show', worker
+        td = link_to 'Edit', edit_worker_path(worker)
+        td = link_to 'Destroy', worker, data: { confirm: 'Are you sure?' }, method: :delete
+
+br
+
+= link_to 'New Worker', new_worker_path

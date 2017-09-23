@@ -1,0 +1,31 @@
+h1 Listing job_types
+
+table
+  thead
+    tr
+      th Script
+      th Working directory
+      th Environment variables
+      th Timeout
+      th Name
+      th User
+      th
+      th
+      th
+
+  tbody
+    - @job_types.each do |job_type|
+      tr
+        td = job_type.script
+        td = job_type.working_directory
+        td = job_type.environment_variables
+        td = job_type.timeout
+        td = job_type.name
+        td = job_type.user
+        td = link_to 'Show', job_type
+        td = link_to 'Edit', edit_job_type_path(job_type)
+        td = link_to 'Destroy', job_type, data: { confirm: 'Are you sure?' }, method: :delete
+
+br
+
+= link_to 'New Job type', new_job_type_path

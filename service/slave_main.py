@@ -30,6 +30,9 @@ class ServerHealth:
         self.virtual_memory = psutil.virtual_memory()
         self.swap_memory = psutil.swap_memory()
 
+    def serialize(self):
+        return self.cpu_count
+
 
 class HealthCheckCoroutine():
     """
@@ -39,19 +42,27 @@ class HealthCheckCoroutine():
     def __init__(self, interval=10):
         self.interval = interval
 
-    def get_server_health(self,):
+    def get_server_health(self):
         return ServerHealth()
 
-    def send_stats(self, health):
+
+    async def send_stats(self, websocket):
+
         logger.debug("Logging node health")
+
+        health = self.get_server_health()
+        await websocket.send(health.serialize())
+
+        logger.debug("Sent health status")
+
 
     async def run(self, websocket):
         logger.debug("Starting health check coroutine.")
         while(True):
-            self.send_stats(self.get_server_health())
+            await self.send_stats(websocket)
 
             # sleep for some timeout
-            await time.sleep(self.interval)
+            await asyncio.sleep(self.interval)
 
 class SlaveManager():
     """
@@ -72,8 +83,10 @@ class SlaveManager():
         self.api_token = api_token
 
     async def process_command(self, websocket):
+
         # keep on processing commands while available
         command = await websocket.recv()
+
         logger.debug("Processing command: {}".format(command))
 
     def spawn_worker_wrapper(self,):
@@ -85,19 +98,21 @@ class SlaveManager():
     async def initiate_connection(self, websocket):
         await websocket.send("000:{}".format(self.hostname))
         response = await websocket.recv()
-        # TODO: handle the error code and possibly recover
+        logger.debug("Successfully associated")
 
     async def run(self):
 
         # connects to websocket on host
         async with websockets.connect(self.service_host) as websocket:
-            # associate this node with the main server
+
+            # register this node with the main server
             logger.debug("Initiating connection")
             await self.initiate_connection(websocket)
 
             # schedule the reporter coroutine
             self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine().run(websocket))
 
+            # keep on processing commands while possible
             while (True):
                 await asyncio.ensure_future(self.process_command(websocket))
 

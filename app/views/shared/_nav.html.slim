@@ -1,18 +1,15 @@
-.row.header
-  .section
-    nav
-      label#menu-toggle-label for="menu-toggle"
-      input#menu-toggle type="checkbox"
-      .logo
+section.nav
+  nav
+    a.nav-link class="nav-link--toggle" onclick="var nav = document.querySelector('nav'); if (nav.className.indexOf('open') != -1) nav.classList.remove('open'); else nav.classList.add('open');"
+      | Menu
+    h1: a href="/" Conductor
 
-      .icon-menu
-      ul.menu
-        - if user_signed_in?
-          li = link_to "Workers", workers_path
-          li = link_to "Jobs", job_types_path
-          li = link_to "Events", event_receivers_path
-          li = link_to "My Account", edit_user_registration_path
-          li = button_to "Logout", destroy_user_session_path, method: :delete
-        - else
-          li = link_to "Register", new_user_registration_path
-          li = link_to "Sign In", new_user_session_path
+    - if user_signed_in?
+      = link_to "Workers", workers_path, class: "nav-link"
+      = link_to "Jobs", job_types_path, class: "nav-link"
+      = link_to "Events", event_receivers_path, class: "nav-link"
+      = link_to "My Account", edit_user_registration_path, class: "nav-link"
+      = button_to "Logout", destroy_user_session_path, {method: :delete, form_class: "nav-link-form", class: "nav-link"}
+    - else
+      = link_to "Register", new_user_registration_path, class: "nav-link"
+      = link_to "Sign In", new_user_session_path, class: "nav-link"

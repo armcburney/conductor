@@ -74,5 +74,6 @@ class EventActionsController < ApplicationController
     params
       .require(:event_action)
       .permit(:event_receiver_id, :job_type, :email_address, :webhook_url, :webhook_body)
+      .reject{|_, v| v.blank?}
   end
 end

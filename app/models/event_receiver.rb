@@ -1,6 +1,7 @@
 class EventReceiver < ApplicationRecord
   belongs_to :job_type, optional: true
   belongs_to :user
+  has_many :event_actions
   validate :has_owned_job_type
 
   def has_owned_job_type

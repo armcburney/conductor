@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170923165357) do
+ActiveRecord::Schema.define(version: 20170923221325) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,7 +22,9 @@ ActiveRecord::Schema.define(version: 20170923165357) do
     t.text     "webhook_body"
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
+    t.integer  "job_type_id"
     t.index ["event_receiver_id"], name: "index_event_actions_on_event_receiver_id", using: :btree
+    t.index ["job_type_id"], name: "index_event_actions_on_job_type_id", using: :btree
   end
 
   create_table "event_receivers", force: :cascade do |t|
@@ -87,6 +89,7 @@ ActiveRecord::Schema.define(version: 20170923165357) do
   end
 
   add_foreign_key "event_actions", "event_receivers"
+  add_foreign_key "event_actions", "job_types"
   add_foreign_key "event_receivers", "job_types"
   add_foreign_key "event_receivers", "users"
   add_foreign_key "job_types", "users"

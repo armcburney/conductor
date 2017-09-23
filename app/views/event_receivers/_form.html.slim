@@ -14,6 +14,6 @@
     = f.number_field :interval
     = f.label "seconds"
   .field
-    = f.label :job_type
-    = f.select :job_type, content_tag(:option,'None',:value=>"") + options_from_collection_for_select(job_types, 'id', 'name')
+    = f.label :job_type_id
+    = f.select :job_type_id, content_tag(:option,'None',:value=>"") + options_from_collection_for_select(job_types, 'id', 'name')
   .actions = f.submit

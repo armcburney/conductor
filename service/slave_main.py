@@ -22,16 +22,24 @@ class ServerHealth:
     """
 
     def __init__(self):
-        self.cpu_count = psutil.cpu_count()
-        self.cpu_freq = psutil.cpu_freq()
+        self.cpu_count = psutil.cpu_count(logical=True)
         self.cpu_util = psutil.cpu_times_percent()
-        # self.disk_usage = psutil.disk_usage()
-        self.network_usage = psutil.net_io_counters()
         self.virtual_memory = psutil.virtual_memory()
-        self.swap_memory = psutil.swap_memory()
+        self.disk_usage = psutil.disk_usage()
+        # TODO: add network statistics
 
     def serialize(self):
-        return self.cpu_count
+        load = self.cpu_times_percent()
+        return {
+            "cpu_count": self.cpu_count,
+            "user_load": load.user,
+            "system_load": load.system,
+            "total_memory": self.virtual_memory.total,
+            "available_memory": self.virtual_memory.available,
+            "total_disk": self.disk_usage.total,
+            "used_disk": self.disk_usage.used,
+            "free_disk": self.disk_usage.free_disk,
+        }
 
 
 class HealthCheckCoroutine():

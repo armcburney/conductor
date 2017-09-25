@@ -10,7 +10,6 @@ import json
 from argparse import ArgumentParser
 
 import websockets
-import subprocess
 import psutil
 
 logging.basicConfig()
@@ -100,7 +99,7 @@ class HealthCheckCoroutine():
         logger.debug("Starting health check coroutine.")
 
         # keep sending stats forever
-        while(True):
+        while websocket.open:
 
             await self.send_stats(websocket)
 
@@ -132,11 +131,15 @@ class SlaveManager():
 
         logger.debug("Processing command: {}".format(command))
 
-    def spawn_worker_wrapper(self,):
+    async def spawn_worker_wrapper(self, command, args):
         """
         Get a command to spawn a worker process.
         """
         logging.debug("Spawning wrapper")
+        # need yield from because not fully compatible yet
+        process = await asyncio.create_subprocess_exec(command, *args, stderr=asyncio.subprocess.PIPE)
+        await process.wait()
+        logging.debug("Wrapper completed")
 
     async def initiate_connection(self, websocket):
         await websocket.send("000:{}".format(self.hostname))
@@ -145,20 +148,23 @@ class SlaveManager():
 
     async def run(self):
 
-        # connects to websocket on host
-        async with websockets.connect(self.service_host) as websocket:
+        # keep a connection to a websocket while we're alive
+        while True:
+            # connects to websocket on host
+            async with websockets.connect(self.service_host) as websocket:
 
-            # register this node with the main server
-            logger.debug("Initiating connection")
-            await self.initiate_connection(websocket)
+                # register this node with the main server
+                logger.debug("Initiating connection")
+                await self.initiate_connection(websocket)
 
-            # schedule the reporter coroutine
-            self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine().run(websocket))
+                # schedule the reporter coroutine
+                self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine().run(websocket))
 
-            # keep on processing commands while possible
-            while (True):
-                await asyncio.ensure_future(self.process_command(websocket))
-        logger.debug("Done running")
+                # keep on processing commands while possible
+                while websocket.open:
+                    await asyncio.ensure_future(self.process_command(websocket))
+
+            logger.debug("Websocket dead")
 
 if __name__ == "__main__":
 

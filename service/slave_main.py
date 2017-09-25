@@ -5,6 +5,7 @@ import threading
 import time
 import asyncio
 import logging
+import json
 
 from argparse import ArgumentParser
 
@@ -21,25 +22,57 @@ class ServerHealth:
     Encapsulate data pertaining to the current health of the server.
     """
 
-    def __init__(self):
-        self.cpu_count = psutil.cpu_count(logical=True)
-        self.cpu_util = psutil.cpu_times_percent()
-        self.virtual_memory = psutil.virtual_memory()
-        self.disk_usage = psutil.disk_usage()
+    def __init__(
+        self,
+        cpu_count,
+        user_load,
+        system_load,
+        total_memory,
+        available_memory,
+        total_disk,
+        used_disk,
+        free_disk
+    ):
+        self.cpu_count = cpu_count
+        self.user_load = user_load
+        self.system_load = system_load
+        self.total_memory = total_memory
+        self.available_memory = available_memory
+        self.total_disk = total_disk
+        self.used_disk = used_disk
+        self.free_disk = free_disk
+
+    @staticmethod
+    def create():
+        cpu_count = psutil.cpu_count(logical=True)
+        cpu_util = psutil.cpu_times_percent()
+        virtual_memory = psutil.virtual_memory()
+        disk_usage = psutil.disk_usage("/")
+
         # TODO: add network statistics
 
+        return ServerHealth(
+            cpu_count=cpu_count,
+            user_load=cpu_util.user,
+            system_load=cpu_util.system,
+            total_memory=virtual_memory.total,
+            available_memory=virtual_memory.available,
+            total_disk=disk_usage.total,
+            used_disk=disk_usage.used,
+            free_disk=disk_usage.free,
+        )
+
     def serialize(self):
-        load = self.cpu_times_percent()
-        return {
+        return json.dumps({
             "cpu_count": self.cpu_count,
-            "user_load": load.user,
-            "system_load": load.system,
-            "total_memory": self.virtual_memory.total,
-            "available_memory": self.virtual_memory.available,
-            "total_disk": self.disk_usage.total,
-            "used_disk": self.disk_usage.used,
-            "free_disk": self.disk_usage.free_disk,
-        }
+            "user_load": self.user_load,
+            "system_load": self.system_load,
+            "total_memory": self.total_memory,
+            "available_memory": self.available_memory,
+            "total_disk": self.total_disk,
+            "used_disk": self.used_disk,
+            "free_disk": self.free_disk,
+        })
 
 
 class HealthCheckCoroutine():
@@ -51,22 +84,24 @@ class HealthCheckCoroutine():
         self.interval = interval
 
     def get_server_health(self):
-        return ServerHealth()
+        return ServerHealth.create()
 
 
     async def send_stats(self, websocket):
 
         logger.debug("Logging node health")
-
-        health = self.get_server_health()
-        await websocket.send(health.serialize())
-
+        health = self.get_server_health().serialize()
+        logger.debug("Sending server health")
+        await websocket.send(health)
         logger.debug("Sent health status")
 
 
     async def run(self, websocket):
         logger.debug("Starting health check coroutine.")
+
+        # keep sending stats forever
         while(True):
+
             await self.send_stats(websocket)
 
             # sleep for some timeout
@@ -123,6 +158,7 @@ class SlaveManager():
             # keep on processing commands while possible
             while (True):
                 await asyncio.ensure_future(self.process_command(websocket))
+        logger.debug("Done running")
 
 if __name__ == "__main__":
 

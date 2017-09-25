@@ -10,24 +10,23 @@ logger = logging.getLogger("Test Server")
 logger.setLevel(logging.DEBUG)
 
 async def read(websocket):
-    while True:
-        logger.debug("Waiting for signal")
-        t = await websocket.recv()
-        logger.debug("ACKing")
-        await websocket.send("ACK")
-        logger.info(t)
+    logger.debug("Waiting for signal")
+    t = await websocket.recv()
+    logger.debug("ACKing")
+    await websocket.send("ACK")
+    logger.info(t)
 
 async def write(websocket):
-    while True:
-        line = await ainput(">>>> ")
-        await websocket.send(line)
+    line = await ainput(">>>> ")
+    await websocket.send(line)
 
 async def connection(websocket, path):
     logger.debug("Started Connection")
-    while True:
+    while websocket.open:
         done, pending = await asyncio.wait(
-            [write(websocket), read(websocket)],
-            return_when=asyncio.ALL_COMPLETED)
+            # [write(websocket), read(websocket)],
+            [read(websocket)],
+            return_when=asyncio.FIRST_COMPLETED)
 
 send_server = websockets.serve(connection, 'localhost', 8765)
 

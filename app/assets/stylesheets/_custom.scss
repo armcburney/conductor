@@ -1,0 +1,310 @@
+//@import vital/sprockets
+//@import vital/all
+
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,400italic);
+
+$primary: #4189D1;
+$primary-shade: #2B5EBD;
+$secondary: #66C2A6;
+$light: #fff;
+$light-shade: #eee;
+$accent: #F07C6C;
+$accent-light: #F39E8E;
+$dark: #111;
+
+@mixin OpenSans {
+  font-family: "Open Sans", Arial, sans-serif;
+  font-weight: 400;
+}
+
+@mixin OpenSansLight {
+  font-family: "Open Sans", Arial, sans-serif;
+  font-weight: 300;
+}
+
+body {
+  @include OpenSans;
+  font-size: 1em;
+  margin: 0;
+  padding: 0;
+}
+
+*::selection {
+  background: $accent;
+}
+h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12 {
+  @include OpenSansLight;
+}
+h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, p,
+nav, ul, .row {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 64rem;
+  padding: 0.5em 1.5rem 1em 1.5rem;
+  margin: 0;
+}
+ul {
+  padding-left: 5rem;
+}
+h1 {
+  font-size: 3em;
+}
+h2 {
+  font-size: 2em;
+}
+h3 {
+  font-size: 1.6em;
+}
+h4 {
+  @include OpenSans;
+  font-style: italic;
+  font-size: 1.3em;
+}
+h3:first-child, h3+h4 {
+  padding-top:0.1em;
+}
+p {
+  font-size: 1.2em;
+}
+.social-buttons {
+  text-align: center;
+  padding-top: 1em;
+}
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p, h7+p, h8+p, h9+p,
+h10+p, h11+p, h12+p, p+p {
+  padding-top: 0;
+}
+h2 {
+  font-size: 2.5em;
+  padding-top: 1em;
+  padding-bottom: 0.8em;
+}
+section, header, footer, .row, nav, iframe {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: 2rem 0;
+}
+section, header, footer {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: $light;
+}
+section:nth-child(odd), section.odd {
+  background-color: $light-shade;
+}
+.row {
+  flex-wrap: wrap;
+  max-width: 64rem;
+  padding: 0;
+}
+.column {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding-right: 1.5em;
+  align-items: center;
+  justify-content: center;
+}
+.column--double {
+  flex: 2;
+}
+.column:last-child {
+  padding-right: 0;
+}
+@media all and (max-width: 1000px) {
+  .row {
+    display: block;
+  }
+  .column {
+    padding-right: 0;
+    display: block;
+  }
+}
+a {
+  transition: all ease 0.3s;
+  color:$accent;
+}
+a:hover {
+  color: $accent-light;
+}
+a img {
+  border:0;
+}
+a.fa {
+  text-decoration: none;
+}
+.no-break {
+  display: inline-block;
+}
+.text-input {
+  box-sizing: border-box;
+  border: 0;
+  padding: 0.6em 1.1em;
+  margin: 0.3em 0;
+  border-radius: 0.3em;
+  background-color: $light;
+  color: $dark;
+  font-size: 1em;
+  transition: all 0.3s ease;
+}
+.text-input:hover {
+  opacity:0.9;
+}
+.text-input:focus {
+  outline: 0;
+  opacity: 1;
+  background-color: $light-shade;
+}
+.text-input--primary {
+  font-size: 1.2em;
+}
+.button, a.button {
+  cursor: pointer;
+  display: inline-block;
+  border: 0;
+  padding: 0.6em 1.1em;
+  margin: 0.3em;
+  border-radius: 0.3em;
+  -webkit-font-smoothing: antialiased;
+  transform: translate3d( 0, 0, 0);
+  background-color: $light;
+  color: $dark;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0,1.5,0.5,1);
+}
+.button:hover {
+  transform: scale(1.1) translate3d( 0, 0, 0 );
+}
+.button--primary, a.button--primary {
+  font-size: 1.2em;
+  background-color:$secondary;
+  color: $light;
+}
+.button--secondary, a.button--secondary {
+  background-color:$accent;
+  color: $light;
+}
+.button--social, a.button--social {
+  padding-left: 0.6em;
+  padding-right: 0.6em;
+  min-width: 1em;
+}
+.button--simple, a.button--simple {
+  font-weight: normal;
+  background-color: transparent;
+  color: $light;
+}
+
+.centered {
+  text-align: center;
+}
+p img {
+  max-width: 100%;
+}
+img.centered {
+  display: block;
+  margin: 20px auto;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  /* chrome 48 bug fix */
+  min-width: 0;
+  min-height: 0;
+}
+@media all and (min-width: 1000px) {
+  img.centered, .graph {
+    max-width: 1000px;
+  }
+}
+
+@media all and (max-width: 800px) {
+  html {
+    font-size:0.8em;
+  }
+}
+
+section.nav {
+  background-color: $primary-shade;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+nav {
+  color: $light;
+  height: 5rem;
+  justify-content: flex-end;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+}
+nav h1 {
+  flex: 1;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 1.5rem;
+  font-size: 2rem;
+  height: 5rem;
+  line-height: 5rem;
+}
+nav h1 a {
+  color: $light;
+  text-decoration: none;
+}
+.nav-link-form {
+  margin: 0;
+  padding: 0;
+}
+a.nav-link, input.nav-link {
+  height: 5rem;
+  text-align: center;
+  line-height: 5rem;
+  padding: 0 1.5rem;
+  color: $light;
+  -webkit-font-smoothing: antialiased;
+  transition: all 0.2s;
+  text-decoration: none;
+  border: none;
+  background: none;
+  font-size: inherit;
+  cursor: pointer;
+}
+a.nav-link:hover, input.nav-link:hover {
+  color: $accent-light;
+}
+a.nav-link--title, input.nav-link--selected {
+  justify-self: flex-start;
+}
+a.nav-link--selected, input.nav-link--selected {
+  background-color: rgba(255,255,255,0.2);
+}
+a.nav-link img {
+  box-sizing: border-box;
+  height: 5rem;
+  padding: 0.7rem;
+  width: auto;
+}
+a.nav-link--toggle {
+  display: none;
+  cursor: pointer;
+}
+@media all and (max-width: 600px) {
+  nav {
+    display:block;
+    transition: all ease 0.3s;
+  }
+  nav.open {
+    height: 25rem;
+  }
+  nav h1 {
+    display:none;
+  }
+  a.nav-link {
+    display: block;
+  }
+  a.nav-link--toggle {
+    display: block;
+  }
+}

@@ -1,27 +1,6 @@
-h1 Listing event_receivers
+h1 Event Receivers
+p Add logic to your job scheduling
 
-table
-  thead
-    tr
-      th Start time
-      th Interval
-      th Job type
-      th Action
-      th
-      th
-      th
+div id="event_receivers"
 
-  tbody
-    - @event_receivers.each do |event_receiver|
-      tr
-        td = event_receiver.start_time
-        td = event_receiver.interval
-        td = event_receiver.job_type
-        td = event_receiver.action
-        td = link_to 'Show', event_receiver
-        td = link_to 'Edit', edit_event_receiver_path(event_receiver)
-        td = link_to 'Destroy', event_receiver, data: { confirm: 'Are you sure?' }, method: :delete
-
-br
-
-= link_to 'New Event receiver', new_event_receiver_path
+= javascript_pack_tag "event_receivers"

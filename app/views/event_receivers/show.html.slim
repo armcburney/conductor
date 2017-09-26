@@ -8,10 +8,8 @@ p
   = @event_receiver.interval
 p
   strong Job type:
-  = @event_receiver.job_type
+  = @event_receiver.job_type&.name || "None"
 p
-  strong Action:
-  = @event_receiver.action
 
 = link_to 'Edit', edit_event_receiver_path(@event_receiver)
 '  |

@@ -8,7 +8,7 @@ Dotenv::Railtie.load
 
 module Conductor
   class Application < Rails::Application
-    config.sass.preferred_syntax = :sass
+    config.sass.preferred_syntax = :scss
 
     config.generators do |g|
       g.javascripts false

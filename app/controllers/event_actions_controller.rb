@@ -2,7 +2,6 @@
 
 class EventActionsController < ApplicationController
   before_action :set_event_action, only: %i(show edit update destroy)
-  before_action :authenticate_user!
 
   # GET /event_actions
   # GET /event_actions.json
@@ -73,7 +72,6 @@ class EventActionsController < ApplicationController
   def event_action_params
     params
       .require(:event_action)
-      .permit(:event_receiver_id, :job_type, :email_address, :webhook_url, :webhook_body)
-      .reject{|_, v| v.blank?}
+      .permit(:event_receiver_id, :job_type_id, :email_address, :webhook_url, :webhook_body)
   end
 end

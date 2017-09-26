@@ -2,7 +2,6 @@
 
 class JobTypesController < ApplicationController
   before_action :set_job_type, only: %i(show edit update destroy)
-  before_action :authenticate_user!
 
   # GET /job_types
   # GET /job_types.json

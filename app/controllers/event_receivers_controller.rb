@@ -2,7 +2,6 @@
 
 class EventReceiversController < ApplicationController
   before_action :set_event_receiver, only: %i(show edit update destroy)
-  before_action :authenticate_user!
 
   # GET /event_receivers
   # GET /event_receivers.json
@@ -15,6 +14,7 @@ class EventReceiversController < ApplicationController
   def show
   end
 
+  # GET /event_receivers/new
   def new
     @event_receiver = EventReceiver.new
   end

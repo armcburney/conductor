@@ -33,7 +33,7 @@ sudo apt-get update
 
 2. Install dependencies for rbenv
 ```shell
-sudo apt-get install autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev
+sudo apt-get install autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev libpq-dev ruby-sidekiq nodejs nodejs-legacy
 ```
 
 3. Install rbenv

@@ -42,7 +42,7 @@ sudo apt-get update
 
 2. Install dependencies for rbenv
 ```shell
-sudo apt-get install autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev libpq-dev ruby-sidekiq nodejs nodejs-legacy
+sudo apt-get install autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev libpq-dev ruby-sidekiq
 ```
 
 3. Install rbenv
@@ -64,7 +64,7 @@ git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
 6. Install nodejs, npm, and yarn
 ```shell
 # Install nodejs
-sudo apt-get install nodejs
+sudo apt-get install nodejs nodejs-legacy
 
 # Install npm
 sudo apt-get install npm

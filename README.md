@@ -24,6 +24,15 @@ brew services start postgresql
 brew services start redis
 ```
 
+4. Install nodejs, npm, and yarn
+```shell
+# Install nodejs and npm
+brew install node
+
+# Install yarn
+brew install yarn
+```
+
 #### Ubuntu 16.04 Setup
 
 1. Update apt-get
@@ -50,6 +59,20 @@ echo 'eval "$(rbenv init -)"' >> ~/.bashrc
 5. Install ruby-build for `rbenv install` command
 ```shell
 git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+```
+
+6. Install nodejs, npm, and yarn
+```shell
+# Install nodejs
+sudo apt-get install nodejs
+
+# Install npm
+sudo apt-get install npm
+
+# Install yarn
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+sudo apt-get update && sudo apt-get install yarn
 ```
 
 #### General Setup

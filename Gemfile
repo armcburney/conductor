@@ -9,8 +9,10 @@ end
 
 ruby "2.4.1"
 
+gem "devise"
 gem "dotenv-rails"
 gem "jbuilder", "~> 2.5"
+gem "jquery-rails"
 gem "pg", "~> 0.21.0"
 gem "puma", "~> 3.0"
 gem "rails", "~> 5.0.2"
@@ -19,8 +21,6 @@ gem "sidekiq"
 gem "slim-rails", "~> 3.1"
 gem "uglifier", ">= 1.3.0"
 gem "webpacker"
-gem "devise"
-gem "jquery-rails"
 
 group :development, :test do
   gem "byebug", platform: :mri

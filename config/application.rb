@@ -9,6 +9,7 @@ Dotenv::Railtie.load
 module Conductor
   class Application < Rails::Application
     config.sass.preferred_syntax = :scss
+    config.middleware.delete Rack::Lock
 
     config.generators do |g|
       g.javascripts false

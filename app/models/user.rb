@@ -7,4 +7,5 @@ class User < ApplicationRecord
   has_many :workers
   has_many :event_receivers
   has_many :jobs, through: :job_types
+  has_many :api_keys
 end

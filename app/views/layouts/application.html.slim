@@ -9,11 +9,7 @@ html
     = stylesheet_link_tag    "application", media: "all"
     = javascript_include_tag "application"
 
-    // React should be added on a page basis, rather than in the application layout
-    = javascript_pack_tag "hello_react"
-
   body
     = render "shared/nav"
-    .row
-      .section
-        = yield
+    section
+      = yield

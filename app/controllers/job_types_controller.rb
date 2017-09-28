@@ -6,7 +6,7 @@ class JobTypesController < ApplicationController
   # GET /job_types
   # GET /job_types.json
   def index
-    @job_types = JobType.all
+    @job_types = JobType.where(user: current_user)
   end
 
   # GET /job_types/1
@@ -26,7 +26,7 @@ class JobTypesController < ApplicationController
   # POST /job_types
   # POST /job_types.json
   def create
-    @job_type = JobType.new(job_type_params)
+    @job_type = current_user.job_types.create(job_type_params)
 
     respond_to do |format|
       if @job_type.save
@@ -72,6 +72,6 @@ class JobTypesController < ApplicationController
   def job_type_params
     params
       .require(:job_type)
-      .permit(:script, :working_directory, :environment_variables, :timeout, :name, :user_id)
+      .permit(:script, :working_directory, :environment_variables, :timeout, :name)
   end
 end

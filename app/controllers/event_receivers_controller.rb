@@ -6,7 +6,7 @@ class EventReceiversController < ApplicationController
   # GET /event_receivers
   # GET /event_receivers.json
   def index
-    @event_receivers = EventReceiver.all
+    @event_receivers = current_user.event_receivers
   end
 
   # GET /event_receivers/1
@@ -26,7 +26,7 @@ class EventReceiversController < ApplicationController
   # POST /event_receivers
   # POST /event_receivers.json
   def create
-    @event_receiver = EventReceiver.new(event_receiver_params)
+    @event_receiver = current_user.event_receivers.create(event_receiver_params)
 
     respond_to do |format|
       if @event_receiver.save
@@ -72,6 +72,6 @@ class EventReceiversController < ApplicationController
   def event_receiver_params
     params
       .require(:event_receiver)
-      .permit(:start_time, :interval, :job_type_id, :action)
+      .permit(:start_time, :interval, :job_type_id)
   end
 end

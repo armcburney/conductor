@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import os
 import threading
 import time
@@ -8,6 +6,7 @@ import logging
 import json
 
 from argparse import ArgumentParser
+from websocket_adapter import RegisterNode, HealthCommand
 
 import websockets
 import psutil
@@ -85,13 +84,12 @@ class HealthCheckCoroutine():
     def get_server_health(self):
         return ServerHealth.create()
 
-
     async def send_stats(self, websocket):
 
         logger.debug("Logging node health")
-        health = self.get_server_health().serialize()
+        health = HealthCommand(self.get_server_health().serialize())
         logger.debug("Sending server health")
-        await websocket.send(health)
+        await websocket.send(str(health))
         logger.debug("Sent health status")
 
 
@@ -114,15 +112,13 @@ class SlaveManager():
     def __init__(
         self,
         hostname,
-        api_token,
+        api_key,
         service_host,
-        service_port,
     ):
 
         self.hostname = hostname
         self.service_host = service_host
-        self.service_port = service_port
-        self.api_token = api_token
+        self.api_key = api_key
 
     async def process_command(self, websocket):
 
@@ -142,7 +138,8 @@ class SlaveManager():
         logging.debug("Wrapper completed")
 
     async def initiate_connection(self, websocket):
-        await websocket.send("000:{}".format(self.hostname))
+        command = RegisterNode({"address": self.hostname, "api_key": self.api_key})
+        await websocket.send(str(command))
         response = await websocket.recv()
         logger.debug("Successfully associated")
 
@@ -150,6 +147,8 @@ class SlaveManager():
 
         # keep a connection to a websocket while we're alive
         while True:
+
+            # try:
             # connects to websocket on host
             async with websockets.connect(self.service_host) as websocket:
 
@@ -165,20 +164,11 @@ class SlaveManager():
                     await asyncio.ensure_future(self.process_command(websocket))
 
             logger.debug("Websocket dead")
+            # except:
+                # logger.debug("Error occured, sleeping")
+                # time.sleep(1)
 
 if __name__ == "__main__":
-
-    slave_manager = SlaveManager(
-        hostname="host",
-        api_token="",
-        service_host="ws://localhost:8765",
-        service_port="port",
-    )
-
-    logger.debug("Starting event loop")
-    asyncio.get_event_loop().run_until_complete(slave_manager.run())
-    asyncio.get_event_loop().run_forever()
-    logger.debug("Done event loop")
 
     parser = ArgumentParser("Main communication endpoint on server. Spawn to communicate with Conductor service.")
 
@@ -199,13 +189,6 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--service_port",
-        dest="service_port",
-        default=80,
-        help="The port on the service master to connect to. Defaults to 80.",
-    )
-
-    parser.add_argument(
         "--hostname",
         dest="hostname",
         action="store",
@@ -213,13 +196,12 @@ if __name__ == "__main__":
         help="The unique hostname this service should register as."
     )
 
-    parser.parse_args()
+    arguments = parser.parse_args()
 
     slave_manager = SlaveManager(
-        hostname=parser.hostname,
-        api_token=parser.token,
-        service_host=parser.service_host,
-        service_port=parser.service_port,
+        hostname=arguments.hostname,
+        api_key=arguments.token,
+        service_host=arguments.service_host,
     )
 
     asyncio.get_event_loop().run_until_complete(slave_manager.run())

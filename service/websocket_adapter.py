@@ -1,26 +1,13 @@
 import websockets
 import json
 
-class WebsocketAdapter():
-    """
-    Adapter sitting translating logical server actions into websocket calls
-    """
-
-    @staticmethod
-    async def register_channel(websocket, channel):
-        await websocket.send("websocket_rails.subscribe")
-
-    @staticmethod
-    async def send_health(self):
-        await websocket.send("device.event")
-
 class Command:
     """
     Abstracted command so that we can represent operations in a more OO way
     """
-    def __init__(self, cmd):
+    def __init__(self, cmd, *args):
         self.cmd = cmd
-        self.args = []
+        self.args = args
 
     def add_arg(self, arg_name, arg_value):
         self.args.append((arg_name, arg_value))
@@ -31,13 +18,13 @@ class Command:
     def __json__(self):
         res = [self.cmd]
         for arg in self.args:
-            res +=
+            res.append(arg)
         return res
 
 class HealthCommand(Command):
-    def __init__(self):
-        super(Command, self).__init__("device.event")
+    def __init__(self, *args):
+        super(HealthCommand, self).__init__("health_check", *args)
 
-class RegisterChannel(Command):
-    def __init__(self):
-        super(Command, self).__init__("websocket_rails.subscribe")
+class RegisterNode(Command):
+    def __init__(self, *args):
+        super(RegisterNode, self).__init__("connect", None, *args)

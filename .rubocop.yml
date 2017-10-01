@@ -23,8 +23,8 @@ Style/MultilineMethodCallIndentation:
 
 Style/PercentLiteralDelimiters:
   PreferredDelimiters:
-    '%i': ()
-    '%w': ()
+    "%i": ()
+    "%w": ()
 
 Style/MutableConstant:
   Enabled: false

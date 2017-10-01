@@ -5,6 +5,10 @@ class WorkerConnectionController < WebsocketRails::BaseController
     worker ? trigger_success : trigger_failure
   end
 
+  def healthcheck
+    # Update last_heartbeat
+  end
+
   private
 
   def worker_user

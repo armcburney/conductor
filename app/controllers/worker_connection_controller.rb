@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class WorkerConnectionController < WebsocketRails::BaseController
+  before_action :update_heartbeat
+
   def connect
     worker ? trigger_success : trigger_failure
   end
@@ -32,5 +34,9 @@ class WorkerConnectionController < WebsocketRails::BaseController
     end
 
     @worker
+  end
+
+  def update_heartbeat
+    worker.update(last_heartbeat: Time.zone.now)
   end
 end

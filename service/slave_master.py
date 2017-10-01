@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os
 import threading
 import time
@@ -23,8 +25,7 @@ class ServerHealth:
     def __init__(
         self,
         cpu_count,
-        user_load,
-        system_load,
+        load,
         total_memory,
         available_memory,
         total_disk,
@@ -32,8 +33,7 @@ class ServerHealth:
         free_disk
     ):
         self.cpu_count = cpu_count
-        self.user_load = user_load
-        self.system_load = system_load
+        self.load = load
         self.total_memory = total_memory
         self.available_memory = available_memory
         self.total_disk = total_disk
@@ -47,12 +47,9 @@ class ServerHealth:
         virtual_memory = psutil.virtual_memory()
         disk_usage = psutil.disk_usage("/")
 
-        # TODO: add network statistics
-
         return ServerHealth(
             cpu_count=cpu_count,
-            user_load=cpu_util.user,
-            system_load=cpu_util.system,
+            load=os.getloadavg(),
             total_memory=virtual_memory.total,
             available_memory=virtual_memory.available,
             total_disk=disk_usage.total,
@@ -63,8 +60,7 @@ class ServerHealth:
     def serialize(self):
         return json.dumps({
             "cpu_count": self.cpu_count,
-            "user_load": self.user_load,
-            "system_load": self.system_load,
+            "load": self.load,
             "total_memory": self.total_memory,
             "available_memory": self.available_memory,
             "total_disk": self.total_disk,
@@ -131,6 +127,7 @@ class SlaveManager():
         """
         Get a command to spawn a worker process.
         """
+        # TODO(adam, andrew): we need to determine how this thing will get spawned
         logging.debug("Spawning wrapper")
         # need yield from because not fully compatible yet
         process = await asyncio.create_subprocess_exec(command, *args, stderr=asyncio.subprocess.PIPE)
@@ -148,36 +145,37 @@ class SlaveManager():
         # keep a connection to a websocket while we're alive
         while True:
 
-            # try:
-            # connects to websocket on host
-            async with websockets.connect(self.service_host) as websocket:
+            try:
+                # connects to websocket on host
+                async with websockets.connect(self.service_host) as websocket:
 
-                # register this node with the main server
-                logger.debug("Initiating connection")
-                await self.initiate_connection(websocket)
+                    # register this node with the main server
+                    logger.debug("Initiating connection")
+                    await self.initiate_connection(websocket)
 
-                # schedule the reporter coroutine
-                self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine().run(websocket))
+                    # schedule the reporter coroutine
+                    self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine().run(websocket))
 
-                # keep on processing commands while possible
-                while websocket.open:
-                    await asyncio.ensure_future(self.process_command(websocket))
+                    # keep on processing commands while possible
+                    while websocket.open:
+                        await asyncio.ensure_future(self.process_command(websocket))
 
-            logger.debug("Websocket dead")
-            # except:
-                # logger.debug("Error occured, sleeping")
-                # time.sleep(1)
+                logger.debug("Websocket dead")
+
+            except:
+                logger.debug("Error occured, sleeping before trying to reconnect")
+                time.sleep(1)
 
 if __name__ == "__main__":
 
-    parser = ArgumentParser("Main communication endpoint on server. Spawn to communicate with Conductor service.")
+    parser = ArgumentParser("Main communication endpoint on worker host. Spawn to communicate with Conductor service.")
 
     parser.add_argument(
         "--token",
         dest="token",
         action="store",
         required=True,
-        help="Provided api service token from Conductor."
+        help="Provided api token from Conductor."
     )
 
     parser.add_argument(
@@ -193,7 +191,7 @@ if __name__ == "__main__":
         dest="hostname",
         action="store",
         required=True,
-        help="The unique hostname this service should register as."
+        help="The unique hostname this node should register itself as."
     )
 
     arguments = parser.parse_args()
@@ -204,4 +202,5 @@ if __name__ == "__main__":
         service_host=arguments.service_host,
     )
 
+    # continually run event loop
     asyncio.get_event_loop().run_until_complete(slave_manager.run())

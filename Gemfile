@@ -9,8 +9,10 @@ end
 
 ruby "2.4.1"
 
+gem "coffee-rails"
 gem "devise"
 gem "dotenv-rails"
+gem "faye-websocket", "0.10.0"
 gem "jbuilder", "~> 2.5"
 gem "jquery-rails"
 gem "pg", "~> 0.21.0"
@@ -21,6 +23,8 @@ gem "sidekiq"
 gem "slim-rails", "~> 3.1"
 gem "uglifier", ">= 1.3.0"
 gem "webpacker"
+gem "websocket-rails", github: "moaa/websocket-rails", branch: "threadsocket-rails"
+gem "websocket-rails-js", github: "websocket-rails/websocket-rails-js", branch: "sub_protocols"
 
 group :development, :test do
   gem "byebug", platform: :mri

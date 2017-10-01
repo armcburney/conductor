@@ -10,10 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170923221325) do
+ActiveRecord::Schema.define(version: 20170927204437) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "api_keys", force: :cascade do |t|
+    t.string   "key",        null: false
+    t.integer  "user_id"
+    t.string   "name",       null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_api_keys_on_key", unique: true, using: :btree
+    t.index ["user_id"], name: "index_api_keys_on_user_id", using: :btree
+  end
 
   create_table "event_actions", force: :cascade do |t|
     t.integer  "event_receiver_id"
@@ -59,7 +69,9 @@ ActiveRecord::Schema.define(version: 20170923221325) do
     t.integer  "job_type_id"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
+    t.integer  "worker_id"
     t.index ["job_type_id"], name: "index_jobs_on_job_type_id", using: :btree
+    t.index ["worker_id"], name: "index_jobs_on_worker_id", using: :btree
   end
 
   create_table "users", force: :cascade do |t|
@@ -88,11 +100,13 @@ ActiveRecord::Schema.define(version: 20170923221325) do
     t.index ["user_id"], name: "index_workers_on_user_id", using: :btree
   end
 
+  add_foreign_key "api_keys", "users"
   add_foreign_key "event_actions", "event_receivers"
   add_foreign_key "event_actions", "job_types"
   add_foreign_key "event_receivers", "job_types"
   add_foreign_key "event_receivers", "users"
   add_foreign_key "job_types", "users"
   add_foreign_key "jobs", "job_types"
+  add_foreign_key "jobs", "workers"
   add_foreign_key "workers", "users"
 end

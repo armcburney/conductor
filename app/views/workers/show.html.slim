@@ -9,3 +9,30 @@ p
 p
   strong Last heartbeat:
   = @worker.last_heartbeat
+p
+  strong CPU Count:
+  = @worker.cpu_count
+  |  processors
+p
+  strong Load:
+  = @worker.load
+p
+  strong Total Memory:
+  = @worker.total_memory
+  |  bytes
+p
+  strong Available Memory:
+  = @worker.available_memory
+  |  bytes
+p
+  strong Total Disk:
+  = @worker.total_disk
+  |  bytes
+p
+  strong Used Disk:
+  = @worker.used_disk
+  |  bytes
+p
+  strong Free Disk:
+  = @worker.free_disk
+  |  bytes

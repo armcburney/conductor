@@ -26,9 +26,11 @@ class WorkerConnectionController < WebsocketRails::BaseController
   def worker
     @worker ||= Worker.find_by(address: message["address"])
 
-    # Create if it doesn't exist
-    @worker ||= worker_user.workers.create(address: message["address"])
+    unless @worker
+      @worker = worker_user.workers.create(address: message["address"]) # Creates a new worker
+      send_message :registered, { id: @worker.id }, namespace: :worker  # Sends worker id to slave
+    end
 
-    send_message :registered, { id: @workers.id }, namespace: :worker
+    @worker
   end
 end

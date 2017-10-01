@@ -6,7 +6,15 @@ class WorkerConnectionController < WebsocketRails::BaseController
   end
 
   def healthcheck
-    # Update last_heartbeat
+    worker.update(
+      cpu_count:        message["cpu_count"],
+      load:             message["load"],
+      total_memory:     message["total_memory"],
+      available_memory: message["available_memory"],
+      total_disk:       message["total_disk"],
+      used_disk:        message["used_disk"],
+      free_disk:        message["free_disk"]
+    )
   end
 
   private
@@ -20,5 +28,7 @@ class WorkerConnectionController < WebsocketRails::BaseController
 
     # Create if it doesn't exist
     @worker ||= worker_user.workers.create(address: message["address"])
+
+    send_message :registered, { id: @workers.id }, namespace: :worker
   end
 end

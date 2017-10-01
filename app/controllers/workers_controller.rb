@@ -66,7 +66,7 @@ class WorkersController < ApplicationController
   private
 
   def set_worker
-    @worker = Worker.find(params[:id])
+    @worker = Worker.friendly.find(params[:id])
   end
 
   def worker_params

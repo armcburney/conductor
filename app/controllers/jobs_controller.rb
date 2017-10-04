@@ -26,7 +26,11 @@ class JobsController < ApplicationController
   # POST /jobs
   # POST /jobs.json
   def create
-    @job = Job.new(job_params)
+    worker = find_free_worker
+    if worker.nil?
+      @job.errors[:base] << "You have no workers to run this on!"
+    end
+    @job = Job.new(job_params.merge({ worker: worker }))
 
     respond_to do |format|
       if @job.save
@@ -69,9 +73,18 @@ class JobsController < ApplicationController
     @job = Job.find(params[:id])
   end
 
+  def find_free_worker
+    current_user
+      .workers
+      .joins('left outer join jobs on jobs.worker_id = workers.id')
+      .group('workers.id')
+      .order('count(distinct jobs.id) asc')
+      .first
+  end
+
   def job_params
     params
       .require(:job)
-      .permit(:stdout, :stderr, :status, :return_code, :worker_id, :job_type_id)
+      .permit(:job_type_id)
   end
 end

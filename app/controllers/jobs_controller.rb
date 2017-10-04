@@ -26,14 +26,12 @@ class JobsController < ApplicationController
   # POST /jobs
   # POST /jobs.json
   def create
-    worker = find_free_worker
-    if worker.nil?
-      @job.errors[:base] << "You have no workers to run this on!"
-    end
-    @job = Job.new(job_params.merge({ worker: worker }))
+    @job = Job.new(job_params.merge({ worker: find_free_worker }))
 
     respond_to do |format|
       if @job.save
+        @job.worker.channel.trigger(:spawn, @job.job_type.to_json)
+
         format.html { redirect_to @job, notice: "Job was successfully created." }
         format.json { render :show, status: :created, location: @job }
       else

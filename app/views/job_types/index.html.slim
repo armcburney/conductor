@@ -23,7 +23,12 @@ table
         td = job_type.name
         td = link_to 'Edit', edit_job_type_path(job_type)
         td = button_to 'Destroy', job_type, method: :delete
-        td = button_to 'Spawn', { controller: "jobs", action: "create", job: { job_type_id: job_type.id } }, method: :post
+        td
+          - if current_user.workers.any?
+            = button_to 'Spawn', { controller: "jobs", action: "create", job: { job_type_id: job_type.id } }, method: :post
+          - else
+            button(disabled=true) Create a worker to spawn this job
+
 
 br
 

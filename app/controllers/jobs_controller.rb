@@ -30,7 +30,7 @@ class JobsController < ApplicationController
 
     respond_to do |format|
       if @job.save
-        @job.worker.channel.trigger(:spawn, @job.job_type.to_json)
+        @job.worker.channel.trigger(:spawn, @job.job_type.to_json, namespace: :worker)
 
         format.html { redirect_to @job, notice: "Job was successfully created." }
         format.json { render :show, status: :created, location: @job }

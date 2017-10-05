@@ -31,7 +31,6 @@ class ProcessWrapper():
             async with websockets.connect(arguments.service_host) as websocket:
                 command = RegisterJob({"job_id": arguments.job_id, "api_key": arguments.token})
                 await websocket.send(str(command))
-                ack = await websocket.recv()
                 logger.debug("Successfully connected to server.")
 
                 logger.debug('Starting job: {}'.format(self.command))
@@ -55,17 +54,21 @@ class ProcessWrapper():
     # also https://docs.python.org/3/library/asyncio-eventloop.html#watch-file-descriptors
     async def send_stdin(self, websocket, writer):
         while websocket.open:
+            logger.debug("send_stdin")
             msg = await websocket.recv()
-            command, *payloads = json.loads(command)
-            logger.debug("Command:", command, "Payloads:", payloads)
-            if command == 'stop':
-                writer.close()
-                return
-            if command == 'stdin':
-                for payload in payloads:
-                    writer.write(payload)
-            else:
-                logger.error("Unexpected websocket command:", command)
+            try:
+                command, *payloads = json.loads(msg)
+                logger.debug("Command: {} Payloads: {}".format(command, payloads))
+                if command == 'stdin':
+                    for payload in payloads:
+                        writer.write(payload.encode())
+                    continue
+                if command == 'stop':
+                    writer.close()
+                    return
+                logger.error("Unexpected websocket command: {}".format(command))
+            except ValueError:
+                logger.error("Failed to parse json: {}".format(msg))
 
     async def read_stdout(self, websocket, reader):
         # TODO hook up to web socket

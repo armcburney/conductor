@@ -13,7 +13,7 @@ async def read(websocket):
     logger.debug("Waiting for signal")
     t = await websocket.recv()
     logger.debug("ACKing")
-    await websocket.send("ACK")
+    await websocket.send('["worker.connect",null,{"id":83758,"channel":null,"user_id":null,"success":true,"result":null,"token":null,"server_token":null}]')
     logger.info(t)
 
 async def write(websocket):
@@ -25,8 +25,11 @@ async def connection(websocket, path):
     while websocket.open:
         done, pending = await asyncio.wait(
             [write(websocket), read(websocket)],
-            #[read(websocket)],
             return_when=asyncio.FIRST_COMPLETED)
+        for future in pending:
+            future.cancel()
+
+        await asyncio.sleep(5)
 
 send_server = websockets.serve(connection, 'localhost', 8765)
 

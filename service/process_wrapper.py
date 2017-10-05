@@ -10,7 +10,7 @@ import sys
 from argparse import ArgumentParser
 
 logging.basicConfig()
-logger = logging.getLogger("Process Wrapper")
+logger = logging.getLogger("ProcessWrapper")
 logger.setLevel(logging.DEBUG)
 
 class ProcessWrapper():
@@ -21,13 +21,13 @@ class ProcessWrapper():
         self.job_id=job_id
         self.command=command
 
-    async def start(self, loop):
+    async def start(self, loop, websocket):
         logger.debug('Starting job: {}'.format(self.command))
         process = await asyncio.create_subprocess_shell(
                 self.command,
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE)
-        job = asyncio.ensure_future(self.spawn_job(process=process))
+        job = asyncio.ensure_future(self.spawn_job(process, loop))
         writer = asyncio.ensure_future(self.send_stdin(process.stdin))
         reader = asyncio.ensure_future(self.read_stdout(process.stdout))
 
@@ -49,19 +49,19 @@ class ProcessWrapper():
             if not ch: return
             sys.stdout.write(ch.decode())
 
-    async def spawn_job(self, process):
+    async def spawn_job(self, process, loop):
         code = await process.wait()
-        logger.debug('Terminated with code {}'.format(code))
+        self._job_terminated(code)
         loop.stop()
 
     def ping_master(self):
         pass
 
-    def _job_terminated(self):
+    def _job_terminated(self, code):
         """
         Callback for when a job is finished
         """
-        pass
+        logger.debug('Terminated with code {}'.format(code))
 
     def _pre_word(self):
         """
@@ -120,7 +120,26 @@ if __name__ == "__main__":
     )
 
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(process_wrapper.start(loop=loop))
-    loop.run_forever()
-    loop.close()
+    try:
+        # connects to websocket on host
+        async with websockets.connect(arguments.service_host) as websocket:
+
+            # register this node with the main server
+            logger.debug("Initiating websocket connection with", arguments.service_host)
+            await self.initiate_connection(websocket)
+
+            # schedule the reporter coroutine
+            self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine().run(websocket))
+
+            # keep on processing commands while possible
+            while websocket.open:
+                await asyncio.ensure_future(self.process_command(websocket))
+
+        logger.debug("ProcessWrapper {} dead".format(job_id))
+        loop.run_until_complete(process_wrapper.start(loop=loop))
+        loop.run_forever()
+    except:
+        logger.debug("Error occured, terminating.")
+    finally:
+        loop.close()
 

@@ -28,3 +28,7 @@ class HealthCommand(Command):
 class RegisterNode(Command):
     def __init__(self, *args):
         super(RegisterNode, self).__init__("connect", None, *args)
+
+class RegisterJob(Command):
+    def __init__(self, *args):
+        super(RegisterJob, self).__init__("connect_job", None, *args)

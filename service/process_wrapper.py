@@ -29,13 +29,13 @@ class ProcessWrapper():
         try:
             # connects to websocket on host
             async with websockets.connect(arguments.service_host) as websocket:
-                command = RegisterJob({"job_id": arguments.job_id, "api_key": arguments.token})
-                await websocket.send(str(command))
+                register = RegisterJob({"job_id": arguments.job_id, "api_key": arguments.token})
+                await websocket.send(str(register))
                 logger.debug("Successfully connected to server.")
 
                 logger.debug('Starting job: {}'.format(self.command))
-                process = await asyncio.create_subprocess_shell(
-                        self.command,
+                process = await asyncio.create_subprocess_exec(
+                        *self.command.split(),
                         stdin=asyncio.subprocess.PIPE,
                         stdout=asyncio.subprocess.PIPE)
                 await asyncio.wait(
@@ -54,7 +54,6 @@ class ProcessWrapper():
     # also https://docs.python.org/3/library/asyncio-eventloop.html#watch-file-descriptors
     async def send_stdin(self, websocket, writer):
         while websocket.open:
-            logger.debug("send_stdin")
             msg = await websocket.recv()
             try:
                 command, *payloads = json.loads(msg)
@@ -62,8 +61,10 @@ class ProcessWrapper():
                 if command == 'stdin':
                     for payload in payloads:
                         writer.write(payload.encode())
+                    await writer.drain()
                     continue
-                if command == 'stop':
+                if command == 'stdin.close':
+                    writer.write_eof()
                     writer.close()
                     return
                 logger.error("Unexpected websocket command: {}".format(command))

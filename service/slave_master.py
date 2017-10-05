@@ -8,10 +8,12 @@ import logging
 import json
 
 from argparse import ArgumentParser
-from websocket_adapter import RegisterNode, HealthCommand
+from websocket_requests import RegisterNode, HealthCommand
+from websocket_responses import ResponseFactory, SpawnResponse, ConnectNodeResponse, RegisterNodeResponse
 
 import websockets
 import psutil
+import traceback
 
 logging.basicConfig()
 logger = logging.getLogger("Slave Main")
@@ -82,11 +84,10 @@ class HealthCheckCoroutine():
 
     async def send_stats(self, websocket):
 
-        logger.debug("Logging node health")
         health = HealthCommand(self.get_server_health().serialize())
         logger.debug("Sending server health")
         await websocket.send(str(health))
-        logger.debug("Sent health status")
+        logger.debug("Sent Health status")
 
 
     async def run(self, websocket):
@@ -126,11 +127,16 @@ class SlaveManager():
         if command == "ACK":
             return
 
-        json_command = json.loads(command)
+        response = ResponseFactory.parse_response(command)
 
-        if json_command[0] == "spawn":
+        if type(response) is SpawnResponse:
             # spawn a job
-            await self.spawn_command(json_command)
+            logger.debug("Got a spawn command")
+            await self.spawn_command(response)
+        elif type(response) is ConnectNodeResponse:
+            logger.debug("Got a connect command")
+        elif type(response) is RegisterNodeResponse:
+            logger.debug("Got a register command")
         else:
             logger.debug("Could not recognize command.")
 
@@ -141,16 +147,19 @@ class SlaveManager():
         Get a command to spawn a worker process.
         """
         # will clean up once we introduce python classes for responses
-        command_details = json.loads(command[1])
-        logger.debug("Spawning {}".format(command_details["name"]))
-        process = await asyncio.create_subprocess_shell(os.path.join(command_details["working_directory"], command_details["script"]), stderr=asyncio.subprocess.PIPE)
+        process = await asyncio.create_subprocess_shell(
+            os.path.join(command.script),
+            stderr=asyncio.subprocess.PIPE
+        )
         # TODO: don't wait for child to finish (blocking here right now for debugging)
         await process.wait()
+        logger.debug("Finished waiting")
 
     async def initiate_connection(self, websocket):
         command = RegisterNode({"address": self.hostname, "api_key": self.api_key})
         await websocket.send(str(command))
         response = await websocket.recv()
+        response = ResponseFactory.parse_response(response)
         logger.debug("Successfully associated host")
 
     async def run(self):
@@ -162,16 +171,19 @@ class SlaveManager():
                 # connects to websocket on host
                 async with websockets.connect(self.service_host) as websocket:
 
-                    # register this node with the main server
-                    logger.debug("Initiating connection")
-                    await self.initiate_connection(websocket)
+                    try:
+                        # register this node with the main server
+                        logger.debug("Initiating connection")
+                        await self.initiate_connection(websocket)
 
-                    # schedule the reporter coroutine
-                    self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine().run(websocket))
+                        # schedule the reporter coroutine
+                        self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine().run(websocket))
 
-                    # keep on processing commands while possible
-                    while websocket.open:
-                        await asyncio.ensure_future(self.process_command(websocket))
+                        # keep on processing commands while possible
+                        while websocket.open:
+                            await asyncio.ensure_future(self.process_command(websocket))
+                    except:
+                        traceback.print_exc()
 
                 logger.debug("Websocket dead")
 

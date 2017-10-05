@@ -27,4 +27,5 @@ class HealthCommand(Command):
 
 class RegisterNode(Command):
     def __init__(self, *args):
-        super(RegisterNode, self).__init__("connect", None, *args)
+        super(RegisterNode, self).__init__("worker.connect", *args)
+

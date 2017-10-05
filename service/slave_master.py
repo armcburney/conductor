@@ -146,13 +146,24 @@ class SlaveManager():
         """
         Get a command to spawn a worker process.
         """
+
+        class ProcessWrapperCommand():
+            def __init__(self, job_id, command):
+                self.job_id = job_id
+                self.command = command
+
+            def __str__(self):
+                return f"./process_wrapper.py --command=\"{self.command}\" --job_id={self.job_id}"
+
+        process_wrapper = str(ProcessWrapperCommand(command.id, command.script))
+        logger.debug(process_wrapper)
         # will clean up once we introduce python classes for responses
         process = await asyncio.create_subprocess_shell(
-            os.path.join(command.script),
+            process_wrapper,
             stderr=asyncio.subprocess.PIPE
         )
         # TODO: don't wait for child to finish (blocking here right now for debugging)
-        await process.wait()
+        # await process.wait()
         logger.debug("Finished waiting")
 
     async def initiate_connection(self, websocket):

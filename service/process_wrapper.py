@@ -9,6 +9,9 @@ import sys
 
 from argparse import ArgumentParser
 
+import websockets
+from websocket_adapter import RegisterJob
+
 logging.basicConfig()
 logger = logging.getLogger("ProcessWrapper")
 logger.setLevel(logging.DEBUG)
@@ -28,12 +31,12 @@ class ProcessWrapper():
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE)
         job = asyncio.ensure_future(self.spawn_job(process, loop))
-        writer = asyncio.ensure_future(self.send_stdin(process.stdin))
-        reader = asyncio.ensure_future(self.read_stdout(process.stdout))
+        writer = asyncio.ensure_future(self.send_stdin(websocket, process.stdin))
+        reader = asyncio.ensure_future(self.read_stdout(websocket, process.stdout))
 
     # TODO investigate connecting pipes https://docs.python.org/3/library/asyncio-eventloop.html#connect-pipes
     # also https://docs.python.org/3/library/asyncio-eventloop.html#watch-file-descriptors
-    async def send_stdin(self, writer):
+    async def send_stdin(self, websocket, writer):
         # TODO hook up to web socket
         while 1:
             ch = sys.stdin.read(1)
@@ -42,7 +45,7 @@ class ProcessWrapper():
                 return
             writer.write(ch.encode())
 
-    async def read_stdout(self, reader):
+    async def read_stdout(self, websocket, reader):
         # TODO hook up to web socket
         while 1:
             ch = await reader.read(1)
@@ -68,6 +71,20 @@ class ProcessWrapper():
         Code to setup a job
         """
         pass
+
+async def start():
+    try:
+        # connects to websocket on host
+        async with websockets.connect(arguments.service_host) as websocket:
+            command = RegisterJob({"job_id": arguments.job_id, "api_key": arguments.token})
+            await websocket.send(str(command))
+            ack = await websocket.recv()
+            logger.debug("Successfully connected to server.")
+
+            asyncio.ensure_future(process_wrapper.start(loop, websocket), loop=loop)
+    except Exception as e:
+        logger.debug("Error occured, terminating:", e)
+
 
 if __name__ == "__main__":
     """
@@ -118,28 +135,10 @@ if __name__ == "__main__":
         job_id=arguments.job_id,
         command=arguments.command,
     )
-
     loop = asyncio.get_event_loop()
     try:
-        # connects to websocket on host
-        async with websockets.connect(arguments.service_host) as websocket:
-
-            # register this node with the main server
-            logger.debug("Initiating websocket connection with", arguments.service_host)
-            await self.initiate_connection(websocket)
-
-            # schedule the reporter coroutine
-            self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine().run(websocket))
-
-            # keep on processing commands while possible
-            while websocket.open:
-                await asyncio.ensure_future(self.process_command(websocket))
-
-        logger.debug("ProcessWrapper {} dead".format(job_id))
-        loop.run_until_complete(process_wrapper.start(loop=loop))
+        loop.run_until_complete(start())
         loop.run_forever()
-    except:
-        logger.debug("Error occured, terminating.")
     finally:
         loop.close()
 

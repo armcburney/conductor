@@ -24,8 +24,8 @@ async def connection(websocket, path):
     logger.debug("Started Connection")
     while websocket.open:
         done, pending = await asyncio.wait(
-            # [write(websocket), read(websocket)],
-            [read(websocket)],
+            [write(websocket), read(websocket)],
+            #[read(websocket)],
             return_when=asyncio.FIRST_COMPLETED)
 
 send_server = websockets.serve(connection, 'localhost', 8765)

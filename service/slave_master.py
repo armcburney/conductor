@@ -123,22 +123,35 @@ class SlaveManager():
 
         logger.debug("Processing command: {}".format(command))
 
-    async def spawn_worker_wrapper(self, command, args):
+        if command == "ACK":
+            return
+
+        json_command = json.loads(command)
+
+        if json_command[0] == "spawn":
+            # spawn a job
+            await self.spawn_command(json_command)
+        else:
+            logger.debug("Could not recognize command.")
+
+        logger.debug("Successfully processed command")
+
+    async def spawn_command(self, command):
         """
         Get a command to spawn a worker process.
         """
-        # TODO(adam, andrew): we need to determine how this thing will get spawned
-        logging.debug("Spawning wrapper")
-        # need yield from because not fully compatible yet
-        process = await asyncio.create_subprocess_exec(command, *args, stderr=asyncio.subprocess.PIPE)
+        # will clean up once we introduce python classes for responses
+        command_details = json.loads(command[1])
+        logger.debug("Spawning {}".format(command_details["name"]))
+        process = await asyncio.create_subprocess_shell(os.path.join(command_details["working_directory"], command_details["script"]), stderr=asyncio.subprocess.PIPE)
+        # TODO: don't wait for child to finish (blocking here right now for debugging)
         await process.wait()
-        logging.debug("Wrapper completed")
 
     async def initiate_connection(self, websocket):
         command = RegisterNode({"address": self.hostname, "api_key": self.api_key})
         await websocket.send(str(command))
         response = await websocket.recv()
-        logger.debug("Successfully associated")
+        logger.debug("Successfully associated host")
 
     async def run(self):
 

@@ -10,10 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170923221325) do
+ActiveRecord::Schema.define(version: 20171001183031) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "api_keys", force: :cascade do |t|
+    t.string   "key",        null: false
+    t.integer  "user_id"
+    t.string   "name",       null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_api_keys_on_key", unique: true, using: :btree
+    t.index ["user_id"], name: "index_api_keys_on_user_id", using: :btree
+  end
 
   create_table "event_actions", force: :cascade do |t|
     t.integer  "event_receiver_id"
@@ -38,6 +48,18 @@ ActiveRecord::Schema.define(version: 20170923221325) do
     t.index ["user_id"], name: "index_event_receivers_on_user_id", using: :btree
   end
 
+  create_table "friendly_id_slugs", force: :cascade do |t|
+    t.string   "slug",                      null: false
+    t.integer  "sluggable_id",              null: false
+    t.string   "sluggable_type", limit: 50
+    t.string   "scope"
+    t.datetime "created_at"
+    t.index ["slug", "sluggable_type", "scope"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type_and_scope", unique: true, using: :btree
+    t.index ["slug", "sluggable_type"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type", using: :btree
+    t.index ["sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_id", using: :btree
+    t.index ["sluggable_type"], name: "index_friendly_id_slugs_on_sluggable_type", using: :btree
+  end
+
   create_table "job_types", force: :cascade do |t|
     t.text     "script"
     t.string   "working_directory"
@@ -59,7 +81,9 @@ ActiveRecord::Schema.define(version: 20170923221325) do
     t.integer  "job_type_id"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
+    t.integer  "worker_id"
     t.index ["job_type_id"], name: "index_jobs_on_job_type_id", using: :btree
+    t.index ["worker_id"], name: "index_jobs_on_worker_id", using: :btree
   end
 
   create_table "users", force: :cascade do |t|
@@ -83,16 +107,27 @@ ActiveRecord::Schema.define(version: 20170923221325) do
     t.integer  "user_id"
     t.string   "address"
     t.datetime "last_heartbeat"
-    t.datetime "created_at",     null: false
-    t.datetime "updated_at",     null: false
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+    t.integer  "cpu_count"
+    t.float    "load"
+    t.integer  "total_memory"
+    t.integer  "available_memory"
+    t.integer  "total_disk"
+    t.integer  "used_disk"
+    t.integer  "free_disk"
+    t.string   "slug"
+    t.index ["slug"], name: "index_workers_on_slug", unique: true, using: :btree
     t.index ["user_id"], name: "index_workers_on_user_id", using: :btree
   end
 
+  add_foreign_key "api_keys", "users"
   add_foreign_key "event_actions", "event_receivers"
   add_foreign_key "event_actions", "job_types"
   add_foreign_key "event_receivers", "job_types"
   add_foreign_key "event_receivers", "users"
   add_foreign_key "job_types", "users"
   add_foreign_key "jobs", "job_types"
+  add_foreign_key "jobs", "workers"
   add_foreign_key "workers", "users"
 end

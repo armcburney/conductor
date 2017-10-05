@@ -1,0 +1,9 @@
+{
+    "cpu_count": NUMBER_OF_PROCESSORS,
+    "load": Average number of processes in run queue (need to divide by # cpus to get better understanding),
+    "total_memory": TOTAL RAM Bytes,
+    "available_memory": FREE RAM Bytes,
+    "total_disk": DISK SPACE Bytes,
+    "used_disk": USED SPACE Bytes,
+    "free_disk": FREE SPACE Bytes
+}

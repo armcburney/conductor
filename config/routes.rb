@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   resources :workers
   resources :jobs
   resources :job_types
+  resources :api_keys
   get  "home/index"
   root "home#index"
 end

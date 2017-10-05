@@ -26,7 +26,7 @@ class JobsController < ApplicationController
   # POST /jobs
   # POST /jobs.json
   def create
-    @job = Job.new(job_params.merge({ worker: find_free_worker }))
+    @job = Job.new(job_params.merge(worker: find_free_worker))
 
     respond_to do |format|
       if @job.save
@@ -74,9 +74,9 @@ class JobsController < ApplicationController
   def find_free_worker
     current_user
       .workers
-      .joins('left outer join jobs on jobs.worker_id = workers.id')
-      .group('workers.id')
-      .order('count(distinct jobs.id) asc')
+      .joins("left outer join jobs on jobs.worker_id = workers.id")
+      .group("workers.id")
+      .order("count(distinct jobs.id) asc")
       .first
   end
 

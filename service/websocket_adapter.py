@@ -31,4 +31,4 @@ class RegisterNode(Command):
 
 class RegisterJob(Command):
     def __init__(self, *args):
-        super(RegisterJob, self).__init__("new_job", None, *args)
+        super(RegisterJob, self).__init__("connect_job", None, *args)

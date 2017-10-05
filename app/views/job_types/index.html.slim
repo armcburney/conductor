@@ -1,4 +1,4 @@
-h1 Listing job_types
+h1 Jobs
 
 table
   thead
@@ -21,10 +21,14 @@ table
         td = job_type.environment_variables
         td = job_type.timeout
         td = job_type.name
-        td = job_type.user
-        td = link_to 'Show', job_type
         td = link_to 'Edit', edit_job_type_path(job_type)
-        td = link_to 'Destroy', job_type, data: { confirm: 'Are you sure?' }, method: :delete
+        td = button_to 'Destroy', job_type, method: :delete
+        td
+          - if current_user.workers.any?
+            = button_to 'Spawn', { controller: "jobs", action: "create", job: { job_type_id: job_type.id } }, method: :post
+          - else
+            button(disabled=true) Create a worker to spawn this job
+
 
 br
 

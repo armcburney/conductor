@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 class WorkerConnectionController < WebsocketRails::BaseController
-  before_action :update_heartbeat
-
   def connect
-    worker ? trigger_success : trigger_failure
+    if worker
+      trigger_success
+      send_message :registered, { id: worker.id }, namespace: :worker  # Sends worker id to slave
+    else
+      trigger_failure
+    end
   end
 
   def healthcheck
@@ -30,13 +33,8 @@ class WorkerConnectionController < WebsocketRails::BaseController
 
     unless @worker
       @worker = worker_user.workers.create(address: message["address"]) # Creates a new worker
-      send_message :registered, { id: @worker.id }, namespace: :worker  # Sends worker id to slave
     end
 
     @worker
-  end
-
-  def update_heartbeat
-    worker.update(last_heartbeat: Time.zone.now)
   end
 end

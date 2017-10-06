@@ -11,7 +11,7 @@ import sys
 from argparse import ArgumentParser
 
 import websockets
-from websocket_adapter import RegisterJob
+from websocket_adapter import RegisterJob, JobStdout, JobStdoutEof
 
 logging.basicConfig()
 logger = logging.getLogger("ProcessWrapper")
@@ -36,7 +36,7 @@ class ProcessWrapper():
                 logger.debug('Starting job: {}'.format(self.command))
                 process = await asyncio.create_subprocess_exec(
                         *self.command.split(),
-                        stdin=asyncio.subprocess.PIPE,
+                        #stdin=asyncio.subprocess.PIPE,
                         stdout=asyncio.subprocess.PIPE)
                 await asyncio.wait(
                     [
@@ -72,11 +72,15 @@ class ProcessWrapper():
                 logger.error("Failed to parse json: {}".format(msg))
 
     async def read_stdout(self, websocket, reader):
-        # TODO hook up to web socket
         while websocket.open:
-            ch = await reader.read(1)
-            if not ch: return
-            sys.stdout.write(ch.decode())
+            encoded = await reader.readline()
+            if not encoded:
+                return
+            line = encoded.decode().strip()
+            logger.debug("got stdout: {}".format(line))
+            message = JobStdout(line)
+            await websocket.send(str(message))
+            logger.debug("sent message")
 
     async def spawn_job(self, process, loop):
         code = await process.wait()

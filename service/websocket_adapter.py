@@ -32,3 +32,15 @@ class RegisterNode(Command):
 class RegisterJob(Command):
     def __init__(self, *args):
         super(RegisterJob, self).__init__('worker.register_job', *args)
+
+class JobStdin(Command):
+    def __init__(self, *args):
+        super(RegisterJob, self).__init__('stdin', *args)
+
+class JobStdout(Command):
+    def __init__(self, *args):
+        super(RegisterJob, self).__init__('stdout', *args)
+
+class JobStdoutEof(Command):
+    def __init__(self, *args):
+        super(RegisterJob, self).__init__('stdout.eof', *args)

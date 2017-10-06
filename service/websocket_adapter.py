@@ -35,12 +35,20 @@ class RegisterJob(Command):
 
 class JobStdin(Command):
     def __init__(self, *args):
-        super(RegisterJob, self).__init__('stdin', *args)
+        super(JobStdin, self).__init__('stdin', *args)
 
 class JobStdout(Command):
     def __init__(self, *args):
-        super(RegisterJob, self).__init__('stdout', *args)
+        super(JobStdout, self).__init__('stdout', *args)
 
 class JobStdoutEof(Command):
     def __init__(self, *args):
-        super(RegisterJob, self).__init__('stdout.eof', *args)
+        super(JobStdoutEof, self).__init__('stdout.eof', *args)
+
+class JobStderr(Command):
+    def __init__(self, *args):
+        super(JobStderr, self).__init__('stderr', *args)
+
+class JobStderrEof(Command):
+    def __init__(self, *args):
+        super(JobStderrEof, self).__init__('stderr.eof', *args)

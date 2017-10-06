@@ -12,7 +12,7 @@ logger.setLevel(logging.DEBUG)
 async def read(websocket):
     while websocket.open:
         t = await websocket.recv()
-        logger.info("Got message: ".format(t))
+        logger.info("Got message: {}".format(t))
 
 async def write(websocket):
     while websocket.open:

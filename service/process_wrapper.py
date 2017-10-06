@@ -11,7 +11,7 @@ import sys
 from argparse import ArgumentParser
 
 import websockets
-from websocket_adapter import RegisterJob, JobStdout, JobStdoutEof
+from websocket_adapter import RegisterJob, JobStdout, JobStdoutEof, JobStderr, JobStderrEof
 
 logging.basicConfig()
 logger = logging.getLogger("ProcessWrapper")
@@ -37,15 +37,18 @@ class ProcessWrapper():
                 process = await asyncio.create_subprocess_exec(
                         *self.command.split(),
                         #stdin=asyncio.subprocess.PIPE,
-                        stdout=asyncio.subprocess.PIPE)
+                        stdout=asyncio.subprocess.PIPE,
+                        stderr=asyncio.subprocess.PIPE)
                 await asyncio.wait(
                     [
                         self.spawn_job(process, loop),
-                        self.send_stdin(websocket, process.stdin),
+                        #self.send_stdin(websocket, process.stdin),
                         self.read_stdout(websocket, process.stdout),
+                        self.read_stderr(websocket, process.stderr),
                     ],
                     loop=loop,
                     return_when=asyncio.ALL_COMPLETED)
+                logger.debug("Returned from await job")
         except Exception as e:
             logger.debug("Error occured, terminating:", e)
 
@@ -72,14 +75,24 @@ class ProcessWrapper():
                 logger.error("Failed to parse json: {}".format(msg))
 
     async def read_stdout(self, websocket, reader):
+        encoder = lambda msg: JobStdout(msg)
+        await self._websocket_writer(websocket, reader, encoder, JobStdoutEof())
+
+    async def read_stderr(self, websocket, reader):
+        encoder = lambda msg: JobStderr(msg)
+        await self._websocket_writer(websocket, reader, encoder, JobStderrEof())
+
+    async def _websocket_writer(self, websocket, reader, encoder, eof):
         while websocket.open:
             encoded = await reader.readline()
             if not encoded:
+                logger.debug("sending eof message")
+                await websocket.send(str(eof))
+                await websocket.recv()
                 return
             line = encoded.decode().strip()
-            logger.debug("got stdout: {}".format(line))
-            message = JobStdout(line)
-            await websocket.send(str(message))
+            logger.debug("got line: {}".format(line))
+            await websocket.send(str(encoder(line)))
             logger.debug("sent message")
 
     async def spawn_job(self, process, loop):
@@ -95,18 +108,12 @@ class ProcessWrapper():
         """
         logger.debug('Terminated with code {}'.format(code))
 
-    def _pre_word(self):
-        """
-        Code to setup a job
-        """
-        pass
-
 if __name__ == "__main__":
     """
     Minimal implementation of spawn worker process.
-    Runs a shell command and pipes stdin/stdout with a one character buffer.
+    Runs a shell command and pipes stout/stderr line by line to websocket host.
 
-    Example: printf 'foo\nbar' | python3 process_wrapper.py --job_id 1 --command 'cat'
+    Example:  python3 process_wrapper.py --job_id 1 --command '/usr/bin/python3 -u write_test.py' --service_host ws://localhost:8765
     """
     parser = ArgumentParser("Worker job process wrapper.")
 

@@ -29,14 +29,19 @@ class WorkerConnectionController < WebsocketRails::BaseController
   end
 
   def worker
-    @worker ||= message["id"] && Worker.find_by(id: message["id"])
+    return @worker if @worker
 
-    if @worker
-      return nil unless @worker.user == worker_user
+    if message["id"]
+      @worker = Worker.find_by(id: message["id"])
+      verify_worker_key!
     else
       @worker = worker_user&.workers&.create! # Creates a new worker
     end
 
     @worker
+  end
+
+  def verify_worker_key!
+    @worker = nil unless worker&.user == worker_user
   end
 end

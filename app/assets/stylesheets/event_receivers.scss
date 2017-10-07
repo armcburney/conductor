@@ -1,0 +1,61 @@
+@import "variables";
+
+#event_receivers {
+  width: 100%;
+  padding: 0.5em 1.5rem 1em 1.5rem;
+  box-sizing: border-box;
+  max-width: 64rem;
+}
+
+.receiver {
+  display: flex;
+  padding: 1em 0;
+  flex-direction: row;
+  background-color: $light-shade;
+  border-radius: 4px;
+  position: relative;
+  border: 1px solid $light-shade;
+  transition: all 0.3s ease;
+
+  .controls {
+    position: absolute;
+    bottom: -15px;
+    right: 20px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    transform: translateX(20px);
+
+    .button {
+      box-shadow: 0 1px 5px rgba(0,0,0,0.15);
+    }
+  }
+
+  &.loading {
+    opacity: 0.5;
+  }
+
+  &.dirty {
+    border: 1px solid $accent;
+
+    .controls {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .actions, .trigger {
+    flex: 1;
+
+    &:first-child {
+      border-right: 1px solid $mid;
+    }
+  }
+
+  .trigger-option {
+    padding: 0.5em 1.5rem 1em 1.5rem;
+  }
+}
+
+.rdt {
+  display: inline-block;
+}

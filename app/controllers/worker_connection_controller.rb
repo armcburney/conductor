@@ -27,10 +27,11 @@ class WorkerConnectionController < WebsocketRails::BaseController
     @worker_user ||= User.joins(:api_keys).find_by(api_keys: { key: message["key"] })
   end
 
-  # Finds a worker by id, creates a new worker if it does not exist
-  # Returns nil if the worker does not belong to the current 'worker_user'
   def worker
-    @worker = @worker ? @worker : WorkerFactory.new(message["id"], worker_user).create
+    # Finds a worker by id, creates a new worker if it does not exist
+    @worker ||= WorkerFactory.new(message["id"], worker_user).create
+
+    # Returns nil if the worker does not belong to the current 'worker_user'
     @worker.user != worker_user ? nil : @worker
   end
 

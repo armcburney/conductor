@@ -2,12 +2,28 @@
 
 class WorkerConnectionController < WebsocketRails::BaseController
   def connect
-    Rails.logger.info "Connect to worker with id: #{message[:id]}."
+    Rails.logger.info "Connect to worker with id: #{message['id']}."
     worker ? trigger_connection : trigger_failure
   end
 
+  def stdout
+    Rails.logger.info "Updated stdout for #{message['job_id']} with stdout: #{message['stdout']}."
+    Rails.logger.info message.slice("stdout")
+    job.update(message.slice("stdout"))
+  end
+
+  def stderr
+    Rails.logger.info "Updated stderr for #{message['job_id']} with stderr: #{message['stderr']}."
+    job.update(message.slice("stderr"))
+  end
+
+  def returncode
+    Rails.logger.info "Updated return code for #{message['job_id']}."
+    job.update(message.slice("return_code"))
+  end
+
   def healthcheck
-    Rails.logger.info "Set healthcheck for worker: #{worker.&id}."
+    Rails.logger.info "Set healthcheck for worker: #{message['id']}."
     worker.update(message.slice(*worker_healthcheck_params))
   end
 
@@ -21,6 +37,13 @@ class WorkerConnectionController < WebsocketRails::BaseController
 
   def send_worker_id_to_slave
     send_message :registered, { id: worker.id }, namespace: :worker
+  end
+
+  def job
+    @job ||= Job.find_by(id: message["job_id"])
+
+    # Triggers failure if it can't find the job
+    @job ? @job : trigger_failure
   end
 
   def worker_user

@@ -2,12 +2,12 @@
 
 class WorkerConnectionController < WebsocketRails::BaseController
   def connect
-    Rails.logger.info "Connect to worker with id: #{message[:id]}."
+    Rails.logger.info "Connect to worker with id: #{message['id']}."
     worker ? trigger_connection : trigger_failure
   end
 
   def healthcheck
-    Rails.logger.info "Set healthcheck for worker: #{worker.&id}."
+    Rails.logger.info "Set healthcheck for worker: #{message['id']}."
     worker.update(message.slice(*worker_healthcheck_params))
   end
 

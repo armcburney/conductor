@@ -5,6 +5,7 @@ class WorkerConnectionController < WebsocketRails::BaseController
     if worker
       trigger_success
       send_message :registered, { id: worker.id }, namespace: :worker  # Sends worker id to slave
+      worker.channel.make_private
       worker.channel.subscribe(connection)
     else
       trigger_failure

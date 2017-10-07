@@ -4,7 +4,6 @@ table
   thead
     tr
       th User
-      th Address
       th Last heartbeat
       th Job
       th
@@ -15,7 +14,6 @@ table
     - @workers.each do |worker|
       tr
         td = worker.user
-        td = worker.address
         td = worker.last_heartbeat
         td = worker.jobs.length
         td = link_to 'Show', worker

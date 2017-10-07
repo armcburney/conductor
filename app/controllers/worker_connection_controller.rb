@@ -2,10 +2,12 @@
 
 class WorkerConnectionController < WebsocketRails::BaseController
   def connect
+    Rails.logger.info "Connect to worker with id: #{message[:id]}."
     worker ? trigger_connection : trigger_failure
   end
 
   def healthcheck
+    Rails.logger.info "Set healthcheck for worker: #{worker.&id}."
     worker.update(message.slice(*worker_healthcheck_params))
   end
 
@@ -22,12 +24,14 @@ class WorkerConnectionController < WebsocketRails::BaseController
   end
 
   def worker_user
-    @worker_user ||= User.joins(:api_keys).where(api_keys: { key: message["key"] }).first
+    @worker_user ||= User.joins(:api_keys).find_by(api_keys: { key: message["key"] })
   end
 
+  # Finds a worker by id, creates a new worker if it does not exist
+  # Returns nil if the worker does not belong to the current 'worker_user'
   def worker
-    return nil if @worker && @worker&.user != user
-    @worker ? @worker : WorkerFactory.new(message["id"], worker_user).create
+    @worker = @worker ? @worker : WorkerFactory.new(message["id"], worker_user).create
+    @worker.user != worker_user ? nil : @worker
   end
 
   def worker_healthcheck_params

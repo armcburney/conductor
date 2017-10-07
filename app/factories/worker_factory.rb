@@ -7,7 +7,6 @@ class WorkerFactory
     @user = user
   end
 
-  # Modified 'find_or_create_by' method
   def create
     id ? Worker.find_by(id: id) : user&.workers&.create!
   end

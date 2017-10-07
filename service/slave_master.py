@@ -8,7 +8,7 @@ import logging
 import json
 
 from argparse import ArgumentParser
-from websocket_requests import RegisterNode, HealthCommand
+from websocket_requests import RegisterNode, HealthCommand, ConnectCommand
 from websocket_responses import ResponseFactory, SpawnResponse, ConnectNodeResponse, RegisterNodeResponse
 
 import websockets
@@ -18,6 +18,8 @@ import traceback
 logging.basicConfig()
 logger = logging.getLogger("Slave Main")
 logger.setLevel(logging.DEBUG)
+
+MAX_RECONNECT_TRIES=10
 
 class ServerHealth:
     """
@@ -117,6 +119,9 @@ class SlaveManager():
         self.service_host = service_host
         self.api_key = api_key
 
+        # to be set based on the response from the server
+        self.node_id = None
+
     async def process_command(self, websocket):
 
         # keep on processing commands while available
@@ -124,19 +129,16 @@ class SlaveManager():
 
         logger.debug("Processing command: {}".format(command))
 
-        if command == "ACK":
-            return
-
         response = ResponseFactory.parse_response(command)
 
         if type(response) is SpawnResponse:
             # spawn a job
-            logger.debug("Got a spawn command")
+            logger.debug("Got a Spawn command")
             await self.spawn_command(response)
         elif type(response) is ConnectNodeResponse:
-            logger.debug("Got a connect command")
+            logger.debug("Got an unexpected Connect command")
         elif type(response) is RegisterNodeResponse:
-            logger.debug("Got a register command")
+            logger.debug("Got an unexpected Register command")
         else:
             logger.debug("Could not recognize command.")
 
@@ -157,13 +159,37 @@ class SlaveManager():
 
     async def initiate_connection(self, websocket):
         command = RegisterNode(address=self.hostname, api_key=self.api_key)
+
+        # Send registration command
         await websocket.send(str(command))
         response = await websocket.recv()
-        response = ResponseFactory.parse_response(response)
-        # FIXME: need to check that reposnse is valid
-        logger.debug("Successfully associated host")
+
+        parsed_response = ResponseFactory.parse_response(response)
+        if not parsed_response is RegisterNodeResponse:
+            logger.error("Unable to register host with master server")
+            return
+
+        self.node_id = parsed_response.node_id
+
+        logger.debug("Successfully registered with master server")
+
+    async def reinitiate_connection(self, websocket):
+        command = ConnectCommand(api_key=self.api_key, node_id=self.node_id, address=self.hostname)
+
+        # Send connection command
+        await websocket.send(str(command))
+        response = await websocket.recv()
+
+        parsed_response = ResponseFactory.parse_response(response)
+        if not type(parsed_response) is ConnectNodeResponse:
+            logger.error("Unable to connect to master server")
+            return
+
+        logger.info("Successfully connected to the master server")
 
     async def run(self):
+        num_reconnect_tries = 0 # how many times we've tried to reconnect
+        reconnect = False
 
         # keep a connection to a websocket while we're alive
         while True:
@@ -171,11 +197,13 @@ class SlaveManager():
             try:
                 # connects to websocket on host
                 async with websockets.connect(self.service_host) as websocket:
-
                     try:
                         # register this node with the main server
                         logger.debug("Initiating connection")
-                        await self.initiate_connection(websocket)
+                        if not reconnect:
+                            await self.initiate_connection(websocket)
+                        else:
+                            await self.reinitiate_connection(websocket)
 
                         # schedule the reporter coroutine
                         self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine().run(websocket))
@@ -185,12 +213,19 @@ class SlaveManager():
                             await asyncio.ensure_future(self.process_command(websocket))
                     except:
                         traceback.print_exc()
+                        raise
 
                 logger.debug("Websocket dead")
 
+                if num_reconnect_tries < MAX_RECONNECT_TRIES:
+                    num_reconnect_tries += 1
+                    reconnect = True
+                else:
+                    reconnect = False
             except:
                 logger.debug("Error occured, sleeping before trying to reconnect")
                 time.sleep(1)
+
 
 if __name__ == "__main__":
 

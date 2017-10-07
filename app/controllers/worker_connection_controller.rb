@@ -2,48 +2,35 @@
 
 class WorkerConnectionController < WebsocketRails::BaseController
   def connect
-    if worker
-      trigger_success
-      send_message :registered, { id: worker.id }, namespace: :worker  # Sends worker id to slave
-      worker.channel.make_private
-      worker.channel.subscribe(connection)
-    else
-      trigger_failure
-    end
+    worker ? trigger_connection : trigger_failure
   end
 
   def healthcheck
-    worker.update(
-      cpu_count:        message["cpu_count"],
-      load:             message["load"],
-      total_memory:     message["total_memory"],
-      available_memory: message["available_memory"],
-      total_disk:       message["total_disk"],
-      used_disk:        message["used_disk"],
-      free_disk:        message["free_disk"]
-    )
+    worker.update(message.slice(*worker_healthcheck_params))
   end
 
   private
+
+  def trigger_connection
+    trigger_success
+    send_worker_id_to_slave
+    WorkerConnectionService.new(worker).connect
+  end
+
+  def send_worker_id_to_slave
+    send_message :registered, { id: worker.id }, namespace: :worker
+  end
 
   def worker_user
     @worker_user ||= User.joins(:api_keys).where(api_keys: { key: message["key"] }).first
   end
 
   def worker
-    return @worker if @worker
-
-    if message["id"]
-      @worker = Worker.find_by(id: message["id"])
-      verify_worker_key!
-    else
-      @worker = worker_user&.workers&.create! # Creates a new worker
-    end
-
-    @worker
+    return nil if @worker && @worker&.user != user
+    @worker ? @worker : WorkerFactory.new(message["id"], worker_user).create
   end
 
-  def verify_worker_key!
-    @worker = nil unless worker&.user == worker_user
+  def worker_healthcheck_params
+    %w(cpu_count load total_memory available_memory total_disk used_disk free_disk)
   end
 end

@@ -11,17 +11,18 @@ class ResponseFactory():
 
         response_type = None
 
-        if command == "worker.connect":
+        print (response)
+        if command == "client_connected":
             response_type = ConnectNodeResponse
         elif command == "worker.registered":
             response_type = RegisterNodeResponse
         elif command == "spawn":
             response_type = SpawnResponse
         else:
+            return None
             raise ResponseNotSupportedException
 
         return response_type.process_response(json_response)
-
 
 class Response():
     @staticmethod
@@ -43,6 +44,9 @@ class RegisterNodeResponse(Response):
         return RegisterNodeResponse(**response_body)
 
 class ConnectNodeResponse(Response):
+    """
+    If you have an id, connect
+    """
     def __init__(self, id, channel, user_id, success, result, token, server_token):
         self.node_id = id
         self.node_channel = channel

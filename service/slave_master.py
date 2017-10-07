@@ -85,9 +85,9 @@ class HealthCheckCoroutine():
     async def send_stats(self, websocket):
 
         health = HealthCommand(self.get_server_health().serialize())
-        logger.debug("Sending server health")
+        logger.debug("Sending Server Health Status")
         await websocket.send(str(health))
-        logger.debug("Sent Health status")
+        logger.debug("Sent Server Health Status")
 
 
     async def run(self, websocket):
@@ -151,15 +151,16 @@ class SlaveManager():
             os.path.join(command.script),
             stderr=asyncio.subprocess.PIPE
         )
-        # TODO: don't wait for child to finish (blocking here right now for debugging)
-        await process.wait()
+        # NOTE: right now we don't wait for child to finish
+        # await process.wait()
         logger.debug("Finished waiting")
 
     async def initiate_connection(self, websocket):
-        command = RegisterNode({"address": self.hostname, "api_key": self.api_key})
+        command = RegisterNode(address=self.hostname, api_key=self.api_key)
         await websocket.send(str(command))
         response = await websocket.recv()
         response = ResponseFactory.parse_response(response)
+        # FIXME: need to check that reposnse is valid
         logger.debug("Successfully associated host")
 
     async def run(self):

@@ -14,6 +14,7 @@ class JobConnectionController < WebsocketRails::BaseController
   def return_code
     Rails.logger.info "Updated return code for #{message['id']}, with return code #{message['return_code']}."
     job&.update(message.slice("return_code"))
+    JobStatusSetter.new(job, message["return_code"]).update
   end
 
   private

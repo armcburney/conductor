@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 class Worker < ApplicationRecord
+  # Callbacks
+  before_commit :update_heartbeat
+
+  # Associations
   belongs_to :user
   has_many :jobs
-
-  before_commit :update_heartbeat
 
   def update_heartbeat
     update(last_heartbeat: Time.zone.now)

@@ -1,13 +1,17 @@
 # frozen_string_literal: true
 
 class Job < ApplicationRecord
+  # Callbacks
+  after_create :make_channel
   before_save :default_values, :send_email
 
+  # Associations
   belongs_to :worker
   belongs_to :job_type
   has_one :user, through: :worker
 
-  after_create :make_channel
+  # Validations
+  validates :status, inclusion: { in: %w(UNDEFINED ERROR NORMAL\ EXECUTION) }
 
   def channel
     WebsocketRails["job.#{id}"]
@@ -16,8 +20,6 @@ class Job < ApplicationRecord
   def make_channel
     channel.make_private
   end
-
-  validates  :status, inclusion: { in: %w(UNDEFINED ERROR NORMAL\ EXECUTION) }
 
   def request_json
     # Send the id of the current job, plus the information from the job type

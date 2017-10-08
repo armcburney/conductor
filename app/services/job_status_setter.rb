@@ -2,6 +2,8 @@
 
 # Updates internal status of job based on return code
 class JobStatusSetter
+  include StatusCodeHelpers
+
   attr_reader :job, :return_code
   def initialize(job, return_code)
     @job         = job
@@ -16,9 +18,9 @@ class JobStatusSetter
 
   def status
     case return_code
-    when -1
+    when ERROR_CODE
       "ERROR"
-    when 0
+    when NORMAL_CODE
       "NORMAL EXECUTION"
     end
   end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Job < ApplicationRecord
-  before_save :default_values
+  before_save :default_values, :send_email
 
   belongs_to :worker
   belongs_to :job_type
@@ -25,7 +25,14 @@ class Job < ApplicationRecord
     job_type.as_json.merge(id: id)
   end
 
+  private
+
   def default_values
     self.status ||= "UNDEFINED"
+  end
+
+  def send_email
+    return unless status == "ERROR"
+    ErrorMailer.email(self).deliver
   end
 end

@@ -1,0 +1,66 @@
+@import "variables";
+
+.worker-scrollable {
+  height: 80vh;
+  overflow-y: auto;
+  overflow-x: visible;
+}
+
+.code {
+  font-family: monospace;
+}
+
+.worker {
+  @include card;
+  display: flex;
+  flex-direction: column;
+  background-color: $light-shade;
+
+  .section {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 20px;
+
+    &.jobs {
+      flex-direction:column;
+    }
+  }
+
+  .datum {
+    @include grid-card;
+    font-size: 0.8em;
+    width: 100px;
+    height: 60px;
+    background-color: $light;
+    vertical-align: middle;
+    display: inline-flex;
+    flex-direction: column;
+
+    span {
+      margin: 0;
+      padding: 0;
+      line-height: 30px;
+      text-align: center;
+    }
+
+    .value {
+      font-weight: bold;
+    }
+  }
+
+  .job {
+    @include card;
+    cursor: pointer;
+    background-color: $light;
+
+    .title {
+      margin-right: 20px;
+    }
+
+    &.selected {
+      border: 1px solid $accent;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transform: translateX(20px);
+    }
+  }
+}

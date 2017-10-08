@@ -1,21 +1,10 @@
 @import "variables";
 
-#event_receivers {
-  width: 100%;
-  padding: 0.5em 1.5rem 1em 1.5rem;
-  box-sizing: border-box;
-  max-width: 64rem;
-}
-
 .receiver {
+  @include card;
   display: flex;
-  padding: 1em 0;
   flex-direction: row;
   background-color: $light-shade;
-  border-radius: 4px;
-  position: relative;
-  border: 1px solid $light-shade;
-  transition: all 0.3s ease;
 
   .controls {
     position: absolute;

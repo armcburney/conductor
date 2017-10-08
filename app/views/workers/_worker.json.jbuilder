@@ -1,2 +1,1 @@
-json.extract! worker, :id, :user_id, :address, :last_heartbeat, :job, :created_at, :updated_at
-json.url worker_url(worker, format: :json)
+json.extract! worker, :id, :last_heartbeat, :created_at, :updated_at, :cpu_count, :load, :total_memory, :available_memory, :total_disk, :used_disk, :free_disk, :jobs

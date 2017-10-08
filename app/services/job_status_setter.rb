@@ -11,19 +11,20 @@ class JobStatusSetter
   end
 
   def update
+    Rails.logger.info "Set the job status to #{status}."
     job.update(status: status)
   end
 
   private
 
   def status
-    case return_code
-    when ERROR_CODE
-      "ERROR"
-    when NORMAL_CODE
-      "NORMAL EXECUTION"
-    else
-      "UNDEFINED"
+    @status ||= begin
+      case return_code
+      when ERROR_CODE  then "ERROR"
+      when NORMAL_CODE then "NORMAL EXECUTION"
+      else
+        "UNDEFINED"
+      end
     end
   end
 end

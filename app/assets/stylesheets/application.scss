@@ -1,5 +1,6 @@
 @import "variables";
 @import "event_receivers";
+@import "workers";
 
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,400italic);
 
@@ -30,12 +31,8 @@ h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12 {
   @include OpenSansLight;
 }
 h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, p,
-nav, ul, .row {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 64rem;
-  padding: 0.5em 1.5rem 1em 1.5rem;
-  margin: 0;
+nav, ul, .row, .container {
+  @include top-level-centered;
 }
 ul {
   padding-left: 5rem;
@@ -99,7 +96,8 @@ section:nth-child(odd), section.odd {
   flex: 1;
   padding-right: 1.5em;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  overflow: hidden;
 }
 .column--double {
   flex: 2;

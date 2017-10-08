@@ -5,6 +5,17 @@ class Job < ApplicationRecord
 
   belongs_to :worker
   belongs_to :job_type
+  has_one :user, through: :worker
+
+  after_create :make_channel
+
+  def channel
+    WebsocketRails["job.#{id}"]
+  end
+
+  def make_channel
+    channel.make_private
+  end
 
   validates  :status, inclusion: { in: %w(UNDEFINED ERROR NORMAL\ EXECUTION) }
 

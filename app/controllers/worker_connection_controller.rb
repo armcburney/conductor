@@ -16,7 +16,7 @@ class WorkerConnectionController < WebsocketRails::BaseController
   def trigger_connection
     trigger_success
     send_worker_id_to_slave
-    WorkerConnectionService.new(worker).connect
+    WorkerConnectionService.new(worker).connect(connection)
   end
 
   def send_worker_id_to_slave

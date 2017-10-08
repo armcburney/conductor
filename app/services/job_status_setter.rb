@@ -22,6 +22,8 @@ class JobStatusSetter
       "ERROR"
     when NORMAL_CODE
       "NORMAL EXECUTION"
+    else
+      "UNDEFINED"
     end
   end
 end

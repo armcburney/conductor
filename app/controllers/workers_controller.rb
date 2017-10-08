@@ -21,38 +21,38 @@ class WorkersController < ApplicationController
   end
 
   # GET /workers/1/edit
-  #def edit
-  #end
+  def edit
+  end
 
   # POST /workers
   # POST /workers.json
-  #def create
-    #@worker = Worker.new(worker_params)
+  def create
+    @worker = Worker.new(worker_params)
 
-    #respond_to do |format|
-      #if @worker.save
-        #format.html { redirect_to @worker, notice: "Worker was successfully created." }
-        #format.json { render :show, status: :created, location: @worker }
-      #else
-        #format.html { render :new }
-        #format.json { render json: @worker.errors, status: :unprocessable_entity }
-      #end
-    #end
-  #end
+    respond_to do |format|
+      if @worker.save
+        format.html { redirect_to @worker, notice: "Worker was successfully created." }
+        format.json { render :show, status: :created, location: @worker }
+      else
+        format.html { render :new }
+        format.json { render json: @worker.errors, status: :unprocessable_entity }
+      end
+    end
+  end
 
-  ## PATCH/PUT /workers/1
-  ## PATCH/PUT /workers/1.json
-  #def update
-    #respond_to do |format|
-      #if @worker.update(worker_params)
-        #format.html { redirect_to @worker, notice: "Worker was successfully updated." }
-        #format.json { render :show, status: :ok, location: @worker }
-      #else
-        #format.html { render :edit }
-        #format.json { render json: @worker.errors, status: :unprocessable_entity }
-      #end
-    #end
-  #end
+  # PATCH/PUT /workers/1
+  # PATCH/PUT /workers/1.json
+  def update
+    respond_to do |format|
+      if @worker.update(worker_params)
+        format.html { redirect_to @worker, notice: "Worker was successfully updated." }
+        format.json { render :show, status: :ok, location: @worker }
+      else
+        format.html { render :edit }
+        format.json { render json: @worker.errors, status: :unprocessable_entity }
+      end
+    end
+  end
 
   # DELETE /workers/1
   # DELETE /workers/1.json

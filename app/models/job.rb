@@ -3,6 +3,7 @@
 class Job < ApplicationRecord
   belongs_to :worker
   belongs_to :job_type
+  validates  :status, inclusion: { in: %w(ERROR NORMAL\ EXECUTION) }
 
   def request_json
     # Send the id of the current job, plus the information from the job type

@@ -11,7 +11,7 @@ ruby "2.4.1"
 
 gem "coffee-rails"
 gem "devise"
-gem "dotenv-rails", groups: %i(development test)
+gem "dotenv-rails"
 gem "faye-websocket", "0.10.0"
 gem "friendly_id", "~> 5.1.0"
 gem "jbuilder", "~> 2.5"

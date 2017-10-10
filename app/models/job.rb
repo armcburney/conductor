@@ -11,7 +11,7 @@ class Job < ApplicationRecord
   has_one :user, through: :worker
 
   # Validations
-  validates :status, inclusion: { in: %w(UNDEFINED ERROR NORMAL\ EXECUTION) }
+  validates :status, inclusion: { in: %w(DISPATCHED UNDEFINED ERROR NORMAL\ EXECUTION) }
 
   def channel
     WebsocketRails["job.#{id}"]

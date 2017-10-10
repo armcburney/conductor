@@ -26,7 +26,7 @@ class JobsController < ApplicationController
   # POST /jobs
   # POST /jobs.json
   def create
-    @job = Job.new(job_params.merge(worker: find_free_worker))
+    @job = Job.new(job_params.merge(worker: find_free_worker, status: "DISPATCHED"))
 
     respond_to do |format|
       if @job.save

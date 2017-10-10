@@ -15,13 +15,13 @@ class JobConnectionController < WebsocketRails::BaseController
 
   def stdout
     Rails.logger.info "Updated stdout for #{message['id']}, with stdout: #{message['stdout']}."
-    job&.update(message.slice("stdout"))
+    job&.append_to_column("stdout", message["stdout"])
     job&.channel&.trigger(:stdout, message["stdout"], namespace: :job)
   end
 
   def stderr
     Rails.logger.info "Updated stderr for #{message['id']}, with stderr: #{message['stderr']}."
-    job&.update(message.slice("stderr"))
+    job&.append_to_column("stderr", message["stderr"])
     job&.channel&.trigger(:stderr, message["stderr"], namespace: :job)
   end
 

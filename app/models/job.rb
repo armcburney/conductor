@@ -27,6 +27,19 @@ class Job < ApplicationRecord
     job_type.as_json.merge(id: id)
   end
 
+  def append_to_column(column, chunk)
+    quoted_chunk = ActiveRecord::Base.connection.quote(chunk)
+    quoted_id = ActiveRecord::Base.connection.quote(id)
+    ActiveRecord::Base.connection.execute(<<~SQL)
+      UPDATE jobs
+      SET #{column} = (
+        CASE WHEN #{column} IS NULL THEN #{quoted_chunk}
+        ELSE #{column} || #{quoted_chunk} END
+      )
+      WHERE id = #{quoted_id}
+    SQL
+  end
+
   private
 
   def default_values

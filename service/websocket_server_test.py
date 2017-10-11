@@ -14,7 +14,7 @@ async def read(websocket):
     t = await websocket.recv()
     logger.debug("ACKing")
     await websocket.send('["worker.connect",null,{"id":83758,"channel":null,"user_id":null,"success":true,"result":null,"token":null,"server_token":null}]')
-    await websocket.send('["spawn",{"id":2,"script":"./boii.py","working_directory":"~","environment_variables":"","timeout":null,"name":"Yes Abhishek","user_id":1,"created_at":"2017-10-04T20:42:14.689Z","updated_at":"2017-10-04T20:42:14.689Z"},{"id":null,"channel":"worker.5","user_id":null,"success":null,"result":null,"token":"01cddb65-bdd1-4227-901a-f3b161cc1858","server_token":null}]')
+    await websocket.send('["spawn",{"id":2,"script":"echo Hello World!!","working_directory":"~","environment_variables":"","timeout":null,"name":"Yes Abhishek","user_id":1,"created_at":"2017-10-04T20:42:14.689Z","updated_at":"2017-10-04T20:42:14.689Z"},{"id":null,"channel":"worker.5","user_id":null,"success":null,"result":null,"token":"01cddb65-bdd1-4227-901a-f3b161cc1858","server_token":null}]')
     logger.info(t)
 
 async def write(websocket):

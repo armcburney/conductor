@@ -1,4 +1,4 @@
 #!/bin/bash
 
-python slave_master.py --hostname="AndrewMain" --service_host="ws://conductor-se464.herokuapp.com/websocket" --token="0c815c1ee6e71b015705c09b76a4761daea359d40d8383c38e0fc89753406a0b"
+python slave_master.py --hostname="AndrewMain" --service_host="ws://conductor-se464.herokuapp.com/websocket" --token="129697adfb3327facb2271df8d13f96aa58b16973727f1c89422467fe30e336d"
 

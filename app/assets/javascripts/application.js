@@ -1,8 +1,7 @@
 //= require_tree .
 //= require websocket_rails/main
 
-console.log('connecting');
-var dispatcher = new WebSocketRails('localhost:5000/websocket');
+var dispatcher = new WebSocketRails(window.websocketURL);
 
 dispatcher.on_open = (data) => {
   console.log('Connection has been established: ', data);

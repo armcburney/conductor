@@ -11,12 +11,12 @@ class ResponseFactory():
 
         response_type = None
 
-        print (response)
+        print ("GOT RESPONSE: " + response)
         if command == "client_connected":
             response_type = ConnectNodeResponse
         elif command == "worker.registered":
             response_type = RegisterNodeResponse
-        elif command == "spawn":
+        elif command == "worker.spawn":
             response_type = SpawnResponse
         else:
             return None
@@ -41,7 +41,7 @@ class RegisterNodeResponse(Response):
 
     @classmethod
     def process_response(cls, response_body):
-        return RegisterNodeResponse(**response_body)
+        return RegisterNodeResponse(**response_body[2])
 
 class ConnectNodeResponse(Response):
     """

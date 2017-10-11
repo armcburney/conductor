@@ -15,9 +15,9 @@ class Command:
         self.args.append((arg_name, arg_value))
 
     def __str__(self):
-        return json.dumps(self.__json__())
+        return json.dumps(self.__getjson__())
 
-    def __json__(self):
+    def __getjson__(self):
         res = [self.cmd]
         for arg in self.args:
             res.append(arg)
@@ -29,9 +29,11 @@ class HealthCommand(Command):
 
 class RegisterNode(Command):
     def __init__(self, api_key, address, **kwargs):
+        payload = {"key": api_key}
+        payload.update(kwargs) # append any extra arguments
         super(RegisterNode, self).__init__(
             "worker.connect",
-            {"api_key": api_key, "address": address}.update(kwargs) # append any extra arguments
+            payload
         )
 
 class ConnectCommand(RegisterNode):

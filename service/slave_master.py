@@ -61,8 +61,8 @@ class ServerHealth:
             free_disk=disk_usage.free,
         )
 
-    def serialize(self):
-        return json.dumps({
+    def to_dict(self):
+        return {
             "cpu_count": self.cpu_count,
             "load": self.load,
             "total_memory": self.total_memory,
@@ -70,7 +70,8 @@ class ServerHealth:
             "total_disk": self.total_disk,
             "used_disk": self.used_disk,
             "free_disk": self.free_disk,
-        })
+        }
+
 
 
 class HealthCheckCoroutine():
@@ -86,8 +87,9 @@ class HealthCheckCoroutine():
 
     async def send_stats(self, websocket):
 
-        health = HealthCommand(self.get_server_health().serialize())
+        health = HealthCommand(self.get_server_health().to_dict())
         logger.debug("Sending Server Health Status")
+        logger.debug(str(health))
         await websocket.send(str(health))
         logger.debug("Sent Server Health Status")
 
@@ -125,11 +127,13 @@ class SlaveManager():
     async def process_command(self, websocket):
 
         # keep on processing commands while available
+        logger.debug("waiting")
         command = await websocket.recv()
 
         logger.debug("Processing command: {}".format(command))
 
         response = ResponseFactory.parse_response(command)
+        print (response)
 
         if type(response) is SpawnResponse:
             # spawn a job
@@ -161,11 +165,16 @@ class SlaveManager():
         command = RegisterNode(address=self.hostname, api_key=self.api_key)
 
         # Send registration command
+        print (str(command))
+
+        logger.debug("Sending registration request")
         await websocket.send(str(command))
+        logger.debug("Waiting for registration response")
         response = await websocket.recv()
 
         parsed_response = ResponseFactory.parse_response(response)
-        if not parsed_response is RegisterNodeResponse:
+        print (parsed_response)
+        if not type(parsed_response) is RegisterNodeResponse:
             logger.error("Unable to register host with master server")
             return
 
@@ -176,6 +185,7 @@ class SlaveManager():
     async def reinitiate_connection(self, websocket):
         command = ConnectCommand(api_key=self.api_key, node_id=self.node_id, address=self.hostname)
 
+        logger.debug("Sending reconnection request")
         # Send connection command
         await websocket.send(str(command))
         response = await websocket.recv()
@@ -197,9 +207,14 @@ class SlaveManager():
             try:
                 # connects to websocket on host
                 async with websockets.connect(self.service_host) as websocket:
+                    response = await websocket.recv()
+                    print (response)
+                    if type(response) is ConnectNodeResponse:
+                        logger.debug("Got connection response")
+
                     try:
                         # register this node with the main server
-                        logger.debug("Initiating connection")
+                        logger.debug("Initiating registration")
                         if not reconnect:
                             await self.initiate_connection(websocket)
                         else:

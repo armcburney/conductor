@@ -88,7 +88,7 @@ class ProcessWrapper():
             if not encoded:
                 logger.debug("sending eof message")
                 await websocket.send(str(eof))
-                await websocket.recv()
+                await asyncio.sleep(0.5) # Dirty hack - TODO wait for websocket to flush before closing it
                 return
             line = encoded.decode().strip()
             logger.debug("got line: {}".format(line))
@@ -165,7 +165,6 @@ if __name__ == "__main__":
 
     try:
         loop.run_until_complete(process_wrapper.start(loop))
-        loop.run_forever()
     finally:
         loop.close()
 

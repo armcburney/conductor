@@ -1,0 +1,50 @@
+@import "variables";
+
+.receiver {
+  @include card;
+  display: flex;
+  flex-direction: row;
+  background-color: $light-shade;
+
+  .controls {
+    position: absolute;
+    bottom: -15px;
+    right: 20px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    transform: translateX(20px);
+
+    .button {
+      box-shadow: 0 1px 5px rgba(0,0,0,0.15);
+    }
+  }
+
+  &.loading {
+    opacity: 0.5;
+  }
+
+  &.dirty {
+    border: 1px solid $accent;
+
+    .controls {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .actions, .trigger {
+    flex: 1;
+
+    &:first-child {
+      border-right: 1px solid $mid;
+    }
+  }
+
+  .trigger-option {
+    padding: 0.5em 1.5rem 1em 1.5rem;
+  }
+}
+
+.rdt {
+  display: inline-block;
+}

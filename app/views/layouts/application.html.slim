@@ -7,6 +7,14 @@ html
 
     = csrf_meta_tags
     = stylesheet_link_tag    "application", media: "all"
+
+    - if Rails.env.production?
+      javascript:
+        window.websocketURL = 'conductor-se464.herokuapp.com/websocket';
+    - else
+      javascript:
+        window.websocketURL = 'localhost:5000/websocket';
+
     = javascript_include_tag "application"
 
   body

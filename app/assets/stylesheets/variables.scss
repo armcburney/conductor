@@ -1,0 +1,33 @@
+$primary: #4189D1;
+$primary-shade: #2B5EBD;
+$secondary: #66C2A6;
+$secondary-light: #76D2B6;
+$light: #fff;
+$light-shade: #f8f8f8;
+$mid: #aaa;
+$accent: #F07C6C;
+$accent-light: #F39E8E;
+$dark: #111;
+
+
+@mixin top-level-centered {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.5em 1.5rem 1em 1.5rem;
+  max-width: 64rem;
+  margin: 0;
+}
+
+@mixin card {
+  transition: all 0.3s ease;
+  border-radius: 4px;
+  position: relative;
+  border: 1px solid $light-shade;
+  padding: 1em;
+  margin: 0 0 1em 0;
+}
+
+@mixin grid-card {
+  @include card;
+  margin: 0 0 1em 1em;
+}

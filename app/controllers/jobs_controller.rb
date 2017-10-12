@@ -26,10 +26,12 @@ class JobsController < ApplicationController
   # POST /jobs
   # POST /jobs.json
   def create
-    @job = Job.new(job_params)
+    @job = Job.new(job_params.merge(worker: find_free_worker, status: "DISPATCHED"))
 
     respond_to do |format|
       if @job.save
+        @job.worker.channel.trigger(:spawn, @job.request_json, namespace: :worker)
+
         format.html { redirect_to @job, notice: "Job was successfully created." }
         format.json { render :show, status: :created, location: @job }
       else
@@ -69,9 +71,18 @@ class JobsController < ApplicationController
     @job = Job.find(params[:id])
   end
 
+  def find_free_worker
+    current_user
+      .workers
+      .joins("left outer join jobs on jobs.worker_id = workers.id")
+      .group("workers.id")
+      .order("count(distinct jobs.id) asc")
+      .first
+  end
+
   def job_params
     params
       .require(:job)
-      .permit(:stdout, :stderr, :status, :return_code, :worker_id, :job_type_id)
+      .permit(:job_type_id)
   end
 end

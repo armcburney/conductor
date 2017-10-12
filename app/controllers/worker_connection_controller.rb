@@ -1,42 +1,41 @@
 # frozen_string_literal: true
 
 class WorkerConnectionController < WebsocketRails::BaseController
-  before_action :update_heartbeat
-
   def connect
-    worker ? trigger_success : trigger_failure
+    Rails.logger.info "Connect to worker with id: #{message['id']}."
+    worker ? trigger_connection : trigger_failure
   end
 
   def healthcheck
-    worker.update(
-      cpu_count:        message["cpu_count"],
-      load:             message["load"],
-      total_memory:     message["total_memory"],
-      available_memory: message["available_memory"],
-      total_disk:       message["total_disk"],
-      used_disk:        message["used_disk"],
-      free_disk:        message["free_disk"]
-    )
+    Rails.logger.info "Set healthcheck for worker: #{message['id']}."
+    worker.update(message.slice(*worker_healthcheck_params))
   end
 
   private
 
+  def trigger_connection
+    trigger_success
+    send_worker_id_to_slave
+    WorkerConnectionService.new(worker).connect(connection)
+  end
+
+  def send_worker_id_to_slave
+    send_message :registered, { id: worker.id }, namespace: :worker
+  end
+
   def worker_user
-    @worker_user ||= User.joins(:api_keys).where(api_keys: { key: message["key"] }).first
+    @worker_user ||= User.joins(:api_keys).find_by(api_keys: { key: message["key"] })
   end
 
   def worker
-    @worker ||= Worker.find_by(address: message["address"])
+    # Finds a worker by id, creates a new worker if it does not exist
+    @worker ||= WorkerFactory.new(message["id"], worker_user).create
 
-    unless @worker
-      @worker = worker_user.workers.create(address: message["address"]) # Creates a new worker
-      send_message :registered, { id: @worker.id }, namespace: :worker  # Sends worker id to slave
-    end
-
-    @worker
+    # Returns nil if the worker does not belong to the current 'worker_user'
+    @worker.user != worker_user ? nil : @worker
   end
 
-  def update_heartbeat
-    worker.update(last_heartbeat: Time.zone.now)
+  def worker_healthcheck_params
+    %w(cpu_count load total_memory available_memory total_disk used_disk free_disk)
   end
 end

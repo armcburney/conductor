@@ -1,27 +1,28 @@
-h1 Listing workers
+h1 Workers
+
+h2 Connected Workers
+.container id="workers"
+= javascript_pack_tag "workers"
+
+h2 API Keys
+p To connect a new worker, run the client on one of your machines using one of your API keys.
 
 table
   thead
     tr
-      th User
-      th Address
-      th Last heartbeat
-      th Job
-      th
-      th
+      th Name
+      th Key
       th
 
   tbody
-    - @workers.each do |worker|
+    - @api_keys.each do |api_key|
       tr
-        td = worker.user
-        td = worker.address
-        td = worker.last_heartbeat
-        td = worker.jobs.length
-        td = link_to 'Show', worker
-        td = link_to 'Edit', edit_worker_path(worker)
-        td = link_to 'Destroy', worker, data: { confirm: 'Are you sure?' }, method: :delete
+        td
+          = api_key.name
+        td
+          = api_key.key
+        td = link_to 'Edit', edit_api_key_path(api_key)
+        td = button_to 'Destroy', api_key, method: :delete
 
-br
+= link_to 'New API Key', new_api_key_path
 
-= link_to 'New Worker', new_worker_path

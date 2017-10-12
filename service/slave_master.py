@@ -81,8 +81,11 @@ class SlaveManager():
         process = await asyncio.create_subprocess_shell(
             # process_wrapper,
             command.script,
+            cwd=command.working_directory,
+            env=command.environment_variables,
             stderr=asyncio.subprocess.PIPE
         )
+
         # NOTE: right now we don't wait for child to finish
         # await process.wait()
 

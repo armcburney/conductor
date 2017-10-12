@@ -24,7 +24,14 @@ class Job < ApplicationRecord
   def request_json
     # Send the id of the current job, plus the information from the job type
     # needed to be able to spawn the job
-    job_type.as_json.merge(id: id)
+    job_type.as_json.merge(id: id, environment_variables: env_var_hash)
+  end
+
+  def env_var_hash
+    return JSON.parse(environment_variables)
+  rescue NameError
+    Rails.logger.info "Invalid json: #{environment_variables}"
+    return {}
   end
 
   def append_to_column(column, chunk)

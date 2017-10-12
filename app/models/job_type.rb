@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 class JobType < ApplicationRecord
+  before_save :nullify_blanks
+
   belongs_to :user
   has_many :jobs
-
-  before_save :nullify_blanks
 
   private
 

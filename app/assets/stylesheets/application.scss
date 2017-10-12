@@ -1,16 +1,11 @@
-//@import vital/sprockets
-//@import vital/all
+@import "variables";
+@import "event_receivers";
+@import "workers";
 
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,400italic);
 
-$primary: #4189D1;
-$primary-shade: #2B5EBD;
-$secondary: #66C2A6;
-$light: #fff;
-$light-shade: #eee;
-$accent: #F07C6C;
-$accent-light: #F39E8E;
-$dark: #111;
+@import "variables";
+@import "react-datetime";
 
 @mixin OpenSans {
   font-family: "Open Sans", Arial, sans-serif;
@@ -36,12 +31,8 @@ h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12 {
   @include OpenSansLight;
 }
 h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, p,
-nav, ul, .row {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 64rem;
-  padding: 0.5em 1.5rem 1em 1.5rem;
-  margin: 0;
+nav, ul, .row, .container {
+  @include top-level-centered;
 }
 ul {
   padding-left: 5rem;
@@ -105,7 +96,8 @@ section:nth-child(odd), section.odd {
   flex: 1;
   padding-right: 1.5em;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  overflow: hidden;
 }
 .column--double {
   flex: 2;
@@ -138,17 +130,7 @@ a.fa {
 .no-break {
   display: inline-block;
 }
-.text-input {
-  box-sizing: border-box;
-  border: 0;
-  padding: 0.6em 1.1em;
-  margin: 0.3em 0;
-  border-radius: 0.3em;
-  background-color: $light;
-  color: $dark;
-  font-size: 1em;
-  transition: all 0.3s ease;
-}
+
 .text-input:hover {
   opacity:0.9;
 }
@@ -172,19 +154,22 @@ a.fa {
   background-color: $light;
   color: $dark;
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0,1.5,0.5,1);
-}
-.button:hover {
-  transform: scale(1.1) translate3d( 0, 0, 0 );
+  transition: all 0.2s ease;
 }
 .button--primary, a.button--primary {
   font-size: 1.2em;
   background-color:$secondary;
   color: $light;
+  &:hover {
+    background-color: $secondary-light;
+  }
 }
 .button--secondary, a.button--secondary {
   background-color:$accent;
   color: $light;
+  &:hover {
+    background-color: $accent-light;
+  }
 }
 .button--social, a.button--social {
   padding-left: 0.6em;
@@ -195,6 +180,74 @@ a.fa {
   font-weight: normal;
   background-color: transparent;
   color: $light;
+}
+
+/* Radio buttons */
+input[type="radio"] {
+  position: absolute;
+  left: -9999px;
+
+  & + label {
+    position: relative;
+    padding-left: 28px;
+    cursor: pointer;
+    line-height: 20px;
+    display: inline-block;
+
+    &:before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      margin-top: -9px;
+      width: 18px;
+      height: 18px;
+      border: 1px solid $mid;
+      border-radius: 100%;
+      background: $light;
+    }
+
+    &:after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      background: $accent;
+      position: absolute;
+      top: 50%;
+      margin-top: -5px;
+      left: 4px;
+      border-radius: 100%;
+      transition: all ease 0.3s;
+    }
+  }
+
+  &:not(:checked) + label:after {
+    opacity: 0;
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  }
+  &:checked + label:after {
+    opacity: 1;
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
+}
+
+/* Text fields */
+input[type="text"], input[type="number"] {
+  display: inline-block;
+  margin: 0.25em 0.9em;
+  padding: 0.5em;
+  border-radius: 4px;
+  border: 1px solid $mid;
+  background-color: $light;
+  transition: all ease 0.3s;
+  vertical-align: baseline;
+
+  &:focus {
+    border: 1px solid $accent;
+    outline: none;
+  }
 }
 
 .centered {

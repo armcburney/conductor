@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171001183031) do
+ActiveRecord::Schema.define(version: 20171011225432) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -30,9 +30,10 @@ ActiveRecord::Schema.define(version: 20171001183031) do
     t.string   "email_address"
     t.string   "webhook_url"
     t.text     "webhook_body"
-    t.datetime "created_at",        null: false
-    t.datetime "updated_at",        null: false
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at",                   null: false
     t.integer  "job_type_id"
+    t.string   "type",              limit: 20, null: false
     t.index ["event_receiver_id"], name: "index_event_actions_on_event_receiver_id", using: :btree
     t.index ["job_type_id"], name: "index_event_actions_on_job_type_id", using: :btree
   end
@@ -78,10 +79,10 @@ ActiveRecord::Schema.define(version: 20171001183031) do
     t.text     "stderr"
     t.string   "status"
     t.integer  "return_code"
-    t.integer  "job_type_id"
+    t.integer  "job_type_id", null: false
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
-    t.integer  "worker_id"
+    t.integer  "worker_id",   null: false
     t.index ["job_type_id"], name: "index_jobs_on_job_type_id", using: :btree
     t.index ["worker_id"], name: "index_jobs_on_worker_id", using: :btree
   end
@@ -104,8 +105,7 @@ ActiveRecord::Schema.define(version: 20171001183031) do
   end
 
   create_table "workers", force: :cascade do |t|
-    t.integer  "user_id"
-    t.string   "address"
+    t.integer  "user_id",          null: false
     t.datetime "last_heartbeat"
     t.datetime "created_at",       null: false
     t.datetime "updated_at",       null: false

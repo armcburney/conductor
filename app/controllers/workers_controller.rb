@@ -6,7 +6,8 @@ class WorkersController < ApplicationController
   # GET /workers
   # GET /workers.json
   def index
-    @workers = Worker.all
+    @workers = Worker.where(user: current_user)
+    @api_keys = ApiKey.where(user: current_user)
   end
 
   # GET /workers/1

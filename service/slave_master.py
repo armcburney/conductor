@@ -10,9 +10,9 @@ import json
 from argparse import ArgumentParser
 from websocket_requests import RegisterNode, HealthCommand, ConnectCommand
 from websocket_responses import ResponseFactory, SpawnResponse, ClientConnectedResponse, RegisterNodeResponse, WorkerConnectedResponse
+from health_check_coroutine import HealthCheckCoroutine
 
 import websockets
-import psutil
 import traceback
 
 logging.basicConfig()
@@ -20,90 +20,6 @@ logger = logging.getLogger("Slave Main")
 logger.setLevel(logging.DEBUG)
 
 MAX_RECONNECT_TRIES=10
-
-class ServerHealth:
-    """
-    Encapsulate data pertaining to the current health of the server.
-    """
-
-    def __init__(
-        self,
-        cpu_count,
-        load,
-        total_memory,
-        available_memory,
-        total_disk,
-        used_disk,
-        free_disk
-    ):
-        self.cpu_count = cpu_count
-        self.load = load
-        self.total_memory = total_memory
-        self.available_memory = available_memory
-        self.total_disk = total_disk
-        self.used_disk = used_disk
-        self.free_disk = free_disk
-
-    @staticmethod
-    def create():
-        cpu_count = psutil.cpu_count(logical=True)
-        cpu_util = psutil.cpu_times_percent()
-        virtual_memory = psutil.virtual_memory()
-        disk_usage = psutil.disk_usage("/")
-
-        return ServerHealth(
-            cpu_count=cpu_count,
-            load=os.getloadavg(),
-            total_memory=virtual_memory.total,
-            available_memory=virtual_memory.available,
-            total_disk=disk_usage.total,
-            used_disk=disk_usage.used,
-            free_disk=disk_usage.free,
-        )
-
-    def to_dict(self):
-        return {
-            "cpu_count": self.cpu_count,
-            "load": self.load,
-            "total_memory": self.total_memory,
-            "available_memory": self.available_memory,
-            "total_disk": self.total_disk,
-            "used_disk": self.used_disk,
-            "free_disk": self.free_disk,
-        }
-
-
-
-class HealthCheckCoroutine():
-    """
-    Periodically poll the system and send stats to the master.
-    """
-
-    def __init__(self, interval=10):
-        self.interval = interval
-
-    def get_server_health(self):
-        return ServerHealth.create()
-
-    async def send_stats(self, websocket):
-
-        health = HealthCommand(self.get_server_health().to_dict())
-        logger.debug("Sending Server Health Status")
-        logger.debug(str(health))
-        await websocket.send(str(health))
-        logger.debug("Sent Server Health Status")
-
-
-    async def run(self, websocket):
-        logger.debug("Starting health check coroutine.")
-
-        # keep sending stats forever
-        while websocket.open:
-
-            await self.send_stats(websocket)
-
-            # sleep for some timeout
-            await asyncio.sleep(self.interval)
 
 class SlaveManager():
     """
@@ -242,7 +158,8 @@ class SlaveManager():
                         # At this point in time we are guaranteed to be registered
 
                         # Schedule the health check
-                        self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine().run(websocket))
+                        logger.debug("Starting health check")
+                        self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine(logger=logger).run(websocket))
 
                         # keep on processing commands from the server while possible
                         while websocket.open:
@@ -292,4 +209,6 @@ if __name__ == "__main__":
     )
 
     # continually run event loop
-    asyncio.get_event_loop().run_until_complete(slave_manager.run())
+    loop = asyncio.get_event_loop()
+    loop.set_debug(True)
+    loop.run_until_complete(slave_manager.run())

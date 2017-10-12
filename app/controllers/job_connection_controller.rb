@@ -1,18 +1,6 @@
 # frozen_string_literal: true
 
 class JobConnectionController < WebsocketRails::BaseController
-  def authorize_channels
-    match = /^job\.(?<id>\w+)$/.match(message[:channel])
-    return deny_channel unless match
-
-    job = Job.find_by(id: match[:id].to_i)
-    if job && current_user && job.user == current_user
-      accept_channel job.as_json
-    else
-      deny_channel "Unauthorized"
-    end
-  end
-
   def stdout
     Rails.logger.info "Updated stdout for #{message['id']}, with stdout: #{message['stdout']}."
     job&.append_to_column("stdout", message["stdout"])

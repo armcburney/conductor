@@ -36,17 +36,17 @@ class RegisterNode(Command):
             payload
         )
 
-class RegisterJob(Command):
-    def __init__(self, *args):
-        super(RegisterJob, self).__init__('job.register_job', *args)
-
 class JobStdout(Command):
     def __init__(self, *args):
-        super(JobStdout, self).__init__('job.stdout', *args)
+        super(JobStdout, self).__init__('job.stdout', {{'stdout': stdout, **kwargs})
 
 class JobStderr(Command):
-    def __init__(self, *args):
-        super(JobStderr, self).__init__('job.stderr', *args)
+    def __init__(self, stderr, **kwargs):
+        super(JobStderr, self).__init__('job.stderr', {{'stderr': stderr, **kwargs})
+
+class JobReturnCode(Command):
+    def __init__(self, code, **kwargs):
+        super(JobReturnCode, self).__init__('job.return_code', {'code': code, **kwargs})
 
 class ConnectCommand(RegisterNode):
     def __init__(self, api_key, node_id, **kwargs):

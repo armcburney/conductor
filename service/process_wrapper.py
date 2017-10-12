@@ -11,10 +11,10 @@ import sys
 from argparse import ArgumentParser
 
 import websockets
-from websocket_adapter import RegisterJob, JobStdout, JobStdoutEof, JobStderr, JobStderrEof
+from websocket_adapter import JobStdout, JobStderr, JobReturnCode
 
 logging.basicConfig()
-logger = logging.getLogger("ProcessWrapper")
+logger = logging.getLogger('ProcessWrapper')
 logger.setLevel(logging.DEBUG)
 
 class ProcessWrapper():
@@ -29,9 +29,7 @@ class ProcessWrapper():
         try:
             # connects to websocket on host
             async with websockets.connect(arguments.service_host) as websocket:
-                register = RegisterJob({"job_id": arguments.job_id, "api_key": arguments.token})
-                await websocket.send(str(register))
-                logger.debug("Successfully connected to server.")
+                logger.debug('Successfully connected to server.')
 
                 logger.debug('Starting job: {}'.format(self.command))
                 process = await asyncio.create_subprocess_exec(
@@ -41,16 +39,17 @@ class ProcessWrapper():
                         stderr=asyncio.subprocess.PIPE)
                 await asyncio.wait(
                     [
-                        self.spawn_job(process, loop),
+                        self.spawn_job(process, loop, websocket),
                         #self.send_stdin(websocket, process.stdin),
                         self.read_stdout(websocket, process.stdout),
                         self.read_stderr(websocket, process.stderr),
                     ],
                     loop=loop,
                     return_when=asyncio.ALL_COMPLETED)
-                logger.debug("Returned from await job")
+                await asyncio.sleep(0.5) # Dirty hack - TODO wait for websocket to flush before closing it
+                logger.debug('Returned from await job')
         except Exception as e:
-            logger.debug("Error occured, terminating:", e)
+            logger.debug('Error occured, terminating:', e)
 
 
     # TODO investigate connecting pipes https://docs.python.org/3/library/asyncio-eventloop.html#connect-pipes
@@ -60,97 +59,88 @@ class ProcessWrapper():
             msg = await websocket.recv()
             try:
                 command, *payloads = json.loads(msg)
-                logger.debug("Command: {} Payloads: {}".format(command, payloads))
-                if command == 'stdin':
+                logger.debug('Command: {} Payloads: {}'.format(command, payloads))
+                if command == 'job.stdin':
                     for payload in payloads:
                         writer.write(payload.encode())
                     await writer.drain()
                     continue
-                if command == 'stdin.close':
+                if command == 'job.stdin_close':
                     writer.write_eof()
                     writer.close()
                     return
-                logger.error("Unexpected websocket command: {}".format(command))
+                logger.error('Unexpected websocket command: {}'.format(command))
             except ValueError:
-                logger.error("Failed to parse json: {}".format(msg))
+                logger.error('Failed to parse json: {}'.format(msg))
 
     async def read_stdout(self, websocket, reader):
-        encoder = lambda msg: JobStdout(msg)
+        encoder = lambda msg: JobStdout(msg, key=self.api_key, id=self.job_id)
         await self._websocket_writer(websocket, reader, encoder, JobStdoutEof())
 
     async def read_stderr(self, websocket, reader):
-        encoder = lambda msg: JobStderr(msg)
+        encoder = lambda msg: JobStderr(msg, key=self.api_key, id=self.job_id)
         await self._websocket_writer(websocket, reader, encoder, JobStderrEof())
 
-    async def _websocket_writer(self, websocket, reader, encoder, eof):
+    async def _websocket_writer(self, websocket, reader, encoder):
         while websocket.open:
             encoded = await reader.readline()
             if not encoded:
-                logger.debug("sending eof message")
-                await websocket.send(str(eof))
-                await asyncio.sleep(0.5) # Dirty hack - TODO wait for websocket to flush before closing it
+                logger.debug('sending eof message')
+                await websocket.send(str(encoder(''))
                 return
             line = encoded.decode().strip()
-            logger.debug("got line: {}".format(line))
+            logger.debug('got line: {}'.format(line))
             await websocket.send(str(encoder(line)))
-            logger.debug("sent message")
+            logger.debug('sent message')
 
-    async def spawn_job(self, process, loop):
+    async def spawn_job(self, process, loop, websocket):
         code = await process.wait()
-        self._job_terminated(code)
+        logger.debug('Terminated with code {}'.format(code))
+        await websocket.send(str(JobReturnCode(code, key=self.api_key, id=self.job_id)))
 
     def ping_master(self):
         pass
 
-    def _job_terminated(self, code):
-        """
-        Callback for when a job is finished
-        """
-        logger.debug('Terminated with code {}'.format(code))
 
-if __name__ == "__main__":
-    """
+if __name__ == '__main__':
+    '''
     Minimal implementation of spawn worker process.
     Runs a shell command and pipes stout/stderr line by line to websocket host.
 
-    Note that a current workaround requires eof messages to be ack'd by the server. Expect
-    a sequence of ["stdout", "some useful data"] terminating with ["stdout.eof"] and then send
-    something back or close the websocket.
-
     Example:  python3 process_wrapper.py --job_id 1 --command '/usr/bin/python3 -u write_test.py' --service_host ws://localhost:8765
-    """
-    parser = ArgumentParser("Worker job process wrapper.")
+    '''
+    parser = ArgumentParser('Worker job process wrapper.')
 
     parser.add_argument(
-        "--token",
-        dest="token",
-        action="store",
+        '--token',
+        dest='token',
+        action='store',
         required=False,
-        help="Provided api service token from Conductor."
+        help='Provided api service token from Conductor.'
     )
 
     parser.add_argument(
-        "--service_host",
-        dest="service_host",
-        action="store",
+        '--service_host',
+        dest='service_host',
+        action='store',
         required=False,
-        help="The service master to connect to.",
+        help='The service master to connect to.',
     )
 
     parser.add_argument(
-        "--job_id",
-        dest="job_id",
-        action="store",
+        '--job_id',
+        dest='job_id',
+        action='store',
         required=True,
-        help="The unique id for this worker job."
+        help='The unique id for this worker job.'
     )
 
     parser.add_argument(
-        "--command",
-        dest="command",
-        action="store",
+        '--command',
+        dest='command',
+        action='store',
         required=True,
-        help="The command to execute."
+        help='The command to execute.'
     )
 
     arguments = parser.parse_args()

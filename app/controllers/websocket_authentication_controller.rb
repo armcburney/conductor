@@ -14,26 +14,20 @@ class WebsocketAuthenticationController < WebsocketRails::BaseController
   private
 
   def authorize_job
-    match = /^job\.(?<id>\w+)$/.match(message[:channel])
-    return deny_channel unless match
-
-    job = Job.find_by(id: match[:id].to_i)
-    if job && current_user && job.user == current_user
-      accept_channel job.as_json
-    else
-      deny_channel
-    end
+    authorize_by_id("job", Job)
   end
 
   def authorize_worker_info
-    Rails.logger.info("Authorizing worker info")
-    match = /^worker_info\.(?<id>\w+)$/.match(message[:channel])
-    Rails.logger.info(match.inspect)
+    authorize_by_id("worker_info", Worker)
+  end
+
+  def authorize_by_id(channel_prefix, klass)
+    match = /^#{channel_prefix}\.(?<id>\w+)$/.match(message[:channel])
     return deny_channel unless match
 
-    worker = Worker.find_by(id: match[:id].to_i)
-    if worker && current_user && worker.user == current_user
-      accept_channel
+    instance = klass.find_by(id: match[:id].to_i)
+    if instance && current_user && instance.user == current_user
+      accept_channel instance.as_json
     else
       deny_channel
     end

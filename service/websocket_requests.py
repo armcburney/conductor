@@ -25,7 +25,7 @@ class Command:
 
 class HealthCommand(Command):
     def __init__(self, health_dict):
-        super(HealthCommand, self).__init__("health_check", health_dict)
+        super(HealthCommand, self).__init__("worker.health_check", health_dict)
 
 class RegisterNode(Command):
     def __init__(self, api_key, **kwargs):

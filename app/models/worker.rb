@@ -29,6 +29,8 @@ class Worker < ApplicationRecord
     WebsocketRails["worker_info.#{id}"]
   end
 
+  private
+
   def make_info_channel
     info_channel.make_private
   end

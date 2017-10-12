@@ -159,12 +159,13 @@ class SlaveManager():
             def __str__(self):
                 return f"python process_wrapper.py --command=\"{self.command}\" --job_id={self.job_id}"
 
-        process_wrapper = str(ProcessWrapperCommand(command.id, command.script))
-        logger.info("Running command: {}".format(process_wrapper))
+        # process_wrapper = str(ProcessWrapperCommand(command.id, command.script))
+        # logger.info("Running command: {}".format(process_wrapper))
 
         # will clean up once we introduce python classes for responses
         process = await asyncio.create_subprocess_shell(
-            process_wrapper,
+            # process_wrapper,
+            command.script,
             stderr=asyncio.subprocess.PIPE
         )
         # NOTE: right now we don't wait for child to finish

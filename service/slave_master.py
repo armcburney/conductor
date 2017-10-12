@@ -73,7 +73,7 @@ class SlaveManager():
                 self.service_host = service_host
 
             def __str__(self):
-                return f"python process_wrapper.py --command=\"{self.command}\" --job_id={self.job_id} --service_host=\"{self.service_host}\""
+                return f"python3 process_wrapper.py --command=\"{self.command}\" --job_id={self.job_id} --service_host=\"{self.service_host}\""
 
         process_wrapper = str(ProcessWrapperCommand(command.id, command.script, self.service_host))
         logger.info("Running command: {}".format(process_wrapper))
@@ -81,10 +81,8 @@ class SlaveManager():
         # will clean up once we introduce python classes for responses
         process = await asyncio.create_subprocess_shell(
             process_wrapper,
-            # command.script,
-            cwd=command.working_directory,
-            env=command.environment_variables,
-            stderr=asyncio.subprocess.PIPE
+            cwd=command.working_directory if command.working_directory != "" else None,
+            env=command.environment_variables
         )
 
         # NOTE: right now we don't wait for child to finish

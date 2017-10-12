@@ -28,9 +28,9 @@ class Job < ApplicationRecord
   end
 
   def env_var_hash
-    return JSON.parse(environment_variables)
+    return JSON.parse(job_type.environment_variables)
   rescue NameError
-    Rails.logger.info "Invalid json: #{environment_variables}"
+    Rails.logger.info "Invalid json: #{job_type.environment_variables}"
     return {}
   end
 

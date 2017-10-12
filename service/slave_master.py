@@ -73,7 +73,7 @@ class SlaveManager():
                 self.service_host = service_host
 
             def __str__(self):
-                return f"python process_wrapper.py --command=\"{self.command}\" --job_id={self.job_id} --service_host=\"{self.service_host}\""
+                return 'python3 process_wrapper.py --command="{0}" --job_id={1} --service_host="{2}"'.format(self.command, self.job_id, self.service_host)
 
         process_wrapper = str(ProcessWrapperCommand(command.id, command.script, self.service_host))
         logger.info("Running command: {}".format(process_wrapper))

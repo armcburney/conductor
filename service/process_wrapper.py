@@ -11,7 +11,7 @@ import sys
 from argparse import ArgumentParser
 
 import websockets
-from websocket_adapter import JobStdout, JobStderr, JobReturnCode
+from websocket_requests import JobStdout, JobStderr, JobReturnCode
 
 logging.basicConfig()
 logger = logging.getLogger('ProcessWrapper')
@@ -75,28 +75,28 @@ class ProcessWrapper():
 
     async def read_stdout(self, websocket, reader):
         encoder = lambda msg: JobStdout(msg, key=self.api_key, id=self.job_id)
-        await self._websocket_writer(websocket, reader, encoder, JobStdoutEof())
+        await self._websocket_writer(websocket, reader, encoder)
 
     async def read_stderr(self, websocket, reader):
         encoder = lambda msg: JobStderr(msg, key=self.api_key, id=self.job_id)
-        await self._websocket_writer(websocket, reader, encoder, JobStderrEof())
+        await self._websocket_writer(websocket, reader, encoder)
 
     async def _websocket_writer(self, websocket, reader, encoder):
         while websocket.open:
             encoded = await reader.readline()
             if not encoded:
-                logger.debug('sending eof message')
-                await websocket.send(str(encoder(''))
+                logger.debug('sending eof')
+                await websocket.send(str(encoder('')))
                 return
             line = encoded.decode().strip()
-            logger.debug('got line: {}'.format(line))
             await websocket.send(str(encoder(line)))
-            logger.debug('sent message')
+            logger.debug('sent message: "{}"'.format(line))
 
     async def spawn_job(self, process, loop, websocket):
         code = await process.wait()
         logger.debug('Terminated with code {}'.format(code))
         await websocket.send(str(JobReturnCode(code, key=self.api_key, id=self.job_id)))
+        logger.debug('Sent job return code')
 
     def ping_master(self):
         pass

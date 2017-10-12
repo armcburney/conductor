@@ -46,7 +46,7 @@ class JobStderr(Command):
 
 class JobReturnCode(Command):
     def __init__(self, code, **kwargs):
-        super(JobReturnCode, self).__init__('job.return_code', {'code': code, **kwargs})
+        super(JobReturnCode, self).__init__('job.return_code', {'return_code': code, **kwargs})
 
 class ConnectCommand(RegisterNode):
     def __init__(self, api_key, node_id, **kwargs):

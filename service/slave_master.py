@@ -67,20 +67,21 @@ class SlaveManager():
         """
 
         class ProcessWrapperCommand():
-            def __init__(self, job_id, command):
+            def __init__(self, job_id, command, service_host):
                 self.job_id = job_id
                 self.command = command
+                self.service_host = service_host
 
             def __str__(self):
-                return f"python process_wrapper.py --command=\"{self.command}\" --job_id={self.job_id}"
+                return f"python process_wrapper.py --command=\"{self.command}\" --job_id={self.job_id} --service_host=\"{self.service_host}\""
 
-        # process_wrapper = str(ProcessWrapperCommand(command.id, command.script))
-        # logger.info("Running command: {}".format(process_wrapper))
+        process_wrapper = str(ProcessWrapperCommand(command.id, command.script, self.service_host))
+        logger.info("Running command: {}".format(process_wrapper))
 
         # will clean up once we introduce python classes for responses
         process = await asyncio.create_subprocess_shell(
-            # process_wrapper,
-            command.script,
+            process_wrapper,
+            # command.script,
             cwd=command.working_directory,
             env=command.environment_variables,
             stderr=asyncio.subprocess.PIPE
@@ -161,7 +162,7 @@ class SlaveManager():
 
                         # Schedule the health check
                         logger.debug("Starting health check")
-                        self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine(logger=logger).run(websocket))
+                        self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine(logger=logger, api_key=self.api_key, node_id=self.node_id).run(websocket))
 
                         # keep on processing commands from the server while possible
                         while websocket.open:

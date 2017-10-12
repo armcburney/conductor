@@ -9,17 +9,19 @@ class HealthCheckCoroutine():
     Periodically poll the system and send stats to the master.
     """
 
-    def __init__(self, interval=10, logger=logging.getLogger()):
+    def __init__(self, api_key, node_id, interval=10, logger=logging.getLogger()):
         self.interval = interval
         self.logger = logger
-
+        self.api_key = api_key
+        self.node_id = node_id
 
     @staticmethod
     def get_server_health():
         return ServerHealth.create()
 
     async def send_stats(self, websocket):
-        health = HealthCommand(self.get_server_health().to_dict())
+
+        health = HealthCommand(self.get_server_health().to_dict(), api_key=self.api_key, id=self.node_id)
         self.logger.debug("Sending Server Health Status")
         self.logger.debug(str(health))
         await websocket.send(str(health))

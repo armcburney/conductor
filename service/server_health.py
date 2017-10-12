@@ -51,7 +51,7 @@ class ServerHealth:
         """
         return {
             "cpu_count": self.cpu_count,
-            "load": self.load,
+            "load": self.load[0],
             "total_memory": self.total_memory,
             "available_memory": self.available_memory,
             "total_disk": self.total_disk,

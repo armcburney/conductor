@@ -8,7 +8,8 @@ class WorkerConnectionController < WebsocketRails::BaseController
 
   def healthcheck
     Rails.logger.info "Set healthcheck for worker: #{message['id']}."
-    worker.update(message.slice(*worker_healthcheck_params))
+    worker&.update(message.slice(*worker.healthcheck_params))
+    worker&.info_channel&.trigger(:healthcheck, worker.health_info, namespace: :worker_info)
   end
 
   private
@@ -33,9 +34,5 @@ class WorkerConnectionController < WebsocketRails::BaseController
 
     # Returns nil if the worker does not belong to the current 'worker_user'
     @worker.user != worker_user ? nil : @worker
-  end
-
-  def worker_healthcheck_params
-    %w(cpu_count load total_memory available_memory total_disk used_disk free_disk)
   end
 end

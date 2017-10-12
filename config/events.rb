@@ -2,7 +2,7 @@
 
 WebsocketRails::EventMap.describe do
   namespace :websocket_rails do
-    subscribe :subscribe_private, to: JobConnectionController, with_method: :authorize_channels
+    subscribe :subscribe_private, to: WebsocketAuthenticationController, with_method: :authorize_channels
   end
 
   namespace :job do

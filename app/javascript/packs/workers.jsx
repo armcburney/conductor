@@ -76,6 +76,17 @@ class Workers extends React.Component {
     };
 
     this.selectJob = this.selectJob.bind(this);
+    this.healthcheck = this.healthcheck.bind(this);
+  }
+
+  healthcheck(data) {
+    console.log('got healthcheck');
+    console.log(data);
+    this.setState(state => {
+      const worker = state.workers.find(w => w.id == data.id);
+      Object.assign(worker, data);
+      return state;
+    });
   }
 
   selectJob(id) {
@@ -137,7 +148,13 @@ class Workers extends React.Component {
           this.selectJob(firstWithJobs.jobs[0].id);
         }
 
-        console.log(json)
+        json.workers.forEach(w => {
+          console.log(`worker_info.${w.id}`);
+          const channel = dispatcher.subscribe_private(`worker_info.${w.id}`);
+          channel.bind('worker_info.healthcheck', this.healthcheck);
+        });
+
+        console.log(json);
       })
       .catch(e => console.error(e));
   }

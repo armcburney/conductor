@@ -16,3 +16,6 @@
 /public/packs-test/
 /node_modules
 .env
+
+# Ignore vim swpfile
+*.swp

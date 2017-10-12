@@ -1,19 +1,18 @@
 #!/usr/bin/python
 
 import os
-import threading
 import time
 import asyncio
 import logging
-import json
+
+import traceback
+import websockets
 
 from argparse import ArgumentParser
-from websocket_requests import RegisterNode, HealthCommand, ConnectCommand
+from websocket_requests import RegisterNode, ConnectCommand
 from websocket_responses import ResponseFactory, SpawnResponse, ClientConnectedResponse, RegisterNodeResponse, WorkerConnectedResponse
 from health_check_coroutine import HealthCheckCoroutine
 
-import websockets
-import traceback
 
 logging.basicConfig()
 logger = logging.getLogger("Slave Main")

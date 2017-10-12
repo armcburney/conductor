@@ -1,26 +1,25 @@
 import json
-class ResponseNotSupportedException(Exception):
-    pass
 
 class ResponseFactory():
 
     @classmethod
     def parse_response(cls, response):
         json_response = json.loads(response)
+
         command = json_response[0]
 
         response_type = None
 
-        print ("GOT RESPONSE: " + response)
         if command == "client_connected":
-            response_type = ConnectNodeResponse
+            response_type = ClientConnectedResponse
         elif command == "worker.registered":
             response_type = RegisterNodeResponse
         elif command == "worker.spawn":
             response_type = SpawnResponse
+        elif command == "worker.connect":
+            response_type = WorkerConnectedResponse
         else:
             return None
-            raise ResponseNotSupportedException
 
         return response_type.process_response(json_response)
 
@@ -30,6 +29,22 @@ class Response():
         raise NotImplementedError
 
 class RegisterNodeResponse(Response):
+    """
+    worker.registered
+    """
+
+    def __init__(self, id):
+        self.node_id = id
+
+    @classmethod
+    def process_response(cls, response_body):
+        return RegisterNodeResponse(**response_body[1])
+
+class WorkerConnectedResponse(Response):
+    """
+    worker.connect
+    """
+
     def __init__(self, id, channel, user_id, success, result, token, server_token):
         self.node_id = id
         self.node_channel = channel
@@ -41,11 +56,12 @@ class RegisterNodeResponse(Response):
 
     @classmethod
     def process_response(cls, response_body):
-        return RegisterNodeResponse(**response_body[2])
+        return WorkerConnectedResponse(**response_body[2])
 
-class ConnectNodeResponse(Response):
+
+class ClientConnectedResponse(Response):
     """
-    If you have an id, connect
+    client_connected
     """
     def __init__(self, id, channel, user_id, success, result, token, server_token):
         self.node_id = id
@@ -58,9 +74,12 @@ class ConnectNodeResponse(Response):
 
     @classmethod
     def process_response(cls, response_body):
-        return ConnectNodeResponse(**response_body[2])
+        return ClientConnectedResponse(**response_body[2])
 
 class SpawnResponse(Response):
+    """
+    worker.spawn
+    """
 
     def __init__(self, id, script, working_directory, environment_variables, timeout, name, user_id, created_at, updated_at):
         self.id = id

@@ -28,7 +28,7 @@ class HealthCommand(Command):
         super(HealthCommand, self).__init__("health_check", health_dict)
 
 class RegisterNode(Command):
-    def __init__(self, api_key, address, **kwargs):
+    def __init__(self, api_key, **kwargs):
         payload = {"key": api_key}
         payload.update(kwargs) # append any extra arguments
         super(RegisterNode, self).__init__(
@@ -37,10 +37,9 @@ class RegisterNode(Command):
         )
 
 class ConnectCommand(RegisterNode):
-    def __init__(self, api_key, address, node_id, **kwargs):
+    def __init__(self, api_key, node_id, **kwargs):
         super(ConnectCommand, self).__init__(
             api_key=api_key,
-            address=address,
             node_id=node_id,
             **kwargs
         )

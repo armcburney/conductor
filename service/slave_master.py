@@ -9,7 +9,7 @@ import json
 
 from argparse import ArgumentParser
 from websocket_requests import RegisterNode, HealthCommand, ConnectCommand
-from websocket_responses import ResponseFactory, SpawnResponse, ConnectNodeResponse, RegisterNodeResponse
+from websocket_responses import ResponseFactory, SpawnResponse, ClientConnectedResponse, RegisterNodeResponse, WorkerConnectedResponse
 
 import websockets
 import psutil
@@ -112,12 +112,10 @@ class SlaveManager():
 
     def __init__(
         self,
-        hostname,
         api_key,
         service_host,
     ):
 
-        self.hostname = hostname
         self.service_host = service_host
         self.api_key = api_key
 
@@ -127,24 +125,24 @@ class SlaveManager():
     async def process_command(self, websocket):
 
         # keep on processing commands while available
-        logger.debug("waiting")
         command = await websocket.recv()
 
         logger.debug("Processing command: {}".format(command))
 
         response = ResponseFactory.parse_response(command)
-        print (response)
+        logger.debug("Got Response with type: {}".format(type(response)))
 
         if type(response) is SpawnResponse:
             # spawn a job
             logger.debug("Got a Spawn command")
             await self.spawn_command(response)
-        elif type(response) is ConnectNodeResponse:
+        elif type(response) is ClientConnectedResponse:
             logger.debug("Got an unexpected Connect command")
         elif type(response) is RegisterNodeResponse:
             logger.debug("Got an unexpected Register command")
         else:
             logger.debug("Could not recognize command.")
+            return
 
         logger.debug("Successfully processed command")
 
@@ -159,10 +157,11 @@ class SlaveManager():
                 self.command = command
 
             def __str__(self):
-                return f"./process_wrapper.py --command=\"{self.command}\" --job_id={self.job_id}"
+                return f"python process_wrapper.py --command=\"{self.command}\" --job_id={self.job_id}"
 
         process_wrapper = str(ProcessWrapperCommand(command.id, command.script))
-        logger.debug(process_wrapper)
+        logger.info("Running command: {}".format(process_wrapper))
+
         # will clean up once we introduce python classes for responses
         process = await asyncio.create_subprocess_shell(
             process_wrapper,
@@ -170,71 +169,81 @@ class SlaveManager():
         )
         # NOTE: right now we don't wait for child to finish
         # await process.wait()
-        logger.debug("Finished waiting")
 
-    async def initiate_connection(self, websocket):
-        command = RegisterNode(address=self.hostname, api_key=self.api_key)
+    async def initiate_connection(self, websocket, reconnect=False):
+
+        # Determine if we want to reconnect with the same host id
+        if reconnect:
+            command = ConnectCommand(api_key=self.api_key, node_id=self.node_id)
+        else:
+            command = RegisterNode(api_key=self.api_key)
 
         # Send registration command
-        print (str(command))
-
         logger.debug("Sending registration request")
         await websocket.send(str(command))
+
+        # wait for response
+        logger.debug("Waiting for connection response")
+        response = await websocket.recv()
+        parsed_response = ResponseFactory.parse_response(response)
+
+        if not parsed_response or \
+           not type(parsed_response) == WorkerConnectedResponse or \
+           not parsed_response.success:
+            return False
+
         logger.debug("Waiting for registration response")
-        response = await websocket.recv()
+        response2 = await websocket.recv()
+        parsed_register_response = ResponseFactory.parse_response(response2)
 
-        parsed_response = ResponseFactory.parse_response(response)
-        print (parsed_response)
-        if not type(parsed_response) is RegisterNodeResponse:
-            logger.error("Unable to register host with master server")
-            return
+        if not parsed_register_response or \
+           not type(parsed_register_response) == RegisterNodeResponse:
+            return False
 
-        self.node_id = parsed_response.node_id
+        logger.debug("Successfully registered with master server: {}".format(parsed_register_response.node_id))
 
-        logger.debug("Successfully registered with master server")
+        self.node_id = parsed_register_response.node_id
 
-    async def reinitiate_connection(self, websocket):
-        command = ConnectCommand(api_key=self.api_key, node_id=self.node_id, address=self.hostname)
-
-        logger.debug("Sending reconnection request")
-        # Send connection command
-        await websocket.send(str(command))
-        response = await websocket.recv()
-
-        parsed_response = ResponseFactory.parse_response(response)
-        if not type(parsed_response) is ConnectNodeResponse:
-            logger.error("Unable to connect to master server")
-            return
-
-        logger.info("Successfully connected to the master server")
+        return True
 
     async def run(self):
+
         num_reconnect_tries = 0 # how many times we've tried to reconnect
-        reconnect = False
+        reconnect = False # whether to try reconnecting with the same id
 
         # keep a connection to a websocket while we're alive
         while True:
 
             try:
+
                 # connects to websocket on host
                 async with websockets.connect(self.service_host) as websocket:
-                    response = await websocket.recv()
-                    print (response)
-                    if type(response) is ConnectNodeResponse:
-                        logger.debug("Got connection response")
 
+                    # get the initial Connect response
+                    response = await websocket.recv()
+                    parsed_response = ResponseFactory.parse_response(response)
+
+                    if not (type(parsed_response) is ClientConnectedResponse):
+                        logger.error("Got unexpected initial response: {}".format(type(parsed_response)))
+
+                        # can't expect this sequence to be valid, try reconnecting
+                        raise Exception()
+
+                    # Try to register node
                     try:
                         # register this node with the main server
-                        logger.debug("Initiating registration")
-                        if not reconnect:
-                            await self.initiate_connection(websocket)
-                        else:
-                            await self.reinitiate_connection(websocket)
+                        logger.debug("Trying to register with host")
 
-                        # schedule the reporter coroutine
+                        if not await self.initiate_connection(websocket, reconnect=reconnect):
+                            # this connection attempt failed
+                            continue
+
+                        # At this point in time we are guaranteed to be registered
+
+                        # Schedule the health check
                         self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine().run(websocket))
 
-                        # keep on processing commands while possible
+                        # keep on processing commands from the server while possible
                         while websocket.open:
                             await asyncio.ensure_future(self.process_command(websocket))
                     except:
@@ -243,6 +252,7 @@ class SlaveManager():
 
                 logger.debug("Websocket dead")
 
+                # If we have retried the max amount of times, then stop trying to reconnect with the same id
                 if num_reconnect_tries < MAX_RECONNECT_TRIES:
                     num_reconnect_tries += 1
                     reconnect = True
@@ -273,18 +283,9 @@ if __name__ == "__main__":
         help="The service master to connect to.",
     )
 
-    parser.add_argument(
-        "--hostname",
-        dest="hostname",
-        action="store",
-        required=True,
-        help="The unique hostname this node should register itself as."
-    )
-
     arguments = parser.parse_args()
 
     slave_manager = SlaveManager(
-        hostname=arguments.hostname,
         api_key=arguments.token,
         service_host=arguments.service_host,
     )

@@ -166,7 +166,7 @@ class Workers extends React.Component {
             <h3>stdout</h3>
             <pre>{this.state.stdout}</pre>
             <h3>stderr</h3>
-            <pre>{this.state.stdout}</pre>
+            <pre>{this.state.stderr}</pre>
           </div>
         </div>
       </div>

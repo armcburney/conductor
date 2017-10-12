@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
 class EventAction < ApplicationRecord
+  # Associations
   belongs_to :event_receiver
   belongs_to :job_type, optional: true
-  validate :owned_job_type?
+
+  # Validations
+  validate  :owned_job_type?
+  validates :type, presence: true
 
   def owned_job_type?
     return unless job_type && job_type.user != event_action.user

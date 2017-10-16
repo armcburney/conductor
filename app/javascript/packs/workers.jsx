@@ -92,7 +92,9 @@ class Workers extends React.Component {
   selectJob(id) {
     // Unsubscribe from last job
     if (this.state.selected !== null) {
-      ['stdout', 'stderr', 'return_code'].forEach(stream => this.channel.unsubscribe(`job.${stream}`));
+      if (this.channel) {
+        ['stdout', 'stderr', 'return_code'].forEach(stream => this.channel.unbind(`job.${stream}`));
+      }
       dispatcher.unsubscribe(`job.${id}`);
     }
 

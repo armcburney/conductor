@@ -88,7 +88,7 @@ class ProcessWrapper():
                 logger.debug('sending eof')
                 await websocket.send(str(encoder('')))
                 return
-            line = encoded.decode().strip()
+            line = encoded.decode()
             await websocket.send(str(encoder(line)))
             logger.debug('sent message: "{}"'.format(line))
 

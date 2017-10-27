@@ -33,7 +33,7 @@ class ProcessWrapper():
 
                 logger.debug('Starting job: {}'.format(self.command))
                 process = await asyncio.create_subprocess_shell(
-                        *self.command.split(),
+                        self.command,
                         #stdin=asyncio.subprocess.PIPE,
                         stdout=asyncio.subprocess.PIPE,
                         stderr=asyncio.subprocess.PIPE)

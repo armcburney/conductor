@@ -27,7 +27,7 @@ class ProcessWrapperCommand():
 
     async def launch_process_wrapper(self):
         process = await asyncio.create_subprocess_exec(
-            self.get_command(),
+            *list(map(str, self.get_command())),
             cwd=self.cwd if self.cwd != "" else None,
             env=self.env
         )
@@ -57,7 +57,16 @@ class ProcessWrapperCommand():
         self.process.send_signal(subprocess.signal.SIGTERM)
 
         # wait for the process to stop
-        # TODO: make sure this doesnt stop our event loop indefinitely
+        # await self.process.wait()
+
+    async def wait(self):
+        if self.done():
+            return
+
         await self.process.wait()
 
-
+    def done(self):
+        if self.process == None:
+            return True
+        else:
+            return self.process.returncode != None

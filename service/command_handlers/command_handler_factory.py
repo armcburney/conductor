@@ -27,4 +27,7 @@ class CommandHandlerFactory():
         else:
             logger.debug("Could not recognize command.")
 
-        return handler
+        if handler is None:
+            return None
+
+        return handler(response)

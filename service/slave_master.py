@@ -4,6 +4,7 @@ import os
 import time
 import asyncio
 import logging
+import signal
 
 import traceback
 import websockets
@@ -50,6 +51,14 @@ class SlaveManager():
         self.node_id = None
         self.pending_children = []
 
+    def get_state_dict(self):
+        return {
+            "service_host": self.service_host,
+            "api_key": self.api_key,
+            "node_id": self.node_id,
+            "pending_children": self.pending_children
+        }
+
     async def process_command(self, websocket):
         """
         Process a command in an actor like fashion
@@ -72,7 +81,8 @@ class SlaveManager():
             warning("Couldn't find handler for command.")
             return
 
-        handler.handle(response)
+        task = await handler.handle(**self.get_state_dict())
+        self.pending_children.append(task)
 
         debug("Successfully processed command")
 
@@ -191,6 +201,31 @@ class SlaveManager():
                 else:
                     reconnect = False
 
+            except SystemExit:
+
+                def alarm_handler():
+                    warning("Timeout, killing remaining tasks")
+                    for task in self.pending_children:
+                        if not task.done():
+                            task.kill()
+                    raise TimeoutError()
+
+                info("Stopping tasks")
+                # this is a special exception telling us to kill ourself
+                try:
+                    for task in self.pending_children:
+                        task.stop()
+
+                    signal.signal(signal.SIGALRM, alarm_handler)
+                    signal.alarm(10)
+
+                    for task in self.pending_children:
+                        task.wait()
+                    signal.alarm(0)
+                except TimeoutError:
+                    pass
+
+                raise
             except:
                 debug("Error occured, sleeping before trying to reconnect")
                 time.sleep(1)

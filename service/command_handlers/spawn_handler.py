@@ -1,7 +1,8 @@
 from command_handlers.command_handler import CommandHandler
+from process_wrapper_command import ProcessWrapperCommand
 
 class SpawnCommandHandler(CommandHandler):
-    def handle(self, command):
+    async def handle(self, **kwargs):
         """
             command: the SpawnCommand to attempt to spawn
 
@@ -9,6 +10,15 @@ class SpawnCommandHandler(CommandHandler):
                 The process wrapper command instance so we can control this job.
         """
 
-        # launch the job
-        return ProcessWrapperCommand(command.id, command.script, self.service_host).launch_process_wrapper()
+        command = self.command
 
+        # launch the job
+        wrapper = ProcessWrapperCommand(
+            command.id,
+            command.script,
+            kwargs["service_host"]
+        )
+
+        process = await wrapper.launch_process_wrapper()
+
+        return wrapper

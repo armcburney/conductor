@@ -32,7 +32,7 @@ class EventReceivers extends React.Component {
       credentials: 'same-origin'
     })
       .then(res => res.json())
-      .then(json => {this.setState(json); console.log(json)})
+      .then(json => this.setState(json))
       .catch(e => console.error(e));
   }
 
@@ -42,16 +42,10 @@ class EventReceivers extends React.Component {
 
   saveReceiver(index, data) {
     const id = this.state.event_receivers[index].id;
-    let url, method;
-    console.log(index);
 
-    if (id === null) {
-      url = '/event_receivers';
-      method = 'POST'
-    } else {
-      url = `/event_receivers/${id}.json`;
-      method = 'PATCH';
-    }
+    let [url, method] = (
+      (id === null) ? ['/event_receivers', 'POST'] : [`/event_receivers/${id}.json`, 'PATCH']
+    );
 
     fetch(url, {
       method: method,

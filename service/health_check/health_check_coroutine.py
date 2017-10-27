@@ -4,7 +4,9 @@ import asyncio
 from health_check.server_health import ServerHealth
 from websocket_requests import HealthCommand
 
-logger = logging.getLogger(__name__)
+logging.basicConfig()
+logger = logging.getLogger("HealthCheckCoroutine")
+logger.setLevel(logging.DEBUG)
 
 class HealthCheckCoroutine():
     """
@@ -26,11 +28,11 @@ class HealthCheckCoroutine():
         logger.debug("Sending Server Health Status")
         logger.debug(str(health))
         await websocket.send(str(health))
-        logger.debug("Sent Server Health Status")
+        logger.info("Sent Server Health Status")
 
 
     async def run(self, websocket):
-        logger.debug("Starting health check coroutine.")
+        logger.info("Starting health check coroutine.")
 
         # keep sending stats forever
         while websocket.open:

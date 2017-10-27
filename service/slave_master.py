@@ -78,9 +78,20 @@ class SlaveManager():
 
     def clean_pending_children(self):
         # cleanup children who are still pending
+        original_pending_tasks = len(self.pending_children)
         self.pending_children = list(
             filter(lambda x: not x.done(), self.pending_children)
         )
+
+        new_pending_tasks = len(self.pending_children)
+
+        if original_pending_tasks > new_pending_tasks:
+            debug(
+                "Cleaned up finished tasks from pending list."
+                " Before {} After {}".format(
+                    original_pending_tasks,
+                    new_pending_tasks)
+            )
 
     async def initiate_connection(self, websocket, reconnect=False):
 
@@ -112,7 +123,7 @@ class SlaveManager():
            not type(parsed_register_response) == RegisterNodeResponse:
             return False
 
-        debug("Successfully registered with master server: {}".format(parsed_register_response.node_id))
+        info("Registered with master server: Worker ID={}".format(parsed_register_response.node_id))
 
         self.node_id = parsed_register_response.node_id
 
@@ -164,6 +175,7 @@ class SlaveManager():
 
                         # keep on processing commands from the server while possible
                         while websocket.open:
+                            self.clean_pending_children()
                             await asyncio.ensure_future(self.process_command(websocket))
                     except:
                         # print debugging info

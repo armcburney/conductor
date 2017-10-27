@@ -29,4 +29,4 @@ I've written a small test server to exercise basic functionality of the slave ma
 python websocket_server_test.py
 ```
 
-and then start the slave master pointing to this service. The script `test_local.sh` is already setup to point to this mock socket server so alternatively you can just run that.
+and then start the slave master pointing to this service. The script `dev_scripts/test_local.sh` is already setup to point to this mock socket server so alternatively you can just run that.

@@ -16,7 +16,6 @@ export default class Receiver extends React.PureComponent {
     this.TRIGGER_INTERVAL = 'TRIGGER_INTERVAL';
 
 
-    console.log(props);
     this.state = this.nullState();
 
     [
@@ -35,7 +34,6 @@ export default class Receiver extends React.PureComponent {
       'return_code'
     ].forEach(property => {
       const updaterName = `update${upperFirst(camelCase(property))}`;
-      console.log(updaterName);
       this[updaterName] =
         (event) => this.setState({[property]: event.target.value, dirty: true});
     });
@@ -103,7 +101,6 @@ export default class Receiver extends React.PureComponent {
   }
 
   save() {
-    console.log(this.stateToRequest());
     this.setState({loading: true}, () => {
       this.props.save(this.props.index, this.stateToRequest());
     });

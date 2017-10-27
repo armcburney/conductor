@@ -4,14 +4,15 @@ import asyncio
 from health_check.server_health import ServerHealth
 from websocket_requests import HealthCommand
 
+logger = logging.getLogger(__name__)
+
 class HealthCheckCoroutine():
     """
     Periodically poll the system and send stats to the master.
     """
 
-    def __init__(self, api_key, node_id, interval=10, logger=logging.getLogger()):
+    def __init__(self, api_key, node_id, interval=10):
         self.interval = interval
-        self.logger = logger
         self.api_key = api_key
         self.node_id = node_id
 
@@ -22,14 +23,14 @@ class HealthCheckCoroutine():
     async def send_stats(self, websocket):
 
         health = HealthCommand(self.get_server_health().to_dict(), api_key=self.api_key, id=self.node_id)
-        self.logger.debug("Sending Server Health Status")
-        self.logger.debug(str(health))
+        logger.debug("Sending Server Health Status")
+        logger.debug(str(health))
         await websocket.send(str(health))
-        self.logger.debug("Sent Server Health Status")
+        logger.debug("Sent Server Health Status")
 
 
     async def run(self, websocket):
-        self.logger.debug("Starting health check coroutine.")
+        logger.debug("Starting health check coroutine.")
 
         # keep sending stats forever
         while websocket.open:

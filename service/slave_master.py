@@ -16,8 +16,13 @@ from process_wrapper_command import ProcessWrapperCommand
 from command_handlers.command_handler_factory import CommandHandlerFactory
 
 
-logging.basicConfig()
-logger = logging.getLogger("Slave Main")
+logging.basicConfig(filename='slave_master.log', level=logging.DEBUG)
+logging.addLevelName( logging.WARNING, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.WARNING))
+logging.addLevelName( logging.INFO, "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.INFO))
+logging.addLevelName( logging.DEBUG, "\033[1;34m%s\033[1;0m" % logging.getLevelName(logging.DEBUG))
+logging.addLevelName( logging.ERROR, "\033[1;41m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
+
+logger = logging.getLogger("Slave Manager")
 logger.setLevel(logging.DEBUG)
 
 MAX_RECONNECT_TRIES=10
@@ -38,6 +43,7 @@ class SlaveManager():
 
         # to be set based on the response from the server
         self.node_id = None
+        self.pending_children = []
 
     async def process_command(self, websocket):
         """
@@ -47,22 +53,29 @@ class SlaveManager():
         # keep on processing commands while available
         command = await websocket.recv()
 
-        logger.debug("Processing raw command: {}".format(command))
+        logger.debug("Parsing raw command: {}".format(command))
         response = ResponseFactory.parse_response(command)
 
+        # if the command is invalid, just ignore it
         if response is None:
-            logger.debug("Could not recognize command. Ignoring")
+            logger.warning("Could not recognize command. Ignoring")
             return
 
         handler = CommandHandlerFactory.get_handler(response)
 
         if handler is None:
-            logger.debug("Couldn't find handler for command.")
+            logger.warning("Couldn't find handler for command.")
             return
 
         handler.handle(response)
 
         logger.debug("Successfully processed command")
+
+    def clean_pending_children(self):
+        # cleanup children who are still pending
+        self.pending_children = list(
+            filter(lambda x: not x.done(), self.pending_children)
+        )
 
     async def initiate_connection(self, websocket, reconnect=False):
 
@@ -139,7 +152,6 @@ class SlaveManager():
                         logger.debug("Starting health check")
                         self.health_check_coroutine = asyncio.ensure_future(
                             HealthCheckCoroutine(
-                                logger=logger,
                                 api_key=self.api_key,
                                 node_id=self.node_id
                             ).run(websocket)

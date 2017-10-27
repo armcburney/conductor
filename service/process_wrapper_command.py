@@ -1,4 +1,8 @@
+import subprocess
 import asyncio
+
+class NoRunningProcessException(Exception):
+    pass
 
 class ProcessWrapperCommand():
     """
@@ -10,6 +14,7 @@ class ProcessWrapperCommand():
         self.service_host = service_host
         self.cwd = cwd
         self.env = env
+        self.process = None
 
     def __str__(self):
         return 'python3 process_wrapper.py --command="{0}" --job_id={1} --service_host="{2}"'.format(self.command, self.job_id, self.service_host)
@@ -26,4 +31,33 @@ class ProcessWrapperCommand():
             cwd=self.cwd if self.cwd != "" else None,
             env=self.env
         )
+        self.process = process
         return process
+
+    async def kill_process(self):
+        """
+        Kills a process.
+        """
+        if self.process == None:
+            raise NoRunningProcessException()
+
+        self.process.send_signal(subprocess.signal.SIGKILL)
+
+        # this should be instant
+        await self.process.wait()
+
+
+    async def stop_process(self):
+        """
+        Try to stop a process.
+        """
+        if self.process == None:
+            raise NoRunningProcessException()
+
+        self.process.send_signal(subprocess.signal.SIGTERM)
+
+        # wait for the process to stop
+        # TODO: make sure this doesnt stop our event loop indefinitely
+        await self.process.wait()
+
+

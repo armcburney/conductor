@@ -1,7 +1,7 @@
 import logging
 import asyncio
 
-from server_health import ServerHealth
+from health_check.server_health import ServerHealth
 from websocket_requests import HealthCommand
 
 class HealthCheckCoroutine():

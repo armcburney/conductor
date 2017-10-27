@@ -11,7 +11,8 @@ import websockets
 from argparse import ArgumentParser
 from websocket_requests import RegisterNode, ConnectCommand
 from websocket_responses import ResponseFactory, SpawnResponse, ClientConnectedResponse, RegisterNodeResponse, WorkerConnectedResponse
-from health_check_coroutine import HealthCheckCoroutine
+from health_check.health_check_coroutine import HealthCheckCoroutine
+from process_wrapper_command import ProcessWrapperCommand
 
 
 logging.basicConfig()
@@ -38,6 +39,9 @@ class SlaveManager():
         self.node_id = None
 
     async def process_command(self, websocket):
+        """
+        Process a command in an actor like fashion
+        """
 
         # keep on processing commands while available
         command = await websocket.recv()
@@ -49,8 +53,9 @@ class SlaveManager():
 
         if type(response) is SpawnResponse:
             # spawn a job
-            logger.debug("Got a Spawn command")
-            await self.spawn_command(response)
+            logger.info("Running command: {}".format(process_wrapper))
+            ProcessWrapperCommand(command.id, command.script, self.service_host).launch_process_wrapper()
+
         elif type(response) is ClientConnectedResponse:
             logger.debug("Got an unexpected Connect command")
         elif type(response) is RegisterNodeResponse:
@@ -60,33 +65,6 @@ class SlaveManager():
             return
 
         logger.debug("Successfully processed command")
-
-    async def spawn_command(self, command):
-        """
-        Get a command to spawn a worker process.
-        """
-
-        class ProcessWrapperCommand():
-            def __init__(self, job_id, command, service_host):
-                self.job_id = job_id
-                self.command = command
-                self.service_host = service_host
-
-            def __str__(self):
-                return 'python3 process_wrapper.py --command="{0}" --job_id={1} --service_host="{2}"'.format(self.command, self.job_id, self.service_host)
-
-        process_wrapper = str(ProcessWrapperCommand(command.id, command.script, self.service_host))
-        logger.info("Running command: {}".format(process_wrapper))
-
-        # will clean up once we introduce python classes for responses
-        process = await asyncio.create_subprocess_shell(
-            process_wrapper,
-            cwd=command.working_directory if command.working_directory != "" else None,
-            env=command.environment_variables
-        )
-
-        # NOTE: right now we don't wait for child to finish
-        # await process.wait()
 
     async def initiate_connection(self, websocket, reconnect=False):
 
@@ -137,10 +115,11 @@ class SlaveManager():
                 # connects to websocket on host
                 async with websockets.connect(self.service_host) as websocket:
 
-                    # get the initial Connect response
+                    # get the initial connection response
                     response = await websocket.recv()
                     parsed_response = ResponseFactory.parse_response(response)
 
+                    # this is the expected first response
                     if not (type(parsed_response) is ClientConnectedResponse):
                         logger.error("Got unexpected initial response: {}".format(type(parsed_response)))
 
@@ -160,12 +139,19 @@ class SlaveManager():
 
                         # Schedule the health check
                         logger.debug("Starting health check")
-                        self.health_check_coroutine = asyncio.ensure_future(HealthCheckCoroutine(logger=logger, api_key=self.api_key, node_id=self.node_id).run(websocket))
+                        self.health_check_coroutine = asyncio.ensure_future(
+                            HealthCheckCoroutine(
+                                logger=logger,
+                                api_key=self.api_key,
+                                node_id=self.node_id
+                            ).run(websocket)
+                        )
 
                         # keep on processing commands from the server while possible
                         while websocket.open:
                             await asyncio.ensure_future(self.process_command(websocket))
                     except:
+                        # print debugging info
                         traceback.print_exc()
                         raise
 
@@ -177,6 +163,7 @@ class SlaveManager():
                     reconnect = True
                 else:
                     reconnect = False
+
             except:
                 logger.debug("Error occured, sleeping before trying to reconnect")
                 time.sleep(1)
@@ -184,14 +171,17 @@ class SlaveManager():
 
 if __name__ == "__main__":
 
-    parser = ArgumentParser("Main communication endpoint on worker host. Spawn to communicate with Conductor service.")
+    parser = ArgumentParser(
+        "Main communication endpoint on worker host. "
+        "Spawn to communicate with Conductor service."
+    )
 
     parser.add_argument(
         "--token",
         dest="token",
         action="store",
         required=True,
-        help="Provided api token from Conductor."
+        help="Provided api token from Conductor web service."
     )
 
     parser.add_argument(
@@ -204,12 +194,13 @@ if __name__ == "__main__":
 
     arguments = parser.parse_args()
 
+    # create an instance of the manager
     slave_manager = SlaveManager(
         api_key=arguments.token,
         service_host=arguments.service_host,
     )
 
-    # continually run event loop
+    # continually run event loop to process coroutines
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
     loop.run_until_complete(slave_manager.run())

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171011225432) do
+ActiveRecord::Schema.define(version: 20171027164742) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -42,9 +42,14 @@ ActiveRecord::Schema.define(version: 20171011225432) do
     t.datetime "start_time"
     t.integer  "interval"
     t.integer  "job_type_id"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
-    t.integer  "user_id",     null: false
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
+    t.integer  "user_id",                     null: false
+    t.boolean  "triggered",   default: false, null: false
+    t.string   "type",                        null: false
+    t.text     "regex"
+    t.text     "stream"
+    t.integer  "return_code"
     t.index ["job_type_id"], name: "index_event_receivers_on_job_type_id", using: :btree
     t.index ["user_id"], name: "index_event_receivers_on_user_id", using: :btree
   end

@@ -15,6 +15,7 @@ export default class Receiver extends React.PureComponent {
     this.TRIGGER_INTERVAL = 'TRIGGER_INTERVAL';
 
 
+    console.log(props);
     this.state = {
       selectedTriggerOption: this.TRIGGER_SCHEDULED
     };
@@ -25,6 +26,7 @@ export default class Receiver extends React.PureComponent {
     this.updateStartAtTime = this.updateStartAtTime.bind(this);
     this.cancelUpdate = this.cancelUpdate.bind(this);
     this.save = this.save.bind(this);
+    this.delete = this.delete.bind(this);
   }
 
   componentDidMount() {
@@ -34,7 +36,7 @@ export default class Receiver extends React.PureComponent {
   componentWillReceiveProps(props) {
     if (props.interval) {
       this.setState({
-        dirty: false,
+        dirty: props.id === null,
         loading: false,
         selectedTriggerOption: this.TRIGGER_INTERVAL,
         scheduleTime: null,
@@ -43,7 +45,7 @@ export default class Receiver extends React.PureComponent {
       });
     } else {
       this.setState({
-        dirty: false,
+        dirty: props.id === null,
         loading: false,
         selectedTriggerOption: this.TRIGGER_SCHEDULED,
         scheduleTime: moment(props.start_time),
@@ -54,7 +56,15 @@ export default class Receiver extends React.PureComponent {
   }
 
   cancelUpdate() {
-    this.componentWillReceiveProps(this.props);
+    if (this.props.id === null) {
+      this.delete()
+    } else {
+      this.componentWillReceiveProps(this.props);
+    }
+  }
+
+  delete() {
+    this.props.delete(this.props.index);
   }
 
   save() {
@@ -67,7 +77,7 @@ export default class Receiver extends React.PureComponent {
 
     this.setState({loading: true});
 
-    this.props.save(this.props.id, {
+    this.props.save(this.props.index, {
       start_time: startTime,
       interval: this.state.selectedTriggerOption == this.TRIGGER_INTERVAL ? this.state.interval : null
     });
@@ -96,6 +106,9 @@ export default class Receiver extends React.PureComponent {
   render() {
     return (
       <div className={this.className()}>
+        <button className='button delete' onClick={this.delete}>
+          Delete
+        </button>
         <div className='controls'>
           <button className='button button--secondary' onClick={this.save}>Save</button>
           <button className='button' onClick={this.cancelUpdate}>Cancel</button>

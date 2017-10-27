@@ -6,6 +6,12 @@
   flex-direction: row;
   background-color: $light-shade;
 
+  .delete {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+  }
+
   .controls {
     position: absolute;
     bottom: -15px;

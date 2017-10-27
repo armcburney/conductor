@@ -13,6 +13,7 @@ from websocket_requests import RegisterNode, ConnectCommand
 from websocket_responses import ResponseFactory, SpawnResponse, ClientConnectedResponse, RegisterNodeResponse, WorkerConnectedResponse
 from health_check.health_check_coroutine import HealthCheckCoroutine
 from process_wrapper_command import ProcessWrapperCommand
+from command_handlers.command_handler_factory import CommandHandlerFactory
 
 
 logging.basicConfig()
@@ -46,23 +47,20 @@ class SlaveManager():
         # keep on processing commands while available
         command = await websocket.recv()
 
-        logger.debug("Processing command: {}".format(command))
-
+        logger.debug("Processing raw command: {}".format(command))
         response = ResponseFactory.parse_response(command)
-        logger.debug("Got Response with type: {}".format(type(response)))
 
-        if type(response) is SpawnResponse:
-            # spawn a job
-            logger.info("Running command: {}".format(process_wrapper))
-            ProcessWrapperCommand(command.id, command.script, self.service_host).launch_process_wrapper()
-
-        elif type(response) is ClientConnectedResponse:
-            logger.debug("Got an unexpected Connect command")
-        elif type(response) is RegisterNodeResponse:
-            logger.debug("Got an unexpected Register command")
-        else:
-            logger.debug("Could not recognize command.")
+        if response is None:
+            logger.debug("Could not recognize command. Ignoring")
             return
+
+        handler = CommandHandlerFactory.get_handler(response)
+
+        if handler is None:
+            logger.debug("Couldn't find handler for command.")
+            return
+
+        handler.handle(response)
 
         logger.debug("Successfully processed command")
 

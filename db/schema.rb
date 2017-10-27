@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171011225432) do
+ActiveRecord::Schema.define(version: 20171012162247) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -47,6 +47,14 @@ ActiveRecord::Schema.define(version: 20171011225432) do
     t.integer  "user_id",     null: false
     t.index ["job_type_id"], name: "index_event_receivers_on_job_type_id", using: :btree
     t.index ["user_id"], name: "index_event_receivers_on_user_id", using: :btree
+  end
+
+  create_table "event_records", force: :cascade do |t|
+    t.integer  "event_receiver_id"
+    t.boolean  "triggered"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.index ["event_receiver_id"], name: "index_event_records_on_event_receiver_id", using: :btree
   end
 
   create_table "friendly_id_slugs", force: :cascade do |t|
@@ -126,6 +134,7 @@ ActiveRecord::Schema.define(version: 20171011225432) do
   add_foreign_key "event_actions", "job_types"
   add_foreign_key "event_receivers", "job_types"
   add_foreign_key "event_receivers", "users"
+  add_foreign_key "event_records", "event_receivers"
   add_foreign_key "job_types", "users"
   add_foreign_key "jobs", "job_types"
   add_foreign_key "jobs", "workers"

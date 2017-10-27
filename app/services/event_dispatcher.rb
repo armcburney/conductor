@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
 class EventDispatcher
-  attr_reader :event_receiver
-  def initialize(event_receiver)
-    @event_receiver = event_receiver
+  attr_reader :event_receivers
+  def initialize(event_receivers)
+    @event_receivers = event_receivers
   end
 
   def batch_dipatch!
-    # iterate through all the jobs of a given job type for a given
-    # event_receiver, and dispatch set the triggered to 'true' for a given
-    # event_record
+    event_receivers.each(&:dispatch!)
   end
 end

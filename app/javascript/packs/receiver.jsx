@@ -1,6 +1,7 @@
 import React from 'react';
 import Datetime from 'react-datetime';
 import moment from 'moment';
+import { camelCase, upperFirst, snakeCase } from 'lodash';
 
 // To add to window
 if (!window.Promise) {
@@ -16,43 +17,77 @@ export default class Receiver extends React.PureComponent {
 
 
     console.log(props);
-    this.state = {
-      selectedTriggerOption: this.TRIGGER_SCHEDULED
-    };
+    this.state = this.nullState();
 
-    this.updateScheduleTime = this.updateScheduleTime.bind(this);
-    this.selectTriggerOption = this.selectTriggerOption.bind(this);
-    this.updateInterval = this.updateInterval.bind(this);
-    this.updateStartAtTime = this.updateStartAtTime.bind(this);
-    this.cancelUpdate = this.cancelUpdate.bind(this);
-    this.save = this.save.bind(this);
-    this.delete = this.delete.bind(this);
+    [
+      'updateType',
+      'updateStartTime',
+      'cancelUpdate',
+      'save',
+      'delete'
+    ].forEach(fn => this[fn] = this[fn].bind(this));
+
+    [
+      'interval',
+      'job_type_id',
+      'regex',
+      'stream',
+      'return_code'
+    ].forEach(property => {
+      const updaterName = `update${upperFirst(camelCase(property))}`;
+      console.log(updaterName);
+      this[updaterName] =
+        (event) => this.setState({[property]: event.target.value, dirty: true});
+    });
   }
 
   componentDidMount() {
     this.componentWillReceiveProps(this.props);
   }
 
+  nullState() {
+    return {
+      dirty: false,
+      loading: false,
+      type: 'ScheduledReceiver',
+      start_time: null,
+      interval: null,
+      job_type_id: null,
+      regex: null,
+      stream: 'stdout',
+      return_code: 0
+    };
+  }
+
+  // Picks properties from `state` that are needed to be sent in a request.
+  stateToRequest() {
+    return (({ type, start_time, interval, job_type_id, regex, stream, return_code }) => {
+
+      // Turn time into a string, if it exists
+      if (start_time !== null) {
+        start_time = start_time.format();
+      }
+
+      return { type, start_time, interval, job_type_id, regex, stream, return_code };
+    })(this.state);
+  }
+
   componentWillReceiveProps(props) {
-    if (props.interval) {
-      this.setState({
-        dirty: props.id === null,
-        loading: false,
-        selectedTriggerOption: this.TRIGGER_INTERVAL,
-        scheduleTime: null,
-        startAtTime: moment(props.start_time),
-        interval: props.interval
-      });
-    } else {
-      this.setState({
-        dirty: props.id === null,
-        loading: false,
-        selectedTriggerOption: this.TRIGGER_SCHEDULED,
-        scheduleTime: moment(props.start_time),
-        startAtTime: null,
-        interval: null
-      });
-    }
+    this.setState(state => {
+
+      state = this.nullState();
+      state.dirty = props.id === null;
+      state.type = props.type || state.type;
+      
+      state.start_time = props.start_time ? moment(props.start_time) : null;
+      state.interval = props.interval;
+      state.job_type_id = props.job_type_id;
+      state.regex = props.regex;
+      state.stream = props.stream;
+      state.return_code = props.return_code;
+
+      return state;
+    });
   }
 
   cancelUpdate() {
@@ -68,39 +103,99 @@ export default class Receiver extends React.PureComponent {
   }
 
   save() {
-    let startTime = null
-    if (this.state.interval && this.state.startAtTime) {
-      startTime = this.state.startAtTime.format();
-    } else if (this.state.scheduleTime) {
-      startTime = this.state.scheduleTime.format();
-    }
-
-    this.setState({loading: true});
-
-    this.props.save(this.props.index, {
-      start_time: startTime,
-      interval: this.state.selectedTriggerOption == this.TRIGGER_INTERVAL ? this.state.interval : null
+    console.log(this.stateToRequest());
+    this.setState({loading: true}, () => {
+      this.props.save(this.props.index, this.stateToRequest());
     });
   }
 
-  updateScheduleTime(scheduleTime) {
-    this.setState({scheduleTime, dirty: true});
+  updateType(event) {
+    this.setState(
+      Object.assign(this.nullState(), {type: event.target.value, dirty: true})
+    );
   }
 
-  updateInterval(event) {
-    this.setState({interval: event.target.value, dirty: true});
-  }
-
-  updateStartAtTime(startAtTime) {
-    this.setState({startAtTime, dirty: true});
-  }
-
-  selectTriggerOption(event) {
-    this.setState({selectedTriggerOption: event.target.name, dirty: true});
+  updateStartTime(start_time) {
+    this.setState({start_time, dirty: true});
   }
 
   className() {
     return `receiver ${this.state.dirty ? 'dirty' : ''} ${this.state.loading ? 'loading' : ''}`;
+  }
+
+  renderJobTypePicker() {
+    return (
+      <select value={`${this.state.job_type_id}`} onChange={this.updateJobTypeId}>
+      {this.props.job_types.map(
+        (job_type) => <option value={`${job_type.id}`}>{job_type.name}</option>
+      )}
+      </select>
+    );
+  }
+
+  renderForm() {
+    switch (this.state.type) {
+      case 'ScheduledReceiver':
+        return (
+          <div className='receiver-form'>
+            <div className='field'>
+              At: <Datetime value={this.state.start_time} onChange={this.updateStartTime} />
+            </div>
+          </div>
+        );
+      case 'IntervalReceiver':
+        return (
+          <div className='receiver-form'>
+            <div className='field'>
+              <label>Every</label>
+              <input type='number' value={this.state.interval || ''} onChange={this.updateInterval} /> seconds
+            </div>
+            <div className='field'>
+              <label>Starting</label>
+              <Datetime value={this.state.start_time || ''} onChange={this.updateStartTime} />
+            </div>
+          </div>
+        );
+      case 'RegexReceiver':
+        return (
+          <div className='receiver-form'>
+            <div className='field'>
+              <label>When</label>
+              <select value={this.state.stream} onChange={this.updateStream}>
+                <option value='stdout'>stdout</option>
+                <option value='stderr'>stderr</option>
+              </select>
+            </div>
+            <div className='field'>
+              <label>From</label> {this.renderJobTypePicker()}
+            </div>
+            <div className='field'>
+              <label>Matches regex</label>
+              <textarea value={this.state.regex || ''} onChange={this.updateRegex} />
+            </div>
+          </div>
+        );
+      case 'TimeoutReceiver':
+        return (
+          <div className='receiver-form'>
+            <div className='field'>
+              <label>When</label> {this.renderJobTypePicker()} times out
+            </div>
+          </div>
+        );
+      case 'ReturnCodeReceiver':
+        return (
+          <div className='receiver-form'>
+            <div className='field'>
+              <label>When</label> {this.renderJobTypePicker()}
+            </div>
+            <div className='field'>
+              <label>Returns</label>
+              <input type="number" value={`${this.state.return_code}`} onChange={this.updateReturnCode} />
+            </div>
+          </div>
+        );
+    }
   }
 
   render() {
@@ -114,33 +209,16 @@ export default class Receiver extends React.PureComponent {
           <button className='button' onClick={this.cancelUpdate}>Cancel</button>
         </div>
         <div className='trigger'>
-          <h3>Trigger:</h3>
-          <div className='trigger-option'>
-            <input
-              type='radio'
-              name={this.TRIGGER_SCHEDULED}
-              id={this.TRIGGER_SCHEDULED}
-              checked={this.state.selectedTriggerOption == this.TRIGGER_SCHEDULED}
-              onChange={this.selectTriggerOption} />
-            <label htmlFor={this.TRIGGER_SCHEDULED}>
-              {'At'}
-              <Datetime value={this.state.scheduleTime} onChange={this.updateScheduleTime} />
-            </label>
-          </div>
-          <div className='trigger-option'>
-            <input
-              type='radio'
-              name={this.TRIGGER_INTERVAL}
-              id={this.TRIGGER_INTERVAL}
-              checked={this.state.selectedTriggerOption == this.TRIGGER_INTERVAL}
-              onChange={this.selectTriggerOption} />
-            <label htmlFor={this.TRIGGER_INTERVAL}>
-              {'Every'}
-              <input type='number' value={this.state.interval || ''} onChange={this.updateInterval} />
-              {'seconds, starting at'}
-              <Datetime value={this.state.startAtTime} onChange={this.updateStartAtTime} />
-            </label>
-          </div>
+          <h3>Trigger:
+            <select value={this.state.type} onChange={this.updateType}>
+              <option value='ScheduledReceiver'>Schedule</option>
+              <option value='IntervalReceiver'>Interval</option>
+              <option value='RegexReceiver'>Job stream Regex match</option>
+              <option value='ReturnCodeReceiver'>{'Job return code'}</option>
+              <option value='TimeoutReceiver'>Job timeout</option>
+            </select>
+          </h3>
+          {this.renderForm()}
         </div>
         <div className='actions'>
           <h3>Actions:</h3>

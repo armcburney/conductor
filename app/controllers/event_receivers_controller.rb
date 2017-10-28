@@ -72,6 +72,6 @@ class EventReceiversController < ApplicationController
   def event_receiver_params
     params
       .require(:event_receiver)
-      .permit(:start_time, :interval, :job_type_id)
+      .permit(:type, :start_time, :interval, :job_type_id, :regex, :stream, :return_code)
   end
 end

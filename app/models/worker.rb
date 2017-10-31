@@ -9,6 +9,16 @@ class Worker < ApplicationRecord
   belongs_to :user
   has_many :jobs
 
+  # Scopes
+  default_scope { order(deleted: :asc, last_heartbeat: :desc) }
+  scope :current, -> { where(deleted: false) }
+  scope :active, -> { current.where("last_heartbeat > ?", 10.minutes.ago) }
+
+  def soft_delete!
+    update(deleted: true)
+    channel.trigger(:delete, {}, namespace: :worker)
+  end
+
   def update_heartbeat
     update(last_heartbeat: Time.zone.now)
   end

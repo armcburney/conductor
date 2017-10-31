@@ -54,7 +54,7 @@ class Worker extends React.Component {
 
   render() {
     return (
-      <div className='worker'>
+      <div className={`worker ${this.props.deleted ? 'deleted' : ''}`}>
         <h3>{this.props.id}</h3>
         <div className='section info'>
           {Object.keys(this.INFO_PROPS).map(this.renderInfoProp)}

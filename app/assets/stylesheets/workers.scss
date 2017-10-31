@@ -16,6 +16,10 @@
   flex-direction: column;
   background-color: $light-shade;
 
+  &.deleted {
+    opacity: 0.8;
+  }
+
   .section {
     display: flex;
     flex-wrap: wrap;

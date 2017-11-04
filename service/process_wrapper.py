@@ -19,11 +19,13 @@ logger.setLevel(logging.DEBUG)
 
 class ProcessWrapper():
 
-    def __init__(self, api_key, service_host, job_id, command):
+    def __init__(self, api_key, service_host, job_id, command, cwd='', env=None):
         self.api_key=api_key
         self.service_host=service_host
         self.job_id=job_id
         self.command=command
+        self.cwd=cwd
+        self.env=env
 
     async def start(self, loop):
         try:
@@ -36,7 +38,9 @@ class ProcessWrapper():
                         self.command,
                         #stdin=asyncio.subprocess.PIPE,
                         stdout=asyncio.subprocess.PIPE,
-                        stderr=asyncio.subprocess.PIPE)
+                        stderr=asyncio.subprocess.PIPE,
+                        cwd=self.cwd if self.cwd != '' else None,
+                        env=self.env)
                 await asyncio.wait(
                     [
                         self.spawn_job(process, loop, websocket),
@@ -46,7 +50,7 @@ class ProcessWrapper():
                     ],
                     loop=loop,
                     return_when=asyncio.ALL_COMPLETED)
-                await asyncio.sleep(0.5) # Dirty hack - TODO wait for websocket to flush before closing it
+                await asyncio.sleep(0.5) # TODO wait for websocket to flush before closing it
                 logger.debug('Returned from await job')
         except Exception as e:
             logger.debug('Error occured, terminating:', e)
@@ -143,6 +147,22 @@ if __name__ == '__main__':
         help='The command to execute.'
     )
 
+    parser.add_argument(
+        '--cwd',
+        dest='cwd',
+        action='store',
+        required=False,
+        help='Working directory in which to execute the command.'
+    )
+
+    parser.add_argument(
+        '--env',
+        dest='env',
+        action='store',
+        required=False,
+        help='Modify the environment in which the command is executed.'
+    )
+
     arguments = parser.parse_args()
 
     process_wrapper = ProcessWrapper(
@@ -150,6 +170,8 @@ if __name__ == '__main__':
         service_host=arguments.service_host,
         job_id=arguments.job_id,
         command=arguments.command,
+        cwd=arguments.cwd,
+        env=json.loads(arguments.env),
     )
     loop = asyncio.get_event_loop()
 

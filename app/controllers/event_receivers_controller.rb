@@ -26,6 +26,7 @@ class EventReceiversController < ApplicationController
   # POST /event_receivers
   # POST /event_receivers.json
   def create
+    Rails.logger.info event_receiver_params.inspect
     @event_receiver = current_user.event_receivers.create(event_receiver_params)
 
     respond_to do |format|
@@ -72,6 +73,15 @@ class EventReceiversController < ApplicationController
   def event_receiver_params
     params
       .require(:event_receiver)
-      .permit(:type, :start_time, :interval, :job_type_id, :regex, :stream, :return_code)
+      .permit(
+        :type,
+        :start_time,
+        :interval,
+        :job_type_id,
+        :regex,
+        :stream,
+        :return_code,
+        event_actions_attributes: EventAction::PROPERTIES
+      )
   end
 end

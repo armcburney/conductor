@@ -9,6 +9,8 @@ class EventAction < ApplicationRecord
   validate  :owned_job_type?
   validates :type, presence: true
 
+  PROPERTIES = %i(job_type_id email_address webhook_url webhook_body type)
+
   def run!
   end
 

@@ -5,6 +5,7 @@ class EventReceiver < ApplicationRecord
   belongs_to :user
   has_many :event_actions
   validate :owned_job_type?
+  accepts_nested_attributes_for :event_actions
 
   # Default dispatch! implementation, overridable by subclasses
   def dispatch!

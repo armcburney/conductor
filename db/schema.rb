@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171031155638) do
+ActiveRecord::Schema.define(version: 20171104222506) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -116,11 +116,11 @@ ActiveRecord::Schema.define(version: 20171031155638) do
     t.datetime "updated_at",                       null: false
     t.integer  "cpu_count"
     t.float    "load"
-    t.integer  "total_memory"
-    t.integer  "available_memory"
-    t.integer  "total_disk"
-    t.integer  "used_disk"
-    t.integer  "free_disk"
+    t.float    "total_memory"
+    t.float    "available_memory"
+    t.float    "total_disk"
+    t.float    "used_disk"
+    t.float    "free_disk"
     t.string   "slug"
     t.boolean  "deleted",          default: false, null: false
     t.index ["slug"], name: "index_workers_on_slug", unique: true, using: :btree

@@ -8,6 +8,23 @@ if (!window.Promise) {
   window.Promise = Promise;
 }
 
+// from https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string
+function humanFileSize(bytes, si) {
+  const thresh = si ? 1000 : 1024;
+  if (Math.abs(bytes) < thresh) {
+    return bytes + ' B';
+  }
+  const units = si
+    ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
+    : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+  let unitIndex = -1;
+  do {
+    bytes /= thresh;
+    ++unitIndex;
+  } while(Math.abs(bytes) >= thresh && unitIndex < units.length - 1);
+  return bytes.toFixed(1)+' '+units[unitIndex];
+}
+
 class Worker extends React.Component {
   constructor(props) {
     super(props);
@@ -32,11 +49,20 @@ class Worker extends React.Component {
     this.props.deleteWorker(this.props.id);
   }
 
+  formatInfo(prop, value) {
+    if (!['total_disk', 'used_disk', 'free_disk', 'available_memory', 'total_memory'].includes(prop)) {
+      return value;
+    }
+
+    // Format as memory size
+    return humanFileSize(value, true);
+  }
+
   renderInfoProp(prop) {
     return (
       <div className='datum' key={prop}>
         <span className='title'>{this.INFO_PROPS[prop]}</span>
-        <span className='value'>{this.props[prop] || 0}</span>
+        <span className='value'>{this.formatInfo(prop, this.props[prop] || 0)}</span>
       </div>
     )
   }

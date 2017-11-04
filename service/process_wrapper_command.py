@@ -4,7 +4,6 @@ import asyncio
 import logging
 import json
 
-logging.basicConfig()
 logger = logging.getLogger("Process Wrapper Command")
 logger.setLevel(logging.DEBUG)
 

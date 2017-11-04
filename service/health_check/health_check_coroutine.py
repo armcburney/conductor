@@ -4,7 +4,6 @@ import asyncio
 from health_check.server_health import ServerHealth
 from websocket_requests import HealthCommand
 
-logging.basicConfig()
 logger = logging.getLogger("HealthCheckCoroutine")
 logger.setLevel(logging.DEBUG)
 

@@ -22,7 +22,7 @@ function humanFileSize(bytes, si) {
     bytes /= thresh;
     ++unitIndex;
   } while(Math.abs(bytes) >= thresh && unitIndex < units.length - 1);
-  return bytes.toFixed(1)+' '+units[unitIndex];
+  return bytes.toFixed(1) + ' ' + units[unitIndex];
 }
 
 class Worker extends React.Component {

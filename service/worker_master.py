@@ -17,13 +17,13 @@ from process_wrapper_command import ProcessWrapperCommand
 from command_handlers.command_handler_factory import CommandHandlerFactory
 
 
-logging.basicConfig(filename='slave_master.log', level=logging.DEBUG)
+logging.basicConfig(filename='worker_manager.log', level=logging.DEBUG)
 logging.addLevelName( logging.WARNING, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.WARNING))
 logging.addLevelName( logging.INFO, "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.INFO))
 logging.addLevelName( logging.DEBUG, "\033[1;34m%s\033[1;0m" % logging.getLevelName(logging.DEBUG))
 logging.addLevelName( logging.ERROR, "\033[1;41m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
 
-logger = logging.getLogger("Slave Manager")
+logger = logging.getLogger("Worker Manager")
 logger.setLevel(logging.DEBUG)
 
 debug = logger.debug
@@ -33,7 +33,7 @@ info = logger.info
 
 MAX_RECONNECT_TRIES=10
 
-class SlaveManager():
+class WorkerManager():
     """
     Spawn wrapper processes when a new command is received.
     """
@@ -257,7 +257,7 @@ if __name__ == "__main__":
     arguments = parser.parse_args()
 
     # create an instance of the manager
-    slave_manager = SlaveManager(
+    worker_manager = WorkerManager(
         api_key=arguments.token,
         service_host=arguments.service_host,
     )
@@ -265,4 +265,4 @@ if __name__ == "__main__":
     # continually run event loop to process coroutines
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
-    loop.run_until_complete(slave_manager.run())
+    loop.run_until_complete(worker_manager.run())

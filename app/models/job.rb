@@ -9,6 +9,7 @@ class Job < ApplicationRecord
   belongs_to :worker
   belongs_to :job_type
   has_one :user, through: :worker
+  has_one :event_dispatch_record
 
   # Validations
   validates :status, inclusion: { in: %w(DISPATCHED UNDEFINED ERROR NORMAL\ EXECUTION) }

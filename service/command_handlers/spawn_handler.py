@@ -4,7 +4,7 @@ from process_wrapper_command import ProcessWrapperCommand
 class SpawnCommandHandler(CommandHandler):
     async def handle(self, **kwargs):
         """
-            command: the SpawnCommand to attempt to spawn
+            self.command: the SpawnCommand to attempt to spawn
 
             Return:
                 The process wrapper command instance so we can control this job.

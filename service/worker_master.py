@@ -24,10 +24,11 @@ import websockets
 
 from argparse import ArgumentParser
 from websocket_requests import RegisterNode, ConnectCommand
-from websocket_responses import ResponseFactory, SpawnResponse, ClientConnectedResponse, RegisterNodeResponse, WorkerConnectedResponse
+from websocket_responses import ResponseFactory, SpawnResponse, ClientConnectedResponse, RegisterNodeResponse, WorkerConnectedResponse, ClientKillResponse
 from health_check.health_check_coroutine import HealthCheckCoroutine
 from process_wrapper_command import ProcessWrapperCommand
 from command_handlers.command_handler_factory import CommandHandlerFactory
+from global_commands import *
 
 
 
@@ -187,6 +188,8 @@ class WorkerManager():
                         while websocket.open:
                             self.clean_pending_children()
                             await asyncio.ensure_future(self.process_command(websocket))
+                    except Kill:
+                        raise
                     except:
                         # print debugging info
                         traceback.print_exc()
@@ -201,7 +204,7 @@ class WorkerManager():
                 else:
                     reconnect = False
 
-            except SystemExit:
+            except Kill:
 
                 def alarm_handler():
                     logger.warning("Timeout, killing remaining tasks")
@@ -225,7 +228,8 @@ class WorkerManager():
                 except TimeoutError:
                     pass
 
-                raise
+                sys.exit(0)
+
             except:
                 logger.debug("Error occured, sleeping before trying to reconnect")
                 time.sleep(1)

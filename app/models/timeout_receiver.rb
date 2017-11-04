@@ -2,6 +2,6 @@
 
 class TimeoutReceiver < EventReceiver
   def trigger_condition_met?(job)
-    # check if job.job_type.timeout exceeded
+    job.created_at.between?(job.created_at + job.timeout.seconds, job.created_at)
   end
 end

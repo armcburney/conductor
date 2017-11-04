@@ -13,7 +13,6 @@ class CommandHandlerFactory():
         if type(response) is SpawnResponse:
             # spawn a job
             logger.info("Got a spawn command")
-
             handler = SpawnCommandHandler
 
         elif type(response) is ClientConnectedResponse:

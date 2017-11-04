@@ -16,7 +16,9 @@ class SpawnCommandHandler(CommandHandler):
         wrapper = ProcessWrapperCommand(
             command.id,
             command.script,
-            kwargs["service_host"]
+            service_host=kwargs["service_host"],
+            cwd=command.working_directory,
+            env=command.environment_variables,
         )
 
         process = await wrapper.launch_process_wrapper()

@@ -43,7 +43,7 @@ class ProcessWrapperCommand():
         self.process = process
         return process
 
-    async def kill_process(self):
+    def kill_process(self):
         """
         Kills a process.
         """
@@ -51,10 +51,6 @@ class ProcessWrapperCommand():
             raise NoRunningProcessException()
 
         self.process.send_signal(subprocess.signal.SIGKILL)
-
-        # this should be instant
-        await self.process.wait()
-
 
     async def stop_process(self):
         """

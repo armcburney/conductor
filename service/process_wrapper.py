@@ -13,9 +13,17 @@ from argparse import ArgumentParser
 import websockets
 from websocket_requests.job_commands import JobStdout, JobStderr, JobReturnCode
 
-logging.basicConfig()
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('ProcessWrapper')
 logger.setLevel(logging.DEBUG)
+
+
+# TO TEST KILL FUNCTIONALITY
+# This block of code will prevent this process from dying.
+# def term_handler(signum, frame):
+    # sys.stdout.write("I dont wanna DIE. You cant kill me.\n")
+# signal.signal(signal.SIGTERM, term_handler)
+
 
 class ProcessWrapper():
 
@@ -33,7 +41,7 @@ class ProcessWrapper():
             async with websockets.connect(arguments.service_host) as websocket:
                 logger.debug('Successfully connected to server.')
 
-                logger.debug('Starting job: {}'.format(self.command))
+                logger.info('Starting job: {}'.format(self.command))
                 process = await asyncio.create_subprocess_shell(
                         self.command,
                         #stdin=asyncio.subprocess.PIPE,
@@ -171,7 +179,7 @@ if __name__ == '__main__':
         job_id=arguments.job_id,
         command=arguments.command,
         cwd=arguments.cwd,
-        env=json.loads(arguments.env),
+        env=json.loads(arguments.env) if arguments.env else None,
     )
     loop = asyncio.get_event_loop()
 

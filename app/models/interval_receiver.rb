@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class IntervalReceiver < EventReceiver
-  def dispatch!
-  end
+  validates :start_time, :interval, presence: true
 
-  def trigger_condition_met?(job)
+  # Only called from sidekiq job, at certain intervals
+  def trigger_condition_met?(_job)
+    true
   end
 end

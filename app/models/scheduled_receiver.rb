@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class ScheduledReceiver < EventReceiver
-  def dispatch!
-  end
+  validates :start_time, presence: true
 
-  def trigger_condition_met?(job)
+  # Only called from sidekiq job, trigger condition will always be met
+  def trigger_condition_met?(_job)
+    true
   end
 end

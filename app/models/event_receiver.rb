@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 class EventReceiver < ApplicationRecord
+  # Associations
   belongs_to :job_type, optional: true
   belongs_to :user
   has_many :event_actions
+
+  # Validations
   validate :owned_job_type?
   accepts_nested_attributes_for :event_actions
 

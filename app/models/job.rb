@@ -13,6 +13,9 @@ class Job < ApplicationRecord
   # Validations
   validates :status, inclusion: { in: %w(DISPATCHED UNDEFINED ERROR NORMAL\ EXECUTION) }
 
+  # Scopes
+  default_scope { order("(return_code IS NULL) ASC, created_at DESC") }
+
   def channel
     WebsocketRails["job.#{id}"]
   end

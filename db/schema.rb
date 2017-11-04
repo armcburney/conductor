@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171027164742) do
+ActiveRecord::Schema.define(version: 20171031155638) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -110,10 +110,10 @@ ActiveRecord::Schema.define(version: 20171027164742) do
   end
 
   create_table "workers", force: :cascade do |t|
-    t.integer  "user_id",          null: false
+    t.integer  "user_id",                          null: false
     t.datetime "last_heartbeat"
-    t.datetime "created_at",       null: false
-    t.datetime "updated_at",       null: false
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
     t.integer  "cpu_count"
     t.float    "load"
     t.integer  "total_memory"
@@ -122,6 +122,7 @@ ActiveRecord::Schema.define(version: 20171027164742) do
     t.integer  "used_disk"
     t.integer  "free_disk"
     t.string   "slug"
+    t.boolean  "deleted",          default: false, null: false
     t.index ["slug"], name: "index_workers_on_slug", unique: true, using: :btree
     t.index ["user_id"], name: "index_workers_on_user_id", using: :btree
   end

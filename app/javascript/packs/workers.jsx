@@ -25,6 +25,11 @@ class Worker extends React.Component {
 
     this.renderInfoProp = this.renderInfoProp.bind(this);
     this.renderJob = this.renderJob.bind(this);
+    this.deleteWorker = this.deleteWorker.bind(this);
+  }
+
+  deleteWorker() {
+    this.props.deleteWorker(this.props.id);
   }
 
   renderInfoProp(prop) {
@@ -54,7 +59,12 @@ class Worker extends React.Component {
 
   render() {
     return (
-      <div className='worker'>
+      <div className={`worker ${this.props.deleted ? 'deleted' : ''}`}>
+        {this.props.deleted ? null :
+          <button className='delete button button--secondary' onClick={this.deleteWorker}>
+            Delete
+          </button>
+        }
         <h3>{this.props.id}</h3>
         <div className='section info'>
           {Object.keys(this.INFO_PROPS).map(this.renderInfoProp)}
@@ -77,6 +87,7 @@ class Workers extends React.Component {
 
     this.selectJob = this.selectJob.bind(this);
     this.healthcheck = this.healthcheck.bind(this);
+    this.deleteWorker = this.deleteWorker.bind(this);
   }
 
   healthcheck(data) {
@@ -159,6 +170,28 @@ class Workers extends React.Component {
       .catch(e => console.error(e));
   }
 
+  deleteWorker(id) {
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    fetch(`/workers/${id}.json`, {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Cache': 'no-cache',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-Token': token
+      },
+      credentials: 'same-origin'
+    })
+      .then(
+        () => this.setState(state => {
+          state.workers.find(w => w.id == id).deleted = true;
+          return state;
+        })
+      )
+      .catch(e => console.error(e));
+  }
+
   render() {
     if (!this.state.workers) return <p>Loading...</p>;
 
@@ -172,7 +205,9 @@ class Workers extends React.Component {
                 {...w}
                 jobTypes={this.state.jobTypes}
                 selected={this.state.selected}
-                selectJob={this.selectJob} />
+                selectJob={this.selectJob}
+                deleteWorker={this.deleteWorker}
+              />
             )}
           </div>
         </div>

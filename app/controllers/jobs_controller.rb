@@ -74,9 +74,13 @@ class JobsController < ApplicationController
   def find_free_worker
     current_user
       .workers
-      .joins("left outer join jobs on jobs.worker_id = workers.id")
+      .active
+      .joins(
+          "LEFT JOIN jobs ON jobs.worker_id = workers.id " +
+          "AND jobs.return_code IS NULL"
+      )
       .group("workers.id")
-      .order("count(distinct jobs.id) asc")
+      .order("COUNT(DISTINCT jobs.id) ASC")
       .first
   end
 

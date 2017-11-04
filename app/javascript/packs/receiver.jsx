@@ -1,14 +1,15 @@
 import React from 'react';
 import Datetime from 'react-datetime';
 import moment from 'moment';
-import { camelCase, upperFirst, snakeCase } from 'lodash';
+import { camelCase, upperFirst, snakeCase, isFunction } from 'lodash';
+import EventActions from './event_actions';
 
 // To add to window
 if (!window.Promise) {
   window.Promise = Promise;
 }
 
-export default class Receiver extends React.PureComponent {
+export default class Receiver extends React.Component {
   constructor(props) {
     super(props);
 
@@ -23,7 +24,11 @@ export default class Receiver extends React.PureComponent {
       'updateStartTime',
       'cancelUpdate',
       'save',
-      'delete'
+      'delete',
+      'saveAction',
+      'addAction',
+      'removeAction',
+      'updateAction'
     ].forEach(fn => this[fn] = this[fn].bind(this));
 
     [
@@ -40,7 +45,7 @@ export default class Receiver extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.componentWillReceiveProps(this.props);
+    this.reset(this.props);
   }
 
   nullState() {
@@ -53,7 +58,8 @@ export default class Receiver extends React.PureComponent {
       job_type_id: null,
       regex: null,
       stream: 'stdout',
-      return_code: 0
+      return_code: 0,
+      event_actions: []
     };
   }
 
@@ -71,9 +77,14 @@ export default class Receiver extends React.PureComponent {
   }
 
   componentWillReceiveProps(props) {
-    this.setState(state => {
+    if (props.updated_at != this.props.updated_at) {
+      this.reset(props);
+    }
+  }
 
-      state = this.nullState();
+  reset(props) {
+    this.setState(state => {
+      state = Object.assign(state, this.nullState());
       state.dirty = props.id === null;
       state.type = props.type || state.type;
       
@@ -83,6 +94,7 @@ export default class Receiver extends React.PureComponent {
       state.regex = props.regex;
       state.stream = props.stream;
       state.return_code = props.return_code;
+      state.event_actions = props.event_actions;
 
       return state;
     });
@@ -92,7 +104,7 @@ export default class Receiver extends React.PureComponent {
     if (this.props.id === null) {
       this.delete()
     } else {
-      this.componentWillReceiveProps(this.props);
+      this.reset(this.props);
     }
   }
 
@@ -106,25 +118,77 @@ export default class Receiver extends React.PureComponent {
     });
   }
 
+  saveWithActions() {
+    this.setState({loading: true}, () => this.props.save(
+      this.props.index,
+      Object.assign(this.stateToRequest(), {event_actions_attributes: this.props.event_actions})
+    ));
+  }
+
   updateType(event) {
-    this.setState(
-      Object.assign(this.nullState(), {type: event.target.value, dirty: true})
-    );
+    const type = event.target.value;
+    this.setState(state => {
+      state = Object.assign(state, this.nullState(), {type, dirty: true});
+
+      if (['RegexReceiver', 'TimeoutReceiver', 'ReturnCodeReceiver'].includes(type)) {
+        state.job_type_id = this.props.job_types[0].id;
+      }
+      return state;
+    });
   }
 
   updateStartTime(start_time) {
     this.setState({start_time, dirty: true});
   }
 
+  saveAction(actionIndex, data) {
+    data = Object.assign(data, {event_receiver_id: this.props.id});
+    console.log(data);
+
+    // If this receiver hasn't been saved yet, so save both at once
+    if (this.props.id === null) {
+      this.saveWithActions();
+
+    // Otherwise, save the action immediately
+    } else {
+      this.props.saveAction(
+        this.props.index,
+        actionIndex,
+        data
+      );
+    }
+  }
+
+  updateAction(index, update, callback) {
+    if (isFunction(update)) {
+      this.setState(state => {
+        state.event_actions[index] = update(state.event_actions[index]);
+        return state;
+      }, callback);
+    } else {
+      this.setState(state => {
+        state.event_actions[index] = Object.assign(state.event_actions[index], update);
+      }, callback);
+    }
+  }
+
+  removeAction(actionIndex) {
+    this.props.removeAction(this.props.index, actionIndex);
+  }
+
+  addAction() {
+    this.props.addAction(this.props.index);
+  }
+
   className() {
-    return `receiver ${this.state.dirty ? 'dirty' : ''} ${this.state.loading ? 'loading' : ''}`;
+    return `entity ${this.state.dirty ? 'dirty' : ''} ${this.state.loading ? 'loading' : ''}`;
   }
 
   renderJobTypePicker() {
     return (
       <select value={`${this.state.job_type_id}`} onChange={this.updateJobTypeId}>
       {this.props.job_types.map(
-        (job_type) => <option value={`${job_type.id}`}>{job_type.name}</option>
+        (job_type, i) => <option key={i} value={`${job_type.id}`}>{job_type.name}</option>
       )}
       </select>
     );
@@ -219,8 +283,18 @@ export default class Receiver extends React.PureComponent {
         </div>
         <div className='actions'>
           <h3>Actions:</h3>
-          <div className='action-list'>
-          </div>
+          <EventActions
+            actions={this.state.event_actions}
+            save={this.saveAction}
+            remove={this.removeAction}
+            update={this.updateAction}
+            job_types={this.props.job_types}
+          />
+          <button
+            className='button button--secondary'
+            onClick={this.addAction}>
+            Add action
+          </button>
         </div>
       </div>
     );

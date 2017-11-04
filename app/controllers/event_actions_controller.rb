@@ -72,6 +72,6 @@ class EventActionsController < ApplicationController
   def event_action_params
     params
       .require(:event_action)
-      .permit(:event_receiver_id, :job_type_id, :email_address, :webhook_url, :webhook_body, :type)
+      .permit(:event_receiver_id, *EventAction::PROPERTIES)
   end
 end

@@ -76,11 +76,11 @@ class JobsController < ApplicationController
       .workers
       .active
       .joins(
-          "left outer join jobs on jobs.worker_id = workers.id " +
-          "and jobs.return_code is null"
+          "LEFT JOIN jobs ON jobs.worker_id = workers.id " +
+          "AND jobs.return_code IS NULL"
       )
       .group("workers.id")
-      .order("count(distinct jobs.id) asc")
+      .order("COUNT(DISTINCT jobs.id) ASC")
       .first
   end
 

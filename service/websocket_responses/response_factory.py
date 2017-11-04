@@ -1,5 +1,8 @@
 import json
-from websocket_responses import *
+import logging
+from websocket_responses.response_to_object_mappings import object_mappings
+
+logger = logging.getLogger("Response Factory")
 
 class ResponseFactory():
 
@@ -9,19 +12,10 @@ class ResponseFactory():
 
         command = json_response[0]
 
-        response_type = None
+        response_type = object_mappings.get(command, None)
 
-        if command == "client_connected":
-            response_type = ClientConnectedResponse
-        elif command == "worker.registered":
-            response_type = RegisterNodeResponse
-        elif command == "worker.spawn":
-            response_type = SpawnResponse
-        elif command == "worker.connect":
-            response_type = WorkerConnectedResponse
-        elif command == "worker.delete":
-            response_type = ClientKillResponse
-        else:
+        if response_type is None:
+            logger.warning('Ignoring response with command "{}"'.format(command))
             return None
 
         return response_type.process_response(json_response)

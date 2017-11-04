@@ -5,3 +5,4 @@ from websocket_responses.spawn import SpawnResponse
 from websocket_responses.worker_connected import WorkerConnectedResponse
 from websocket_responses.client_kill import ClientKillResponse
 from websocket_responses.response_factory import ResponseFactory
+from websocket_responses.response_to_object_mappings import object_mappings

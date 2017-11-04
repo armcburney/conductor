@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class EventDispatchRecord < ApplicationRecord
+class EventDispatcher < ApplicationRecord
   belongs_to :event_receiver
   validates :triggered, presence: true
 

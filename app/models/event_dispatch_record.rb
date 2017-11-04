@@ -5,11 +5,9 @@ class EventDispatchRecord < ApplicationRecord
   validates :triggered, presence: true
 
   def dispatch!(job)
-    # Don't perform an action if it has already been performed on the rising edge trigger
-    return if triggered
-
-    # Only perform the dispatch if the event_receiver's trigger condition has been met
-    return unless event_receiver.trigger_condition_met?
+    # 1) Don't perform an action if it has already been performed on the rising edge trigger
+    # 2) Only perform the dispatch if the event_receiver's trigger condition has been met
+    return if triggered || !event_receiver.trigger_condition_met?
 
     # Run each of the event actions corresponding to the job
     job.event_actions.each(&:run!)

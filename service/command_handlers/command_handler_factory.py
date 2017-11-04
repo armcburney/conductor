@@ -1,5 +1,6 @@
 from command_handlers.spawn_handler import SpawnCommandHandler
-from websocket_responses import SpawnResponse, ClientConnectedResponse, RegisterNodeResponse
+from command_handlers.kill_handler import KillCommandHandler
+from websocket_responses import SpawnResponse, ClientConnectedResponse, RegisterNodeResponse, ClientKillResponse
 import logging
 
 logging.basicConfig()
@@ -13,16 +14,19 @@ class CommandHandlerFactory():
         if type(response) is SpawnResponse:
             # spawn a job
             logger.info("Got a spawn command")
-
             handler = SpawnCommandHandler
 
         elif type(response) is ClientConnectedResponse:
             logger.debug("Got a Connect command")
-            #TODO: add handler
+            #TODO: add handler (for better decoupling in the future)
 
         elif type(response) is RegisterNodeResponse:
             logger.debug("Got a Register command")
-            #TODO: add handler
+            #TODO: add handler (for better decoupling in the future)
+
+        elif type(response) is ClientKillResponse:
+            logger.debug("Got a Kill Command")
+            handler = KillCommandHandler
 
         else:
             logger.debug("Could not recognize command.")

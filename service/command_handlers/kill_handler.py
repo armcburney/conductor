@@ -1,5 +1,6 @@
 from command_handlers.command_handler import CommandHandler
 import signal
+import sys
 
 class KillCommandHandler(CommandHandler):
     async def handle(self, **kwargs):

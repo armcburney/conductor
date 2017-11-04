@@ -18,6 +18,8 @@ class ResponseFactory():
             response_type = SpawnResponse
         elif command == "worker.connect":
             response_type = WorkerConnectedResponse
+        elif command == "worker.delete":
+            response_type = ClientKillResponse
         else:
             return None
 
@@ -75,6 +77,18 @@ class ClientConnectedResponse(Response):
     @classmethod
     def process_response(cls, response_body):
         return ClientConnectedResponse(**response_body[2])
+
+class ClientKillResponse(Response):
+    """
+    kill client
+    """
+    def __init__(self):
+        pass
+
+    @classmethod
+    def process_response(cls, response_body):
+        return ClientKillResponse()
+
 
 class SpawnResponse(Response):
     """

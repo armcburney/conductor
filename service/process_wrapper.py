@@ -11,7 +11,7 @@ import sys
 from argparse import ArgumentParser
 
 import websockets
-from websocket_requests import JobStdout, JobStderr, JobReturnCode
+from websocket_requests.job_commands import JobStdout, JobStderr, JobReturnCode
 
 logging.basicConfig()
 logger = logging.getLogger('ProcessWrapper')

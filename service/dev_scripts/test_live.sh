@@ -1,4 +1,4 @@
 #!/bin/bash
 
-python worker_master.py --service_host="ws://conductor-se464.herokuapp.com/websocket" --token="beff63b8337f699f2544baff232901b52f1a8c80811a5bc12e7948a1b806090c"
+python worker_master.py --service_host="ws://conductor-se464.herokuapp.com/websocket" --token="129697adfb3327facb2271df8d13f96aa58b16973727f1c89422467fe30e336d"
 

@@ -1,9 +1,22 @@
 #!/usr/bin/python
 
+import sys
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logging.addLevelName( logging.WARNING, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.WARNING))
+logging.addLevelName( logging.INFO, "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.INFO))
+logging.addLevelName( logging.DEBUG, "\033[1;34m%s\033[1;0m" % logging.getLevelName(logging.DEBUG))
+logging.addLevelName( logging.ERROR, "\033[1;41m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
+
+logger = logging.getLogger("Worker Manager")
+
+# fh = logging.FileHandler('worker_manager.log')
+# fh.setLevel(logging.DEBUG)
+# logger.addHandler(fh)
+
 import os
 import time
 import asyncio
-import logging
 import signal
 
 import traceback
@@ -17,19 +30,6 @@ from process_wrapper_command import ProcessWrapperCommand
 from command_handlers.command_handler_factory import CommandHandlerFactory
 
 
-logging.basicConfig(filename='worker_manager.log', level=logging.DEBUG)
-logging.addLevelName( logging.WARNING, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.WARNING))
-logging.addLevelName( logging.INFO, "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.INFO))
-logging.addLevelName( logging.DEBUG, "\033[1;34m%s\033[1;0m" % logging.getLevelName(logging.DEBUG))
-logging.addLevelName( logging.ERROR, "\033[1;41m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
-
-logger = logging.getLogger("Worker Manager")
-logger.setLevel(logging.DEBUG)
-
-debug = logger.debug
-warning = logger.warning
-error = logger.error
-info = logger.info
 
 MAX_RECONNECT_TRIES=10
 
@@ -67,24 +67,24 @@ class WorkerManager():
         # keep on processing commands while available
         command = await websocket.recv()
 
-        debug("Parsing raw command: {}".format(command))
+        logger.debug("Parsing raw command: {}".format(command))
         response = ResponseFactory.parse_response(command)
 
         # if the command is invalid, just ignore it
         if response is None:
-            warning("Could not recognize command. Ignoring")
+            logger.warning("Could not recognize command. Ignoring")
             return
 
         handler = CommandHandlerFactory.get_handler(response)
 
         if handler is None:
-            warning("Couldn't find handler for command.")
+            logger.warning("Couldn't find handler for command.")
             return
 
         task = await handler.handle(**self.get_state_dict())
         self.pending_children.append(task)
 
-        debug("Successfully processed command")
+        logger.debug("Successfully processed command")
 
     def clean_pending_children(self):
         # cleanup children who are still pending
@@ -96,7 +96,7 @@ class WorkerManager():
         new_pending_tasks = len(self.pending_children)
 
         if original_pending_tasks > new_pending_tasks:
-            debug(
+            logger.debug(
                 "Cleaned up finished tasks from pending list."
                 " Before {} After {}".format(
                     original_pending_tasks,
@@ -112,11 +112,11 @@ class WorkerManager():
             command = RegisterNode(api_key=self.api_key)
 
         # Send registration command
-        debug("Sending registration request")
+        logger.debug("Sending registration request")
         await websocket.send(str(command))
 
         # wait for response
-        debug("Waiting for connection response")
+        logger.debug("Waiting for connection response")
         response = await websocket.recv()
         parsed_response = ResponseFactory.parse_response(response)
 
@@ -125,7 +125,7 @@ class WorkerManager():
            not parsed_response.success:
             return False
 
-        debug("Waiting for registration response")
+        logger.debug("Waiting for registration response")
         registration_response = await websocket.recv()
         parsed_register_response = ResponseFactory.parse_response(registration_response)
 
@@ -133,7 +133,7 @@ class WorkerManager():
            not type(parsed_register_response) == RegisterNodeResponse:
             return False
 
-        info("Registered with master server: Worker ID={}".format(parsed_register_response.node_id))
+        logger.info("Registered with master server: Worker ID={}".format(parsed_register_response.node_id))
 
         self.node_id = parsed_register_response.node_id
 
@@ -158,7 +158,7 @@ class WorkerManager():
 
                     # this is the expected first response
                     if not (type(parsed_response) is ClientConnectedResponse):
-                        error("Got unexpected initial response: {}".format(type(parsed_response)))
+                        logger.error("Got unexpected initial response: {}".format(type(parsed_response)))
 
                         # can't expect this sequence to be valid, try reconnecting
                         raise Exception()
@@ -166,7 +166,7 @@ class WorkerManager():
                     # Try to register node
                     try:
                         # register this node with the main server
-                        debug("Trying to register with host")
+                        logger.debug("Trying to register with host")
 
                         if not await self.initiate_connection(websocket, reconnect=reconnect):
                             # this connection attempt failed
@@ -175,7 +175,7 @@ class WorkerManager():
                         # At this point in time we are guaranteed to be registered
 
                         # Schedule the health check
-                        debug("Starting health check")
+                        logger.debug("Starting health check")
                         self.health_check_coroutine = asyncio.ensure_future(
                             HealthCheckCoroutine(
                                 api_key=self.api_key,
@@ -192,7 +192,7 @@ class WorkerManager():
                         traceback.print_exc()
                         raise
 
-                debug("Websocket dead")
+                logger.debug("Websocket dead")
 
                 # If we have retried the max amount of times, then stop trying to reconnect with the same id
                 if num_reconnect_tries < MAX_RECONNECT_TRIES:
@@ -204,13 +204,13 @@ class WorkerManager():
             except SystemExit:
 
                 def alarm_handler():
-                    warning("Timeout, killing remaining tasks")
+                    logger.warning("Timeout, killing remaining tasks")
                     for task in self.pending_children:
                         if not task.done():
                             task.kill()
                     raise TimeoutError()
 
-                info("Stopping tasks")
+                logger.info("Stopping tasks")
                 # this is a special exception telling us to kill ourself
                 try:
                     for task in self.pending_children:
@@ -227,7 +227,7 @@ class WorkerManager():
 
                 raise
             except:
-                debug("Error occured, sleeping before trying to reconnect")
+                logger.debug("Error occured, sleeping before trying to reconnect")
                 time.sleep(1)
 
 

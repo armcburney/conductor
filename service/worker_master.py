@@ -19,6 +19,9 @@ logging.addLevelName( logging.CRITICAL, "\033[1;92m%s\033[1;0m" % logging.getLev
 logger = logging.getLogger("Worker Manager")
 logger.setLevel(logging.DEBUG)
 
+logging.getLogger('asyncio').propagate = False
+logging.getLogger('websockets.protocol').propagate = False
+
 from websocket_requests import RegisterNode, ConnectCommand
 from websocket_responses import ResponseFactory, SpawnResponse, ClientConnectedResponse, RegisterNodeResponse, WorkerConnectedResponse, ClientKillResponse
 from health_check.health_check_coroutine import HealthCheckCoroutine
@@ -223,13 +226,6 @@ class WorkerManager():
         # keep a connection to a websocket while we're alive
         while True:
 
-            # If we have retried the max amount of times,
-            # then stop trying to reconnect with the same id
-            if self.num_reconnect_tries < MAX_RECONNECT_TRIES:
-                reconnect = True
-            else:
-                reconnect = False
-
             try:
 
                 # connects to websocket on host
@@ -253,6 +249,14 @@ class WorkerManager():
                 traceback.print_exc()
 
                 raise
+
+            finally:
+                # If we have retried the max amount of times,
+                # then stop trying to reconnect with the same id
+                if self.num_reconnect_tries < MAX_RECONNECT_TRIES:
+                    reconnect = True
+                else:
+                    reconnect = False
 
 if __name__ == "__main__":
 

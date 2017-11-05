@@ -72,16 +72,7 @@ class JobsController < ApplicationController
   end
 
   def find_free_worker
-    current_user
-      .workers
-      .active
-      .joins(
-          "LEFT JOIN jobs ON jobs.worker_id = workers.id " +
-          "AND jobs.return_code IS NULL"
-      )
-      .group("workers.id")
-      .order("COUNT(DISTINCT jobs.id) ASC")
-      .first
+    current_user.workers.assignment_order.first
   end
 
   def job_params

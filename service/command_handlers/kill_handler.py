@@ -5,5 +5,6 @@ import sys
 
 class KillCommandHandler(CommandHandler):
     async def handle(self, **kwargs):
-        # dummy class just so we can follow a consistent standard
+
+        # send this message to upstream caller
         raise Kill()

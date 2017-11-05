@@ -1,37 +1,20 @@
 from command_handlers.spawn_handler import SpawnCommandHandler
 from command_handlers.kill_handler import KillCommandHandler
-from websocket_responses import SpawnResponse, ClientConnectedResponse, RegisterNodeResponse, ClientKillResponse
+from command_handlers import response_to_command
 import logging
 
-logging.basicConfig()
 logger = logging.getLogger("Command Handler Factory")
 logger.setLevel(logging.DEBUG)
 
 class CommandHandlerFactory():
     @staticmethod
     def get_handler(response):
-        handler  = None
-        if type(response) is SpawnResponse:
-            # spawn a job
-            logger.info("Got a spawn command")
-            handler = SpawnCommandHandler
-
-        elif type(response) is ClientConnectedResponse:
-            logger.debug("Got a Connect command")
-            #TODO: add handler (for better decoupling in the future)
-
-        elif type(response) is RegisterNodeResponse:
-            logger.debug("Got a Register command")
-            #TODO: add handler (for better decoupling in the future)
-
-        elif type(response) is ClientKillResponse:
-            logger.debug("Got a Kill Command")
-            handler = KillCommandHandler
-
-        else:
-            logger.debug("Could not recognize command.")
+        handler  = response_to_command.get(type(response), None)
 
         if handler is None:
+            logger.warning("Could not recognize command %s", type(response))
             return None
+
+        logger.debug("Got a %s command, using %s ", type(response), handler)
 
         return handler(response)

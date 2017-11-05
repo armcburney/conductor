@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class EventReceiver < ApplicationRecord
+  # Callbacks
+  after_create :create_event_dispatcher!
+
   # Associations
   belongs_to :job_type, optional: true
   belongs_to :user
@@ -14,5 +17,15 @@ class EventReceiver < ApplicationRecord
   def owned_job_type?
     return unless job_type && job_type.user != user
     errors.add(:job_type, "must be one of your jobs")
+  end
+
+  private
+
+  def create_event_dispatcher!
+    job_type.jobs.each do |job|
+      event_dispatchers.push(
+        EventDispatcher.first_or_create(event_receiver: self, job: job, triggered: false)
+      )
+    end
   end
 end

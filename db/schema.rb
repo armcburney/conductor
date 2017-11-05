@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171105005356) do
+ActiveRecord::Schema.define(version: 20171105131300) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -40,10 +40,12 @@ ActiveRecord::Schema.define(version: 20171105005356) do
 
   create_table "event_dispatchers", force: :cascade do |t|
     t.boolean  "triggered",         default: false, null: false
-    t.integer  "event_receiver_id"
+    t.integer  "event_receiver_id",                 null: false
     t.datetime "created_at",                        null: false
     t.datetime "updated_at",                        null: false
+    t.integer  "job_id",                            null: false
     t.index ["event_receiver_id"], name: "index_event_dispatchers_on_event_receiver_id", using: :btree
+    t.index ["job_id"], name: "index_event_dispatchers_on_job_id", using: :btree
   end
 
   create_table "event_receivers", force: :cascade do |t|

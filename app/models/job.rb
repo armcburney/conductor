@@ -64,6 +64,8 @@ class Job < ApplicationRecord
 
   def create_event_dispatcher!
     # If the event_receiver does not exist, it will be updated when the event_receiver is created
-    EventDispatcher.new(event_receiver: job_type.event_receiver, job: self, triggered: false)
+    job_type.event_receivers.each do |receiver|
+      EventDispatcher.new(event_receiver: receiver, job: self)
+    end
   end
 end

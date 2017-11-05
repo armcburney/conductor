@@ -2,14 +2,14 @@
 
 class Job < ApplicationRecord
   # Callbacks
-  after_create :make_channel
+  after_create :make_channel, :create_event_dispatcher!
   before_save :default_values, :send_email
 
   # Associations
   belongs_to :worker
   belongs_to :job_type
   has_one :user, through: :worker
-  has_one :event_dispatcher
+  has_one :event_dispatcher, dependent: :destroy
 
   # Validations
   validates :status, inclusion: { in: %w(DISPATCHED UNDEFINED ERROR NORMAL\ EXECUTION) }
@@ -19,10 +19,6 @@ class Job < ApplicationRecord
 
   def channel
     WebsocketRails["job.#{id}"]
-  end
-
-  def make_channel
-    channel.make_private
   end
 
   def request_json
@@ -53,6 +49,10 @@ class Job < ApplicationRecord
 
   private
 
+  def make_channel
+    channel.make_private
+  end
+
   def default_values
     self.status ||= "UNDEFINED"
   end
@@ -60,5 +60,12 @@ class Job < ApplicationRecord
   def send_email
     return unless status == "ERROR"
     ErrorMailer.email(self).deliver
+  end
+
+  def create_event_dispatcher!
+    # If the event_receiver does not exist, it will be updated when the event_receiver is created
+    job_type.event_receivers.each do |receiver|
+      EventDispatcher.new(event_receiver: receiver, job: self)
+    end
   end
 end

@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 class EventDispatcher < ApplicationRecord
+  # Associations
+  belongs_to :job
   belongs_to :event_receiver
+
+  # Validations
   validates :triggered, presence: true
 
   def dispatch!(job)

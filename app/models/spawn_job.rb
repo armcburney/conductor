@@ -8,6 +8,6 @@
 #
 class SpawnJob < EventAction
   def run!(user)
-    Job.new(job_params.merge(worker: user.workers.assignment_order.first, status: "DISPATCHED"))
+    Job.new(job_type_id: job_type.id, worker: user.workers.assignment_order.first, status: "DISPATCHED")
   end
 end

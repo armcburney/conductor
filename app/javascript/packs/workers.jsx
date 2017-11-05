@@ -223,22 +223,20 @@ class Workers extends React.Component {
 
     return (
       <div className='row'>
-        <div className='column'>
-          <div className='worker-scrollable'>
-            {this.state.workers.map((w) =>
-              <Worker
-                key={w.id}
-                {...w}
-                jobTypes={this.state.jobTypes}
-                selected={this.state.selected}
-                selectJob={this.selectJob}
-                deleteWorker={this.deleteWorker}
-              />
-            )}
-          </div>
+        <div className='column second'>
+          {this.state.workers.map((w) =>
+            <Worker
+              key={w.id}
+              {...w}
+              jobTypes={this.state.jobTypes}
+              selected={this.state.selected}
+              selectJob={this.selectJob}
+              deleteWorker={this.deleteWorker}
+            />
+          )}
         </div>
-        <div className='column'>
-          <div className='worker-scrollable'>
+        <div className='column first'>
+          <div className='selected-job'>
             <h2>Job {this.state.selected}</h2>
             {this.state.returnCode !== null && <p>Returned {this.state.returnCode}</p>}
             <h3>stdout</h3>

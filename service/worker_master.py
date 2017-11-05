@@ -25,8 +25,10 @@ from health_check.health_check_coroutine import HealthCheckCoroutine
 from command_handlers.command_handler_factory import CommandHandlerFactory
 from global_commands import *
 
-
 MAX_RECONNECT_TRIES=10
+
+class ConnectionError(Exception):
+        pass
 
 class WorkerManager():
     """
@@ -48,6 +50,7 @@ class WorkerManager():
 
         # jobs which have been spawned and havent finished
         self.pending_children = []
+        self.num_reconnect_tries = 0 # how many times we've tried to reconnect
 
     def get_state_dict(self):
         return {
@@ -71,21 +74,22 @@ class WorkerManager():
         response = ResponseFactory.parse_response(command)
         if response is None:
             logger.warning("Could not recognize command. Ignoring")
-            return
+            return False
 
         # find the appropriate handler for this job
         handler = CommandHandlerFactory.get_handler(response)
         if handler is None:
             logger.warning("Couldn't find handler for command.")
-            return
+            return False
 
         # execute the command based on our current state
-        task = await handler.handle(**self.get_state_dict())
-
         # add this task to the waiting list
-        self.pending_children.append(task)
+        self.pending_children.append(
+            await handler.handle(**self.get_state_dict())
+        )
 
         logger.info("Processed request")
+        return True
 
     def clean_pending_children(self):
         # cleanup children who are still pending
@@ -104,7 +108,7 @@ class WorkerManager():
                 new_pending_tasks,
             )
 
-    async def initiate_connection(self, websocket, reconnect=False):
+    async def registration(self, websocket, reconnect=False):
 
         # Determine if we want to reconnect with the same host id
         # Tightly coupled but I think it makes sense here
@@ -126,7 +130,7 @@ class WorkerManager():
         if not parsed_response or \
            not isinstance(parsed_response, WorkerConnectedResponse) or \
            not parsed_response.success:
-            return False
+            raise ConnectionError()
 
         logger.debug("Waiting for registration response")
         registration_response = await websocket.recv()
@@ -134,17 +138,86 @@ class WorkerManager():
 
         if not parsed_register_response or \
            not isinstance(parsed_register_response, RegisterNodeResponse):
-            return False
+            raise ConnectionError()
 
         logger.info("Registered with master server: Worker ID={}".format(parsed_register_response.node_id))
 
         self.node_id = parsed_register_response.node_id
 
-        return True
+    async def pre_registration(self, websocket):
+        # get the initial connection response
+        response = await websocket.recv()
+        parsed_response = ResponseFactory.parse_response(response)
+
+        # this is the expected first response
+        if not (isinstance(parsed_response, ClientConnectedResponse)):
+            logger.error("Got unexpected initial response: %s", type(parsed_response))
+
+            # can't expect this sequence to be valid, fail
+            raise ConnectionError()
+
+        # we're connected
+
+    async def register_and_process(self, websocket, reconnect):
+
+        await self.pre_registration(websocket)
+
+        # Try to register node
+        try:
+            # register this node with the main server
+            logger.debug("Trying to register with host")
+
+            #will fail hard
+            await self.registration(websocket, reconnect=reconnect)
+
+            # we are connected, reset retry counter
+            self.num_reconnect_tries = 0
+
+            # At this point in time we are guaranteed to be registered
+
+            # Schedule the health check
+            self.health_check_coroutine = asyncio.ensure_future(
+                HealthCheckCoroutine(
+                    api_key=self.api_key,
+                    node_id=self.node_id
+                ).run(websocket)
+            )
+
+            # keep on processing commands from the server while possible
+            while websocket.open:
+                self.clean_pending_children()
+                await asyncio.ensure_future(self.process_command(websocket))
+
+        except Kill:
+            logger.info("Stopping tasks")
+
+            #try to gracefully stop
+            try:
+                # send SIGSTOP to children
+                for task in self.pending_children:
+                    await task.stop_process()
+
+                # check that all things stopped
+                for task in self.pending_children:
+                    await asyncio.wait_for(task.wait(), timeout=10)
+                    logger.debug("Killed task %s", task)
+            except asyncio.TimeoutError:
+                logger.critical("Timeout, killing remaining tasks and raising exception")
+                for task in self.pending_children:
+                    if not task.done():
+                        task.kill_process()
+
+            raise
+
+        finally:
+
+            if self.health_check_coroutine:
+                logger.info("Stopping Health check")
+                self.health_check_coroutine.cancel()
+                self.health_check_coroutine = None
 
     async def run(self):
 
-        num_reconnect_tries = 0 # how many times we've tried to reconnect
         reconnect = False # whether to try reconnecting with the same id
 
         # keep a connection to a websocket while we're alive
@@ -152,7 +225,7 @@ class WorkerManager():
 
             # If we have retried the max amount of times,
             # then stop trying to reconnect with the same id
-            if num_reconnect_tries < MAX_RECONNECT_TRIES:
+            if self.num_reconnect_tries < MAX_RECONNECT_TRIES:
                 reconnect = True
             else:
                 reconnect = False
@@ -161,96 +234,25 @@ class WorkerManager():
 
                 # connects to websocket on host
                 async with websockets.connect(self.service_host) as websocket:
-
-                    # get the initial connection response
-                    response = await websocket.recv()
-                    parsed_response = ResponseFactory.parse_response(response)
-
-                    # this is the expected first response
-                    if not (type(parsed_response) is ClientConnectedResponse):
-                        logger.error("Got unexpected initial response: %s", type(parsed_response))
-
-                        # can't expect this sequence to be valid, try reconnecting
-                        raise Exception()
-
-                    # Try to register node
-                    try:
-                        # register this node with the main server
-                        logger.debug("Trying to register with host")
-
-                        if not await self.initiate_connection(websocket, reconnect=reconnect):
-                            num_reconnect_tries += 1
-                            # this connection attempt failed
-                            continue
-
-                        # we are connected, reset retry counter
-                        num_reconnect_tries = 0
-
-                        # At this point in time we are guaranteed to be registered
-
-                        # Schedule the health check
-                        logger.debug("Starting health check")
-                        self.health_check_coroutine = asyncio.ensure_future(
-                            HealthCheckCoroutine(
-                                api_key=self.api_key,
-                                node_id=self.node_id
-                            ).run(websocket)
-                        )
-
-                        # keep on processing commands from the server while possible
-                        while websocket.open:
-                            self.clean_pending_children()
-                            await asyncio.ensure_future(self.process_command(websocket))
-
-                    except Kill:
-
-                        def alarm_handler(signum, frame):
-                            logger.critical("Timeout, killing remaining tasks and raising exception")
-                            for task in self.pending_children:
-                                if not task.done():
-                                    task.kill_process()
-
-                            raise TimeoutError()
-
-                        logger.info("Stopping tasks")
-
-                        # send SIGSTOP to children
-                        for task in self.pending_children:
-                            await task.stop_process()
-
-                        # setup timeout alarm
-                        signal.signal(signal.SIGALRM, alarm_handler)
-                        signal.alarm(10)
-
-                        # check that all things stopped
-                        for task in self.pending_children:
-                            await task.wait()
-                            logger.debug("Killed task %s", task)
-
-                        # reset alarm so it doesn't fail
-                        signal.alarm(0)
-
-                        raise
-
-                    except:
-                        # print debugging info
-                        traceback.print_exc()
-                        raise
-
-                logger.debug("Websocket dead")
+                    await self.register_and_process(websocket, reconnect)
 
             except Kill:
                 logger.info("Shutting down node.")
                 sys.exit(0)
 
-            except:
-                if self.health_check_coroutine:
-                    self.health_check_coroutine.cancel()
-                    self.health_check_coroutine = None
+            except ConnectionError:
+                # print stack trace
+                traceback.print_exc()
 
+                self.num_reconnect_tries += 1
                 logger.info("Error occured, sleeping before trying to reconnect")
                 time.sleep(10)
 
+            except:
+                # print stack trace
+                traceback.print_exc()
+
+                raise
 
 if __name__ == "__main__":
 

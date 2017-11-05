@@ -7,8 +7,8 @@ class EventReceiver < ApplicationRecord
   # Associations
   belongs_to :job_type, optional: true
   belongs_to :user
-  has_many :event_actions
-  has_many :event_dispatchers
+  has_many :event_actions, dependent: :destroy
+  has_many :event_dispatchers, dependent: :destroy
 
   # Validations
   validate :owned_job_type?

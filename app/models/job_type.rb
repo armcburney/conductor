@@ -5,6 +5,7 @@ class JobType < ApplicationRecord
 
   belongs_to :user
   has_many :jobs
+  has_many :event_receivers
 
   private
 

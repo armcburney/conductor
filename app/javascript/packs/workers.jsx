@@ -108,17 +108,21 @@ class Workers extends React.Component {
     super(props);
     this.state = {
       stdout: '',
-      stderr: ''
+      stderr: '',
+      hideDeleted: true,
     };
 
     this.selectJob = this.selectJob.bind(this);
     this.healthcheck = this.healthcheck.bind(this);
     this.deleteWorker = this.deleteWorker.bind(this);
+    this.setHideDeleted = this.setHideDeleted.bind(this);
+  }
+
+  setHideDeleted(event) {
+    this.setState({ hideDeleted: event.target.checked });
   }
 
   healthcheck(data) {
-    console.log('got healthcheck');
-    console.log(data);
     this.setState(state => {
       const worker = state.workers.find(w => w.id == data.id);
       Object.assign(worker, data);
@@ -222,23 +226,25 @@ class Workers extends React.Component {
     if (!this.state.workers) return <p>Loading...</p>;
 
     return (
-      <div className='row'>
-        <div className='column'>
-          <div className='worker-scrollable'>
-            {this.state.workers.map((w) =>
-              <Worker
-                key={w.id}
-                {...w}
-                jobTypes={this.state.jobTypes}
-                selected={this.state.selected}
-                selectJob={this.selectJob}
-                deleteWorker={this.deleteWorker}
-              />
-            )}
+      <div className={`row ${this.state.hideDeleted ? 'hideDeleted' : ''}`}>
+        <div className='column second'>
+          <div>
+            <input type='checkbox' onChange={this.setHideDeleted} checked={this.state.hideDeleted} name='hideDeleted' id='hideDeleted' />
+            <label htmlFor='hideDeleted'>Hide deleted workers</label>
           </div>
+          {this.state.workers.map((w) =>
+            <Worker
+              key={w.id}
+              {...w}
+              jobTypes={this.state.jobTypes}
+              selected={this.state.selected}
+              selectJob={this.selectJob}
+              deleteWorker={this.deleteWorker}
+            />
+          )}
         </div>
-        <div className='column'>
-          <div className='worker-scrollable'>
+        <div className='column first'>
+          <div className='selected-job'>
             <h2>Job {this.state.selected}</h2>
             {this.state.returnCode !== null && <p>Returned {this.state.returnCode}</p>}
             <h3>stdout</h3>

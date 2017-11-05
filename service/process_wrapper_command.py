@@ -8,6 +8,10 @@ logger = logging.getLogger("Process Wrapper Command")
 logger.setLevel(logging.DEBUG)
 
 class NoRunningProcessException(Exception):
+    """
+    Thrown when somebody tries to kill the process wrapper command
+    subprocess when nothing has been spawned yet.
+    """
     pass
 
 class ProcessWrapperCommand():
@@ -23,13 +27,14 @@ class ProcessWrapperCommand():
         self.process = None
 
     def __str__(self):
-        return ' '.join(map(str, self.get_command()));
+        return ' '.join(map(str, self.get_command()))
 
     def get_command(self):
-        cmd = ['python3', 'process_wrapper.py',
-                '--command', self.command,
-                '--job_id', self.job_id,
-                '--service_host', self.service_host]
+        cmd = [
+            'python3', 'process_wrapper.py',
+            '--command', self.command,
+            '--job_id', self.job_id,
+            '--service_host', self.service_host]
         if self.cwd:
             cmd.extend(['--cwd', self.cwd])
         if self.env:
@@ -47,7 +52,7 @@ class ProcessWrapperCommand():
         """
         Kills a process.
         """
-        if self.process == None:
+        if self.process is None:
             raise NoRunningProcessException()
 
         self.process.send_signal(subprocess.signal.SIGKILL)
@@ -56,7 +61,7 @@ class ProcessWrapperCommand():
         """
         Try to stop a process.
         """
-        if self.process == None:
+        if self.process is None:
             raise NoRunningProcessException()
 
         self.process.send_signal(subprocess.signal.SIGTERM)
@@ -71,7 +76,7 @@ class ProcessWrapperCommand():
         await self.process.wait()
 
     def done(self):
-        if self.process == None:
+        if self.process is None:
             return True
-        else:
-            return self.process.returncode != None
+
+        return self.process.returncode != None

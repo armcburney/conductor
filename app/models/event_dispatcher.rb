@@ -14,7 +14,7 @@ class EventDispatcher < ApplicationRecord
     return if triggered || !event_receiver.trigger_condition_met?
 
     # Run each of the event actions corresponding to the job
-    job.event_actions.each { |job| job.run!(user) }
+    job.event_actions.each { |action| action.run!(user) }
 
     # Set the record to be triggered
     self.triggered = true

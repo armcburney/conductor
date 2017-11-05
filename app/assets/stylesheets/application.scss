@@ -31,7 +31,7 @@ h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12 {
   @include OpenSansLight;
 }
 h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, p,
-nav, ul, .row, .container {
+nav, ul, .row, .container, pre {
   @include top-level-centered;
 }
 ul {
@@ -89,15 +89,15 @@ section:nth-child(odd), section.odd {
   flex-wrap: wrap;
   max-width: 64rem;
   padding: 0;
+  display:flex;
 }
 .column {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 1;
   padding-right: 1.5em;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
-  overflow: hidden;
 }
 .column--double {
   flex: 2;
@@ -105,13 +105,27 @@ section:nth-child(odd), section.odd {
 .column:last-child {
   padding-right: 0;
 }
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break:break-all;
+  overflow-wrap: break-word;
+}
 @media all and (max-width: 1000px) {
   .row {
-    display: block;
+    flex-direction: column;
   }
   .column {
     padding-right: 0;
     display: block;
+
+    &.first {
+      order: 1;
+    }
+
+    &.second {
+      order: 2;
+    }
   }
 }
 a {

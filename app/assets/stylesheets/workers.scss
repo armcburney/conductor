@@ -1,13 +1,22 @@
 @import "variables";
 
-.worker-scrollable {
-  height: 80vh;
-  overflow-y: auto;
-  overflow-x: visible;
+.selected-job {
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: scroll;
 }
 
 .code {
   font-family: monospace;
+}
+
+.hideDeleted .worker.deleted {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
 .worker {
@@ -16,6 +25,7 @@
   flex-direction: column;
   background-color: $light-shade;
   position: relative;
+  max-height: 200vh;
 
   &.deleted {
     opacity: 0.3;
@@ -68,10 +78,27 @@
       margin-right: 20px;
     }
 
+    &:before {
+      content: "▶";
+      color: $accent;
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      text-align: center;
+      left:-30px;
+      opacity: 0;
+      transition: all linear 0.2s;
+    }
+
     &.selected {
       border: 1px solid $accent;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       transform: translateX(20px);
+
+      &:before {
+        opacity: 1;
+      }
     }
   }
 }

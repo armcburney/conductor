@@ -5,5 +5,5 @@ class HealthCommand(Command):
         temp_dict = health_dict
         temp_dict.update({"key": api_key})
         temp_dict.update({"id": id})
-        super(HealthCommand, self).__init__("worker.health_check", temp_dict)
+        super(HealthCommand, self).__init__("worker.healthcheck", temp_dict)
 

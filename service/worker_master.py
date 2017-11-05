@@ -7,6 +7,7 @@ logging.addLevelName( logging.WARNING, "\033[1;31m%s\033[1;0m" % logging.getLeve
 logging.addLevelName( logging.INFO, "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.INFO))
 logging.addLevelName( logging.DEBUG, "\033[1;34m%s\033[1;0m" % logging.getLevelName(logging.DEBUG))
 logging.addLevelName( logging.ERROR, "\033[1;41m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
+logging.addLevelName( logging.CRITICAL, "\033[1;92m%s\033[1;0m" % logging.getLevelName(logging.CRITICAL))
 
 logger = logging.getLogger("Worker Manager")
 
@@ -26,7 +27,6 @@ from argparse import ArgumentParser
 from websocket_requests import RegisterNode, ConnectCommand
 from websocket_responses import ResponseFactory, SpawnResponse, ClientConnectedResponse, RegisterNodeResponse, WorkerConnectedResponse, ClientKillResponse
 from health_check.health_check_coroutine import HealthCheckCoroutine
-from process_wrapper_command import ProcessWrapperCommand
 from command_handlers.command_handler_factory import CommandHandlerFactory
 from global_commands import *
 
@@ -206,27 +206,25 @@ class WorkerManager():
 
             except Kill:
 
-                def alarm_handler():
-                    logger.warning("Timeout, killing remaining tasks")
+                def alarm_handler(signum, frame):
+                    logger.critical("Timeout, killing remaining tasks and raising exception")
                     for task in self.pending_children:
                         if not task.done():
-                            task.kill()
+                            task.kill_process()
                     raise TimeoutError()
 
                 logger.info("Stopping tasks")
                 # this is a special exception telling us to kill ourself
-                try:
-                    for task in self.pending_children:
-                        task.stop()
+                for task in self.pending_children:
+                    await task.stop_process()
 
-                    signal.signal(signal.SIGALRM, alarm_handler)
-                    signal.alarm(10)
+                signal.signal(signal.SIGALRM, alarm_handler)
+                signal.alarm(1)
 
-                    for task in self.pending_children:
-                        task.wait()
-                    signal.alarm(0)
-                except TimeoutError:
-                    pass
+                for task in self.pending_children:
+                    await task.wait()
+                    logger.debug("Killed task {}".format(task))
+                signal.alarm(0)
 
                 sys.exit(0)
 

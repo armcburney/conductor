@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class JobConnectionController < WebsocketRails::BaseController
-  after_action :dispatch_events, only: %i(stdout stderr return_code)
+  after_action :dispatch_job_events!, only: %i(stdout stderr return_code)
 
   def stdout
     Rails.logger.info "Updated stdout for #{message['id']}, with stdout: #{message['stdout']}."
@@ -31,7 +31,7 @@ class JobConnectionController < WebsocketRails::BaseController
     @job ? @job : trigger_failure
   end
 
-  def dispatch_events
-    EventDispatcher.new(job)
+  def dispatch_job_events!
+    job.event_dispatcher.dispatch!
   end
 end

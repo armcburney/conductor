@@ -5,17 +5,11 @@ class EventReceiver < ApplicationRecord
   belongs_to :job_type, optional: true
   belongs_to :user
   has_many :event_actions
+  has_many :event_dispatchers
 
   # Validations
   validate :owned_job_type?
   accepts_nested_attributes_for :event_actions
-
-  # Default dispatch! implementation, overridable by subclasses
-  def dispatch!
-    return if triggered
-    event_actions.each(&:run!)
-    self.triggered = true
-  end
 
   def owned_job_type?
     return unless job_type && job_type.user != user

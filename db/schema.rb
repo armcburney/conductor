@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171104222506) do
+ActiveRecord::Schema.define(version: 20171104235401) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -38,15 +38,22 @@ ActiveRecord::Schema.define(version: 20171104222506) do
     t.index ["job_type_id"], name: "index_event_actions_on_job_type_id", using: :btree
   end
 
+  create_table "event_dispatchers", force: :cascade do |t|
+    t.boolean  "triggered"
+    t.integer  "event_receiver_id"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.index ["event_receiver_id"], name: "index_event_dispatchers_on_event_receiver_id", using: :btree
+  end
+
   create_table "event_receivers", force: :cascade do |t|
     t.datetime "start_time"
     t.integer  "interval"
     t.integer  "job_type_id"
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
-    t.integer  "user_id",                     null: false
-    t.boolean  "triggered",   default: false, null: false
-    t.string   "type",                        null: false
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+    t.integer  "user_id",     null: false
+    t.string   "type",        null: false
     t.text     "regex"
     t.text     "stream"
     t.integer  "return_code"
@@ -130,6 +137,7 @@ ActiveRecord::Schema.define(version: 20171104222506) do
   add_foreign_key "api_keys", "users"
   add_foreign_key "event_actions", "event_receivers"
   add_foreign_key "event_actions", "job_types"
+  add_foreign_key "event_dispatchers", "event_receivers"
   add_foreign_key "event_receivers", "job_types"
   add_foreign_key "event_receivers", "users"
   add_foreign_key "job_types", "users"

@@ -2,7 +2,7 @@ from websocket_responses import Response
 
 class ClientConnectedResponse(Response):
     """
-    client_connected
+    client_connected command from server
     """
     def __init__(self, id, channel, user_id, success, result, token, server_token):
         self.node_id = id

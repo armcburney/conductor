@@ -15,7 +15,7 @@ class ResponseFactory():
         response_type = object_mappings.get(command, None)
 
         if response_type is None:
-            logger.warning('Ignoring response with command "{}"'.format(command))
+            logger.warning('Ignoring response with command "%s"', command)
             return None
 
         return response_type.process_response(json_response)

@@ -10,4 +10,3 @@ class ClientKillResponse(Response):
     @classmethod
     def process_response(cls, response_body):
         return ClientKillResponse()
-

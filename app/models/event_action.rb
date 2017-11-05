@@ -11,7 +11,8 @@ class EventAction < ApplicationRecord
 
   PROPERTIES = %i(job_type_id email_address webhook_url webhook_body type)
 
-  def run!
+  def run!(_user)
+    raise NotImplementedError, "EventAction::run!(user) is a pure virtual method."
   end
 
   def owned_job_type?

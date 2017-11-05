@@ -13,6 +13,15 @@ class Worker < ApplicationRecord
   default_scope { order(deleted: :asc, last_heartbeat: :desc) }
   scope :current, -> { where(deleted: false) }
   scope :active, -> { current.where("last_heartbeat > ?", 10.minutes.ago) }
+  scope :assignment_order, lambda {
+    active
+      .joins(
+        "LEFT JOIN jobs ON jobs.worker_id = workers.id "\
+        "AND jobs.return_code IS NULL"
+      )
+      .group("workers.id")
+      .order("COUNT(DISTINCT jobs.id) ASC")
+  }
 
   def soft_delete!
     update(deleted: true)

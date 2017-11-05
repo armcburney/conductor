@@ -23,9 +23,7 @@ class EventReceiver < ApplicationRecord
 
   def create_event_dispatcher!
     job_type.jobs.each do |job|
-      event_dispatchers.push(
-        EventDispatcher.first_or_create(event_receiver: self, job: job)
-      )
+      EventDispatcher.first_or_create(event_receiver: self, job: job)
     end
   end
 end

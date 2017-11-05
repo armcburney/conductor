@@ -11,12 +11,21 @@
   font-family: monospace;
 }
 
+.hideDeleted .worker.deleted {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
 .worker {
   @include card;
   display: flex;
   flex-direction: column;
   background-color: $light-shade;
   position: relative;
+  max-height: 200vh;
 
   &.deleted {
     opacity: 0.3;

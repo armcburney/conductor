@@ -4,18 +4,23 @@ class MockWebsocket:
         # Each response is a lambda that generates a string
         # None means wait for user command
         self.actions = actions
+        self.messages = []
 
     def add_action(self, action):
         self.actions.append(action)
 
-    async def send(self):
+    async def send(self, msg):
         assert (self.actions[0] is None)
         self.actions.pop(0)
+        self.messages.append(msg)
 
     async def recv(self):
         func = self.actions[0]
         self.actions.pop(0)
         return func()
+
+    def get_messages(self):
+        return self.messages
 
 class MockServer:
     def __init__(self):
@@ -36,4 +41,4 @@ class WebsocketAction:
         self.data = data
 
     def __call__(self):
-        self.data()
+        return self.data()

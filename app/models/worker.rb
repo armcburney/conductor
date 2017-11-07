@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class Worker < ApplicationRecord
+  # Constants
+  RETRY_TIME = 3_600
+
   # Callbacks
   before_commit :update_heartbeat
   after_create :make_info_channel

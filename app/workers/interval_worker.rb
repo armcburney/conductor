@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class InternalWorker
+class IntervalWorker
   include Sidekiq::Worker
   attr_reader :receiver
 
@@ -8,7 +8,7 @@ class InternalWorker
     @receiver = Receiver.find_by(id)
     return unless receiver
     dispatch_events
-    InternalWorker.perform_at(receiver.interval.from_now, id)
+    IntervalWorker.perform_at(start_time + (n * interval.seconds), id)
   end
 
   private
@@ -18,5 +18,9 @@ class InternalWorker
       dispatcher.dispatch!(receiver.user)
       dispatcher.reset_trigger!
     end
+  end
+
+  def n
+    ((Time.zone.now.to_i - start_time) / interval).ceil
   end
 end

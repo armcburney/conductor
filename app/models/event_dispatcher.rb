@@ -19,4 +19,8 @@ class EventDispatcher < ApplicationRecord
     # Set the record to be triggered
     self.triggered = true
   end
+
+  def reset_trigger!
+    self.triggered = false
+  end
 end

@@ -8,12 +8,6 @@ class IntervalWorker
     @receiver = Receiver.find_by(id)
     return unless receiver
     receiver.event_actions.each(&:run!)
-    IntervalWorker.perform_at(receiver.start_time + (n * receiver.interval.seconds), id)
-  end
-
-  private
-
-  def n
-    ((Time.zone.now.to_i - receiver.start_time) / receiver.interval).ceil
+    IntervalWorker.perform_at(receiver.start_time + receiver.next_interval_time, id)
   end
 end

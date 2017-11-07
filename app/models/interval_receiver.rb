@@ -12,13 +12,13 @@ class IntervalReceiver < EventReceiver
     true
   end
 
+  def next_interval_time
+    (((Time.zone.now.to_i - start_time) / interval).ceil + interval.seconds)
+  end
+
   private
 
   def create_internal_job!
-    IntervalWorker.perform_at(start_time + (n * interval.seconds), id)
-  end
-
-  def n
-    ((Time.zone.now.to_i - start_time) / interval).ceil
+    IntervalWorker.perform_at(start_time + next_interval_time, id)
   end
 end

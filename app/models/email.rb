@@ -4,10 +4,10 @@
 # EventAction derived class using Single Table Inheritance
 #
 # Public interface:
-#   run!(user)
+#   run!
 #
 class Email < EventAction
-  def run!(_user)
+  def run!
     ErrorMailer.email(job_type).deliver
   end
 end

@@ -13,7 +13,7 @@ class IntervalReceiver < EventReceiver
   end
 
   def next_interval_time
-    (((Time.zone.now.to_i - start_time) / interval).ceil + interval).seconds
+    (((Time.zone.now.to_i - start_time) / interval).ceil * interval).seconds
   end
 
   private

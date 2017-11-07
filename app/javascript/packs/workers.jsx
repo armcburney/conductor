@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Promise from 'promise-polyfill'; 
+import Promise from 'promise-polyfill';
 import 'whatwg-fetch';
 
 // To add to window

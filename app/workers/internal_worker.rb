@@ -2,9 +2,10 @@
 
 class InternalWorker
   include Sidekiq::Worker
+  attr_reader :receiver
 
   def perform(id)
-    receiver = Receiver.find_by(id)
+    @receiver = Receiver.find_by(id)
     return unless receiver
     dispatch_events
     InternalWorker.perform_at(receiver.interval.from_now, id)

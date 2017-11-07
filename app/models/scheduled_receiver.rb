@@ -2,7 +2,7 @@
 
 class ScheduledReceiver < EventReceiver
   # Callbacks
-  after_create :schedule_job
+  after_create :create_scheduled_job!
 
   # Validations
   validates :start_time, presence: true
@@ -14,7 +14,7 @@ class ScheduledReceiver < EventReceiver
 
   private
 
-  def schedule_job
+  def create_scheduled_job!
     JobWorker.perform_at(start_time.from_now, id)
   end
 end

@@ -87,7 +87,7 @@ export default class Receiver extends React.Component {
       state = Object.assign(state, this.nullState());
       state.dirty = props.id === null;
       state.type = props.type || state.type;
-      
+
       state.start_time = props.start_time ? moment(props.start_time) : null;
       state.interval = props.interval;
       state.job_type_id = props.job_type_id;

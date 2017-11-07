@@ -7,7 +7,7 @@ class IntervalReceiver < EventReceiver
   # Validations
   validates :start_time, :interval, presence: true
 
-  # Only called from sidekiq job, at certain intervals
+  # Sidekiq job scheduled after_create => trigger condition will always be met
   def trigger_condition_met?(_job)
     true
   end

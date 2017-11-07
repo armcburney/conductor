@@ -15,6 +15,6 @@ class ScheduledReceiver < EventReceiver
   private
 
   def create_scheduled_job!
-    JobWorker.perform_at(start_time.from_now, id)
+    ScheduledWorker.perform_at(start_time.from_now, id)
   end
 end

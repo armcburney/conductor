@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class JobWorker
+class ScheduledWorker
   include Sidekiq::Worker
   attr_reader :receiver
 
@@ -16,7 +16,7 @@ class JobWorker
     if worker
       @job = Job.new(job_type: receiver.job_type, worker: worker, status: "DISPATCHED")
     else
-      JobWorker.perform_at(receiver.start_time.from_now, id)
+      ScheduledWorker.perform_at(receiver.start_time.from_now, id)
     end
   end
 

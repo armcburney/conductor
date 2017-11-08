@@ -98,14 +98,14 @@ class EventAction extends React.Component {
 
   renderForm() {
     switch (this.props.type) {
-      case 'EmailAction':
+      case 'Email':
         return (
           <div className='field'>
             <label>Email</label>
             <input type='text' value={this.props.email_address || ''} onChange={this.updateEmailAddress} />
           </div>
         );
-      case 'WebhookAction':
+      case 'Webhook':
         return (
           <div>
             <div className='field'>
@@ -118,7 +118,7 @@ class EventAction extends React.Component {
             </div>
           </div>
         );
-      case 'SpawnJobAction':
+      case 'SpawnJob':
         return (
           <select value={`${this.props.job_type_id}`} onChange={this.updateJobTypeId}>
           {this.props.job_types.map(
@@ -143,9 +143,9 @@ class EventAction extends React.Component {
           <div className='field'>
             <label>Type:</label>
             <select value={this.props.type} onChange={this.updateType}>
-              <option value='EmailAction'>Send an email</option>
-              <option value='WebhookAction'>Send a webhook</option>
-              <option value='SpawnJobAction'>Spawn another job</option>
+              <option value='Email'>Send an email</option>
+              <option value='Webhook'>Send a webhook</option>
+              <option value='SpawnJob'>Spawn another job</option>
             </select>
           </div>
           {this.renderForm()}

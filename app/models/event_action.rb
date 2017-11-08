@@ -17,7 +17,7 @@ class EventAction < ApplicationRecord
   end
 
   def owned_job_type?
-    return unless job_type && job_type.user != event_action.user
+    return unless job_type && job_type.user != user
     errors.add(:job_type, "must be one of your jobs")
   end
 end

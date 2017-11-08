@@ -32,6 +32,6 @@ class JobConnectionController < WebsocketRails::BaseController
   end
 
   def dispatch_job_events!
-    job.event_dispatcher.dispatch!(current_user)
+    job.event_dispatchers.each(&:dispatch!)
   end
 end

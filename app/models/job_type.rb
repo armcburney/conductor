@@ -10,7 +10,7 @@ class JobType < ApplicationRecord
   private
 
   def nullify_blanks
-    self.environment_variables = "{}" if environment_variables&.empty?
-    self.working_directory = nil if working_directory&.empty?
+    update(environment_variables: "{}") if environment_variables&.empty?
+    update(working_directory: nil) if working_directory&.empty?
   end
 end

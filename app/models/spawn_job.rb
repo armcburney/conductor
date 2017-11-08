@@ -12,7 +12,7 @@ class SpawnJob < EventAction
     if worker
       Job.create(job_type: job_type, worker: worker, status: "DISPATCHED")
     else
-      ScheduledWorker.perform_at(Worker::RETRY_TIME.from_now, id)
+      ScheduledWorker.perform_at(Worker::RETRY_TIME.from_now, event_receiver.id)
     end
   end
 end

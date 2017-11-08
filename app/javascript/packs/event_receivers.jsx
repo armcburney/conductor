@@ -112,11 +112,8 @@ class EventReceivers extends React.Component {
       .event_actions[actionIndex]
       .id;
 
-      console.log(this.state.event_receivers[receiverIndex]
-      .event_actions[actionIndex])
-
     let [url, method] = (
-      (id === null) ? ['/event_actions', 'POST'] : [`/event_actions/${id}.json`, 'PATCH']
+      (id === null) ? ['/event_actions.json', 'POST'] : [`/event_actions/${id}.json`, 'PATCH']
     );
 
     fetch(url, {
@@ -133,7 +130,7 @@ class EventReceivers extends React.Component {
     })
       .then(res => res.json())
       .then(json => this.setState(state => {
-        state.event_receivers[receiverIndex][actionIndex] = json;
+        state.event_receivers[receiverIndex].event_actions[actionIndex] = json;
         return state;
       }))
       .catch(e => console.error(e));
@@ -146,7 +143,7 @@ class EventReceivers extends React.Component {
         .splice(actionIndex, 1);
 
       if (action.id !== null) {
-        fetch(`event_actions/${action.id}`, {
+        fetch(`event_actions/${action.id}.json`, {
           method: 'DELETE',
           headers: {
             'Accept': 'application/json',

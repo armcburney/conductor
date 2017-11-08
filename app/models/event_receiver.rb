@@ -14,6 +14,11 @@ class EventReceiver < ApplicationRecord
   validate :owned_job_type?
   accepts_nested_attributes_for :event_actions
 
+  # Pure virtual method, overridden by derived concretions
+  def trigger_condition_met?(_job)
+    raise NotImplementedError, "EventReceiver::trigger_condition_met!(job) is a pure virtual method."
+  end
+
   def owned_job_type?
     return unless job_type && job_type.user != user
     errors.add(:job_type, "must be one of your jobs")

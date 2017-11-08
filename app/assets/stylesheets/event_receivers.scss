@@ -32,7 +32,7 @@
   &.dirty {
     border: 1px solid $accent;
 
-    .controls {
+    & > .controls {
       transform: translateX(0);
       opacity: 1;
     }

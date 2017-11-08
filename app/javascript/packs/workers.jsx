@@ -73,11 +73,11 @@ class Worker extends React.Component {
         className={`job ${job.id === this.props.selected ? 'selected' : ''}`}
         key={job.id}
         onClick={() => this.props.selectJob(job.id)}>
-        <span className='title'>
+        <span className='job-id'>
           {job.id}
         </span>
-        <span className='code'>
-          {this.props.jobTypes[job.job_type_id].script}
+        <span className='title'>
+          {this.props.jobTypes[job.job_type_id].name}
         </span>
       </div>
     )
@@ -107,6 +107,7 @@ class Workers extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      selected: null,
       stdout: '',
       stderr: '',
       hideDeleted: true,
@@ -184,7 +185,7 @@ class Workers extends React.Component {
           return state;
         });
 
-        const firstWithJobs = json.workers.find(w => w.jobs.length > 0);
+        const firstWithJobs = json.workers.find(w => !w.deleted && w.jobs.length > 0);
         if (firstWithJobs) {
           this.selectJob(firstWithJobs.jobs[0].id);
         }
@@ -215,11 +216,36 @@ class Workers extends React.Component {
     })
       .then(
         () => this.setState(state => {
-          state.workers.find(w => w.id == id).deleted = true;
+          const worker = state.workers.find(w => w.id == id);
+          worker.deleted = true;
+
+          // Deselect the job if the job was in the now-deleted worker
+          if (worker.jobs.some(j => j.id === state.selected)) {
+            state.selected = null;
+          }
           return state;
         })
       )
       .catch(e => console.error(e));
+  }
+
+  renderJob() {
+    if (this.state.selected === null) {
+      return (
+        <div>Select a job</div>
+      );
+    }
+
+    return (
+      <div>
+        <h2>Job {this.state.selected}</h2>
+        {this.state.returnCode !== null && <p>Returned {this.state.returnCode}</p>}
+        <h3>stdout</h3>
+        <pre>{this.state.stdout}</pre>
+        <h3>stderr</h3>
+        <pre>{this.state.stderr}</pre>
+      </div>
+    );
   }
 
   render() {
@@ -245,12 +271,7 @@ class Workers extends React.Component {
         </div>
         <div className='column first'>
           <div className='selected-job'>
-            <h2>Job {this.state.selected}</h2>
-            {this.state.returnCode !== null && <p>Returned {this.state.returnCode}</p>}
-            <h3>stdout</h3>
-            <pre>{this.state.stdout}</pre>
-            <h3>stderr</h3>
-            <pre>{this.state.stderr}</pre>
+            {this.renderJob()}
           </div>
         </div>
       </div>

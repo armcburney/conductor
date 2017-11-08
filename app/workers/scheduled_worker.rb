@@ -16,7 +16,7 @@ class ScheduledWorker
     if worker
       @job = Job.new(job_type: receiver.job_type, worker: worker, status: "DISPATCHED")
     else
-      ScheduledWorker.perform_at(receiver.start_time.from_now, id)
+      ScheduledWorker.perform_at(Worker::RETRY_TIME.from_now, id)
     end
   end
 

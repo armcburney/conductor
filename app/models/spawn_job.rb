@@ -4,10 +4,15 @@
 # EventAction derived class using Single Table Inheritance
 #
 # Public interface:
-#   run!(user)
+#   run!
 #
 class SpawnJob < EventAction
-  def run!(user)
-    Job.new(job_type: job_type, worker: user.workers.assignment_order.first, status: "DISPATCHED")
+  def run!
+    worker = user.workers.assignment_order.first
+    if worker
+      Job.create(job_type: job_type, worker: worker, status: "DISPATCHED")
+    else
+      ScheduledWorker.perform_at(Worker::RETRY_TIME.from_now, event_receiver.id)
+    end
   end
 end

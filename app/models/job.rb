@@ -2,14 +2,14 @@
 
 class Job < ApplicationRecord
   # Callbacks
-  after_create :make_channel, :create_event_dispatcher!
+  after_create :make_channel, :create_event_dispatchers!
   before_save :default_values, :send_email
 
   # Associations
   belongs_to :worker
   belongs_to :job_type
   has_one :user, through: :worker
-  has_one :event_dispatcher, dependent: :destroy
+  has_many :event_dispatchers, dependent: :destroy
 
   # Validations
   validates :status, inclusion: { in: %w(DISPATCHED UNDEFINED ERROR NORMAL\ EXECUTION) }
@@ -47,7 +47,6 @@ class Job < ApplicationRecord
     SQL
   end
 
-  private
 
   def make_channel
     channel.make_private
@@ -62,10 +61,10 @@ class Job < ApplicationRecord
     ErrorMailer.email(self).deliver
   end
 
-  def create_event_dispatcher!
+  def create_event_dispatchers!
     # If the event_receiver does not exist, it will be updated when the event_receiver is created
     job_type.event_receivers.each do |receiver|
-      EventDispatcher.new(event_receiver: receiver, job: self)
+      event_dispatchers.create(event_receiver: receiver)
     end
   end
 end

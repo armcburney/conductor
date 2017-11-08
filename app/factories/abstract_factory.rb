@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-class WorkerFactory < AbstractFactory
+class AbstractFactory
   attr_reader :id, :user
   def initialize(id, user)
     @id   = id
     @user = user
   end
 
+  # Pure virtual create function
   def create
-    id ? Worker.find_by(id: id) : user&.workers&.create!
+    raise NotImplementedError, "AbstractFactory::create is a pure virtual method."
   end
 end

@@ -36,7 +36,7 @@ class EventAction extends React.Component {
 
   reset(props) {
     this.props.update(state => {
-      state = Object.assign(state, this.nullState());
+      state = Object.assign({}, state, this.nullState());
       state.dirty = props.id === null;
 
       this.DATA_FIELDS.forEach(field => state[field] = props[field] || state[field]);
@@ -74,7 +74,7 @@ class EventAction extends React.Component {
 
   cancel() {
     if (this.props.id !== null) {
-      this.reset(this.props);
+      this.reset(this.props.savedState());
     } else {
       this.remove(this.props.index);
     }
@@ -106,25 +106,26 @@ class EventAction extends React.Component {
           </div>
         );
       case 'Webhook':
-        return (
-          <div>
-            <div className='field'>
-              <label>Webhook URL</label>
-              <input type='text' value={this.props.webhook_url || ''} onChange={this.updateWebhookUrl} />
-            </div>
-            <div className='field'>
-              <label>Webhook body</label>
-              <textarea value={this.props.webhook_body || ''} onChange={this.updateWebhookBody} />
-            </div>
+        return [
+          <div key='1' className='field'>
+            <label>Webhook URL</label>
+            <input type='text' value={this.props.webhook_url || ''} onChange={this.updateWebhookUrl} />
+          </div>,
+          <div key='2' className='field'>
+            <label>Webhook body</label>
+            <textarea value={this.props.webhook_body || ''} onChange={this.updateWebhookBody} />
           </div>
-        );
+        ];
       case 'SpawnJob':
         return (
-          <select value={`${this.props.job_type_id}`} onChange={this.updateJobTypeId}>
-          {this.props.job_types.map(
-            (job_type, i) => <option key={i} value={`${job_type.id}`}>{job_type.name}</option>
-          )}
-          </select>
+          <div className='field'>
+            <label>Job</label>
+            <select value={`${this.props.job_type_id}`} onChange={this.updateJobTypeId}>
+            {this.props.job_types.map(
+              (job_type, i) => <option key={i} value={`${job_type.id}`}>{job_type.name}</option>
+            )}
+            </select>
+          </div>
         );
     }
   }
@@ -167,6 +168,7 @@ export default function EventActions(props) {
           save={props.save}
           remove={props.remove}
           update={(update, callback) => props.update(index, update, callback)}
+          savedState={() => props.savedState(index)}
           job_types={props.job_types}
         />
     )}

@@ -1,7 +1,7 @@
 import React from 'react';
 import Datetime from 'react-datetime';
 import moment from 'moment';
-import { camelCase, upperFirst, snakeCase, isFunction } from 'lodash';
+import { camelCase, upperFirst, snakeCase, isFunction, cloneDeep } from 'lodash';
 import EventActions from './event_actions';
 
 // To add to window
@@ -28,7 +28,8 @@ export default class Receiver extends React.Component {
       'saveAction',
       'addAction',
       'removeAction',
-      'updateAction'
+      'updateAction',
+      'actionSavedState'
     ].forEach(fn => this[fn] = this[fn].bind(this));
 
     [
@@ -80,11 +81,17 @@ export default class Receiver extends React.Component {
     if (props.updated_at != this.props.updated_at) {
       this.reset(props);
     }
+    props.event_actions.forEach((action, i) => {
+      this.setState(state => {
+        state.event_actions[i] = cloneDeep(action);
+        return state;
+      });
+    });
   }
 
   reset(props) {
     this.setState(state => {
-      state = Object.assign(state, this.nullState());
+      state = Object.assign({}, state, this.nullState());
       state.dirty = props.id === null;
       state.type = props.type || state.type;
 
@@ -94,7 +101,7 @@ export default class Receiver extends React.Component {
       state.regex = props.regex;
       state.stream = props.stream;
       state.return_code = props.return_code;
-      state.event_actions = props.event_actions;
+      state.event_actions = cloneDeep(props.event_actions);
 
       return state;
     });
@@ -128,7 +135,7 @@ export default class Receiver extends React.Component {
   updateType(event) {
     const type = event.target.value;
     this.setState(state => {
-      state = Object.assign(state, this.nullState(), {type, dirty: true});
+      state = Object.assign({}, state, this.nullState(), {type, dirty: true});
 
       if (['RegexReceiver', 'TimeoutReceiver', 'ReturnCodeReceiver'].includes(type)) {
         state.job_type_id = this.props.job_types[0].id;
@@ -143,7 +150,6 @@ export default class Receiver extends React.Component {
 
   saveAction(actionIndex, data) {
     data = Object.assign(data, {event_receiver_id: this.props.id});
-    console.log(data);
 
     // If this receiver hasn't been saved yet, so save both at once
     if (this.props.id === null) {
@@ -167,9 +173,13 @@ export default class Receiver extends React.Component {
       }, callback);
     } else {
       this.setState(state => {
-        state.event_actions[index] = Object.assign(state.event_actions[index], update);
+        state.event_actions[index] = Object.assign({}, state.event_actions[index], update);
       }, callback);
     }
+  }
+
+  actionSavedState(index) {
+    return this.props.event_actions[index];
   }
 
   removeAction(actionIndex) {
@@ -198,7 +208,7 @@ export default class Receiver extends React.Component {
     switch (this.state.type) {
       case 'ScheduledReceiver':
         return (
-          <div className='receiver-form'>
+          <div className='form'>
             <div className='field'>
               At: <Datetime value={this.state.start_time} onChange={this.updateStartTime} />
             </div>
@@ -206,7 +216,7 @@ export default class Receiver extends React.Component {
         );
       case 'IntervalReceiver':
         return (
-          <div className='receiver-form'>
+          <div className='form'>
             <div className='field'>
               <label>Every</label>
               <input type='number' value={this.state.interval || ''} onChange={this.updateInterval} /> seconds
@@ -219,7 +229,7 @@ export default class Receiver extends React.Component {
         );
       case 'RegexReceiver':
         return (
-          <div className='receiver-form'>
+          <div className='form'>
             <div className='field'>
               <label>When</label>
               <select value={this.state.stream} onChange={this.updateStream}>
@@ -238,7 +248,7 @@ export default class Receiver extends React.Component {
         );
       case 'TimeoutReceiver':
         return (
-          <div className='receiver-form'>
+          <div className='form'>
             <div className='field'>
               <label>When</label> {this.renderJobTypePicker()} times out
             </div>
@@ -246,7 +256,7 @@ export default class Receiver extends React.Component {
         );
       case 'ReturnCodeReceiver':
         return (
-          <div className='receiver-form'>
+          <div className='form'>
             <div className='field'>
               <label>When</label> {this.renderJobTypePicker()}
             </div>
@@ -288,6 +298,7 @@ export default class Receiver extends React.Component {
             save={this.saveAction}
             remove={this.removeAction}
             update={this.updateAction}
+            savedState={this.actionSavedState}
             job_types={this.props.job_types}
           />
           <button

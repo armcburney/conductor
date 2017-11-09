@@ -1,6 +1,7 @@
 @import "variables";
 @import "event_receivers";
 @import "workers";
+@import "job_types";
 
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,400italic);
 
@@ -56,10 +57,6 @@ h3:first-child, h3+h4 {
 }
 p {
   font-size: 1.2em;
-}
-.social-buttons {
-  text-align: center;
-  padding-top: 1em;
 }
 h1+p, h2+p, h3+p, h4+p, h5+p, h6+p, h7+p, h8+p, h9+p,
 h10+p, h11+p, h12+p, p+p {
@@ -157,6 +154,7 @@ a.fa {
   font-size: 1.2em;
 }
 .button, a.button {
+  @include OpenSans;
   cursor: pointer;
   display: inline-block;
   border: 0;
@@ -181,6 +179,7 @@ a.fa {
 .button--secondary, a.button--secondary {
   background-color:$accent;
   color: $light;
+  font-size: 0.7rem;
   &:hover {
     background-color: $accent-light;
   }
@@ -194,6 +193,11 @@ a.fa {
   font-weight: normal;
   background-color: transparent;
   color: $light;
+}
+.button:disabled {
+  cursor: default;
+  color: $light;
+  background-color: $mid;
 }
 
 /* Radio buttons */
@@ -248,7 +252,8 @@ input[type="radio"] {
 }
 
 /* Text fields */
-input[type="text"], input[type="number"] {
+input[type="text"], input[type="number"],
+textarea, select {
   display: inline-block;
   margin: 0.25em 0.9em;
   padding: 0.5em;
@@ -261,6 +266,41 @@ input[type="text"], input[type="number"] {
   &:focus {
     border: 1px solid $accent;
     outline: none;
+  }
+}
+
+.form {
+  display: table;
+  border-spacing: 0.5em;
+
+  .field {
+    display: table-row;
+  }
+
+  .actions {
+    display: table-caption;
+    caption-side: bottom;
+    text-align: center;
+    padding: 1em 0;
+
+    form, input, button, .button {
+      display: inline-block;
+      width: auto;
+      vertical-align: middle;
+    }
+  }
+
+  label {
+    display: table-cell;
+    vertical-align: top;
+  }
+
+  select, input, textarea {
+    box-sizing: border-box;
+    display: table-cell;
+    width: 100%;
+    min-width: 5em;
+    vertical-align: top;
   }
 }
 

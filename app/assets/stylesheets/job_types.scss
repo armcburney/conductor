@@ -1,0 +1,23 @@
+@import "variables";
+
+.job_type {
+  @include card;
+  background-color: $light-shade;
+
+  .actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+
+    form {
+      display: inline-block;
+    }
+
+    @media all and (max-width: 1000px) {
+      & {
+        flex-direction: row;
+      }
+    }
+  }
+}

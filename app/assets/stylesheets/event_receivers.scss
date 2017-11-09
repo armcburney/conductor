@@ -19,6 +19,7 @@
     opacity: 0;
     transition: all 0.3s ease;
     transform: translateX(20px);
+    pointer-events: none;
 
     .button {
       box-shadow: 0 1px 5px rgba(0,0,0,0.15);
@@ -35,6 +36,7 @@
     & > .controls {
       transform: translateX(0);
       opacity: 1;
+      pointer-events: all;
     }
   }
 

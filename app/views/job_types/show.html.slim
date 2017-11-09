@@ -1,24 +1,3 @@
 p#notice = notice
 
-p
-  strong Script:
-  = @job_type.script
-p
-  strong Working directory:
-  = @job_type.working_directory
-p
-  strong Environment variables:
-  = @job_type.environment_variables
-p
-  strong Timeout:
-  = @job_type.timeout
-p
-  strong Name:
-  = @job_type.name
-p
-  strong User:
-  = @job_type.user
-
-= link_to 'Edit', edit_job_type_path(@job_type)
-'  |
 = link_to 'Back', job_types_path

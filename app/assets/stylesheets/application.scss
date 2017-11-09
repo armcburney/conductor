@@ -1,6 +1,7 @@
 @import "variables";
 @import "event_receivers";
 @import "workers";
+@import "job_types";
 
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,400italic);
 
@@ -153,6 +154,7 @@ a.fa {
   font-size: 1.2em;
 }
 .button, a.button {
+  @include OpenSans;
   cursor: pointer;
   display: inline-block;
   border: 0;
@@ -281,8 +283,10 @@ textarea, select {
     text-align: center;
     padding: 1em 0;
 
-    input, button {
+    form, input, button, .button {
+      display: inline-block;
       width: auto;
+      vertical-align: middle;
     }
   }
 

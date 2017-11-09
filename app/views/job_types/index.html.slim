@@ -1,29 +1,26 @@
 h1 Job Templates
 
-table
-  thead
-    tr
-      th Script
-      th Working directory
-      th Environment variables
-      th Timeout
-      th Name
-      th User
-      th
-      th
-      th
-
-  tbody
-    - @job_types.each do |job_type|
-      tr
-        td = job_type.script
-        td = job_type.working_directory
-        td = job_type.environment_variables
-        td = job_type.timeout
-        td = job_type.name
-        td = link_to 'Edit', edit_job_type_path(job_type), class: "button button--secondary"
-        td = button_to 'Destroy', job_type, method: :delete, class: "button button--secondary"
-        td
+.container
+  - @job_types.each do |job_type|
+    .job_type
+      h2 = job_type.name
+      .row
+        .column.column--double
+          .field
+            label Script
+            pre = job_type.script
+          .field
+            label Working directory
+            pre = job_type.working_directory
+          .field
+            label Environment Variables
+            pre = job_type.environment_variables
+          .field
+            label Timeout
+            span = job_type.timeout
+        .column.actions
+          = link_to "Edit", edit_job_type_path(job_type), class: "button button--secondary"
+          = button_to "Destroy", job_type, method: :delete, class: "button button--secondary"
           - if current_user.workers.active.any?
             = button_to 'Spawn', { controller: "jobs", action: "create", job: { job_type_id: job_type.id } }, method: :post, class: "button button--secondary"
           - elsif current_user.workers.any?

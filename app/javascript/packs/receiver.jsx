@@ -81,11 +81,9 @@ export default class Receiver extends React.Component {
     if (props.updated_at != this.props.updated_at) {
       this.reset(props);
     }
-    props.event_actions.forEach((action, i) => {
-      this.setState(state => {
-        state.event_actions[i] = cloneDeep(action);
-        return state;
-      });
+    this.setState(state => {
+      state.event_actions = props.event_actions.map(a => cloneDeep(a));
+      return state;
     });
   }
 
@@ -183,6 +181,7 @@ export default class Receiver extends React.Component {
   }
 
   removeAction(actionIndex) {
+    console.log(actionIndex);
     this.props.removeAction(this.props.index, actionIndex);
   }
 

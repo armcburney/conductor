@@ -177,6 +177,7 @@ a.fa {
 .button--secondary, a.button--secondary {
   background-color:$accent;
   color: $light;
+  font-size: 0.7rem;
   &:hover {
     background-color: $accent-light;
   }
@@ -190,6 +191,11 @@ a.fa {
   font-weight: normal;
   background-color: transparent;
   color: $light;
+}
+.button:disabled {
+  cursor: default;
+  color: $light;
+  background-color: $mid;
 }
 
 /* Radio buttons */

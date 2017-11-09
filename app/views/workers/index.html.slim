@@ -21,8 +21,8 @@ table
           = api_key.name
         td
           = api_key.key
-        td = link_to 'Edit', edit_api_key_path(api_key)
-        td = button_to 'Destroy', api_key, method: :delete
+        td = link_to 'Edit', edit_api_key_path(api_key), class: "button button--secondary"
+        td = button_to 'Destroy', api_key, method: :delete, class: "button button--secondary"
 
-= link_to 'New API Key', new_api_key_path
+= link_to 'New API Key', new_api_key_path, class: "button button--primary"
 

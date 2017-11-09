@@ -181,7 +181,6 @@ export default class Receiver extends React.Component {
   }
 
   removeAction(actionIndex) {
-    console.log(actionIndex);
     this.props.removeAction(this.props.index, actionIndex);
   }
 

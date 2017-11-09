@@ -22,7 +22,7 @@ h1 Job Templates
           = link_to "Edit", edit_job_type_path(job_type), class: "button button--secondary"
           = button_to "Destroy", job_type, method: :delete, class: "button button--secondary"
           - if current_user.workers.active.any?
-            = button_to 'Spawn', { controller: "jobs", action: "create", job: { job_type_id: job_type.id } }, method: :post, class: "button button--secondary"
+            = button_to "Spawn", { controller: "jobs", action: "create", job: { job_type_id: job_type.id } }, method: :post, class: "button button--secondary"
           - elsif current_user.workers.any?
             button.button.button--secondary(disabled=true) Wait for one of your workers to come online to spawn this job.
           - else
@@ -31,4 +31,4 @@ h1 Job Templates
 
 br
 
-= link_to 'New Job type', new_job_type_path, class: "button button--primary"
+= link_to "New Job type", new_job_type_path, class: "button button--primary"

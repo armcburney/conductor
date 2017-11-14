@@ -9,6 +9,8 @@ import traceback
 from typing import Iterable
 import websockets
 
+from defaults import *
+
 logging.basicConfig(level=logging.DEBUG)
 logging.addLevelName( logging.WARNING, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.WARNING))
 logging.addLevelName( logging.INFO, "\033[1;33m%s\033[1;0m" % logging.getLevelName(logging.INFO))
@@ -317,7 +319,7 @@ if __name__ == "__main__":
         "--service_host",
         dest="service_host",
         action="store",
-        required=True,
+        default=DEFAULT_SERVER,
         help="The service master to connect to.",
     )
 

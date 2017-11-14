@@ -1,3 +1,32 @@
 #home
   h1 Conductor
   hr
+  h2 How to create a worker
+  ol
+    li
+      h3
+        | Navigate to service directory <pre>/service/</pre>
+    li
+      h3 Create sandboxed virtual environment (OPTIONAL)
+      ul
+        li
+          pre virtualenv -p YOUR_PATH_TO_PYTHON3.6 .
+        li
+          pre . bin/activate # activate the virtualenv
+
+    li
+      h3 Install requirements
+      pre
+        | pip install -r requirements.txt </pre>
+
+    li
+      h3
+        | Provisioning
+      p
+        | In order to provision a new node, start up <span class="code">worker_master.py</span> with the provided api token. See `service/dev_scripts/test_live.sh` for an example.
+        pre
+          | python worker_master.py --service_host="ws://SERVICE_ADDRESS" --token="YOUR_API_TOKEN"</pre>
+
+    li
+      h3
+        | Profit?!?!

@@ -1,32 +1,37 @@
 #home
   h1 Conductor
   hr
-  h2 How to create a worker
-  ol
-    li
-      h3
-        | Navigate to service directory <pre>/service/</pre>
-    li
-      h3 Create sandboxed virtual environment (OPTIONAL)
-      ul
-        li
-          pre virtualenv -p YOUR_PATH_TO_PYTHON3.6 .
-        li
-          pre . bin/activate # activate the virtualenv
-
-    li
-      h3 Install requirements
-      pre
-        | pip install -r requirements.txt </pre>
-
-    li
-      h3
-        | Provisioning
-      p
-        | In order to provision a new node, start up <span class="code">worker_master.py</span> with the provided api token. See `service/dev_scripts/test_live.sh` for an example.
+  - if current_user
+    h2 How to create a worker
+    ol
+      li
+        h3 Navigate to service directory <span class="code">/service/</span>
+      li
+        h3 Create sandboxed virtual environment (OPTIONAL)
         pre
-          | python worker_master.py --service_host="ws://SERVICE_ADDRESS" --token="YOUR_API_TOKEN"</pre>
+          code.bash
+            | virtualenv -p YOUR_PATH_TO_PYTHON3.6 .
+            | . bin/activate # activate the virtualenv
 
-    li
-      h3
-        | Profit?!?!
+      li
+        h3 Install requirements
+        pre
+          code.bash
+            | pip install -r requirements.txt
+
+      li 
+        h3 Create an <a href="/workers#api_keys">API key</a>
+
+      li
+        h3 Provision a worker
+        p In order to provision a new node, start up <span class="code">worker_master.py</span> with the provided api token. See <span class="code">service/dev_scripts/test_live.sh</span> for an example.
+        pre
+          code.bash
+            | python worker_master.py --token="YOUR_API_KEY"
+
+    script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"
+    link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/tomorrow-night.min.css"
+    javascript:
+      hljs.initHighlightingOnLoad();
+  - else
+    TODO: add description of use case here

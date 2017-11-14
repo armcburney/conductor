@@ -108,6 +108,9 @@ pre {
   word-break:break-all;
   overflow-wrap: break-word;
 }
+code {
+  padding: 1rem !important;
+}
 @media all and (max-width: 1000px) {
   .row {
     flex-direction: column;

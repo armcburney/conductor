@@ -259,18 +259,6 @@ export default class Receiver extends React.Component {
             </div>
           </div>
         );
-      case 'ReturnCodeReceiver':
-        return (
-          <div className='form'>
-            <div className='field'>
-              <label>When</label> {this.renderJobTypePicker()}
-            </div>
-            <div className='field'>
-              <label>Returns</label>
-              <input type="number" value={`${this.state.return_code}`} onChange={this.updateReturnCode} />
-            </div>
-          </div>
-        );
     }
   }
 

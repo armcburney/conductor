@@ -8,6 +8,6 @@
 #
 class Email < EventAction
   def run!
-    ErrorMailer.email(job_type).deliver
+    NotificationMailer.email(email_address, email_body).deliver
   end
 end

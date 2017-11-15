@@ -32,6 +32,7 @@ class JobConnectionController < WebsocketRails::BaseController
   end
 
   def dispatch_job_events!
+    job.reload
     job.event_dispatchers.each(&:dispatch!)
   end
 end

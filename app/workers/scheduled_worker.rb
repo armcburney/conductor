@@ -7,12 +7,12 @@ class ScheduledWorker
   def perform(id)
     @receiver = EventReceiver.find_by(id: id)
     return unless receiver
-    schedule_job
+    schedule_job(id)
   end
 
   private
 
-  def schedule_job
+  def schedule_job(id)
     if worker
       @job = Job.new(job_type: receiver.job_type, worker: worker, status: "DISPATCHED")
     else

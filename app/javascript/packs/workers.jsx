@@ -136,7 +136,7 @@ class Workers extends React.Component {
   spawn(data) {
     this.setState(state => {
       const worker = state.workers.find(w => w.id == data.worker_id);
-      worker.jobs.push(data);
+      worker.jobs.unshift(data);
       return state;
     });
   }

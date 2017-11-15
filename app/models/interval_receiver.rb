@@ -19,6 +19,7 @@ class IntervalReceiver < EventReceiver
   private
 
   def create_internal_job!
+    Rails.logger.info "Scheduling at #{(start_time + next_interval_time).inspect}"
     IntervalWorker.perform_at(start_time + next_interval_time, id)
   end
 end

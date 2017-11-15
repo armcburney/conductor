@@ -5,7 +5,7 @@ class ScheduledWorker
   attr_reader :receiver
 
   def perform(id)
-    @receiver = EventReceiver.find_by(id)
+    @receiver = EventReceiver.find_by(id: id)
     return unless receiver
     schedule_job
   end
@@ -16,7 +16,7 @@ class ScheduledWorker
     if worker
       @job = Job.new(job_type: receiver.job_type, worker: worker, status: "DISPATCHED")
     else
-      ScheduledWorker.perform_at(Worker::RETRY_TIME.from_now, id)
+      ScheduledWorker.perform_at(Worker::RETRY_TIME.seconds.from_now, id)
     end
   end
 

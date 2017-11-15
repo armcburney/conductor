@@ -9,11 +9,11 @@
 class SpawnJob < EventAction
   def run!
     worker = user.workers.assignment_order.first
+    logger.info worker.inspect
     if worker
       job = Job.create(job_type: job_type, worker: worker, status: "DISPATCHED")
-      worker.channel.trigger(:spawn, job.request_json, namespace: :worker)
     else
-      ScheduledWorker.perform_at(Worker::RETRY_TIME.from_now, event_receiver.id)
+      ScheduledWorker.perform_at(Worker::RETRY_TIME.seconds.from_now, event_receiver.id)
     end
   end
 end

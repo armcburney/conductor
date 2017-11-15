@@ -157,7 +157,7 @@ export default class Receiver extends React.Component {
     const runSave = () => this.props.saveAction(
       this.props.index,
       actionIndex,
-      Object.assign(data, {event_receiver_id: this.props.id})
+      Object.assign(data, {event_receiver_id: this.props.id, dirty: false})
     );
 
     // If this receiver hasn't been saved yet, save receiver first

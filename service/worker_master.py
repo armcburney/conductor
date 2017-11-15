@@ -268,6 +268,8 @@ class WorkerManager():
 
         reconnect = False # whether to try reconnecting with the same id
 
+
+        timeout = 10
         # keep a connection to a websocket while we're alive
         while True:
 
@@ -276,6 +278,7 @@ class WorkerManager():
                 # connects to websocket on host
                 async with websockets.connect(self.service_host) as websocket:
                     await self.register_and_process(websocket, reconnect)
+                    timeout = 10
 
             except Kill:
                 logger.info("Shutting down node.")
@@ -286,12 +289,12 @@ class WorkerManager():
                 traceback.print_exc()
 
                 self.num_reconnect_tries += 1
-                logger.info("Error occured, sleeping before trying to reconnect")
-                time.sleep(10)
+                logger.info("Error occured, sleeping for %s seconds before trying to reconnect", timeout)
+                time.sleep(timeout)
+                timeout = min(timeout << 1, 1000)
 
             except:
                 # print stack trace
-                # Try to recover
                 traceback.print_exc()
                 raise
 

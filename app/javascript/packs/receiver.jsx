@@ -259,6 +259,18 @@ export default class Receiver extends React.Component {
             </div>
           </div>
         );
+      case 'ReturnCodeReceiver':
+        return (
+          <div className='form'>
+            <div className='field'>
+              <label>When</label> {this.renderJobTypePicker()}
+            </div>
+            <div className='field'>
+              <label>Returns</label>
+              <input type="number" value={`${this.state.return_code}`} onChange={this.updateReturnCode} />
+            </div>
+          </div>
+        );
     }
   }
 
@@ -279,7 +291,6 @@ export default class Receiver extends React.Component {
               <option value='IntervalReceiver'>Interval</option>
               <option value='RegexReceiver'>Job stream Regex match</option>
               <option value='ReturnCodeReceiver'>{'Job return code'}</option>
-              <option value='TimeoutReceiver'>Job timeout</option>
             </select>
           </h3>
           {this.renderForm()}

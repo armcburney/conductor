@@ -10,11 +10,11 @@
     = f.label :script
     = f.text_area :script
   .field
-    = f.label :working_directory
+    label Working directory (absolute path)
     = f.text_field :working_directory
   .field
     label Environment variables (as JSON)
-    = f.text_area :environment_variables
+    = f.text_area :environment_variables, placeholder: '{"ARG": "VALUE"}'
   .field
     = f.label :name
     = f.text_field :name

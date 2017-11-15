@@ -44,7 +44,7 @@ class EventReceivers extends React.Component {
     return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
   }
 
-  saveReceiver(index, data) {
+  saveReceiver(index, data, callback) {
     const id = this.state.event_receivers[index].id;
 
     let [url, method] = (
@@ -65,9 +65,11 @@ class EventReceivers extends React.Component {
     })
       .then(res => res.json())
       .then(json => this.setState(state => {
+        const oldActions = state.event_receivers[index].event_actions;
         state.event_receivers[index] = json;
+        state.event_receivers[index].event_actions = oldActions;
         return state;
-      }))
+      }, callback))
       .catch(e => console.error(e));
   }
 
@@ -102,7 +104,8 @@ class EventReceivers extends React.Component {
 
   addAction(index) {
     this.setState(state => {
-      state.event_receivers[index].event_actions.push({id: null});
+      state.event_receivers[index].event_actions = state.event_receivers[index].event_actions.slice();
+      state.event_receivers[index].event_actions.push({id: null, guid: guid()});
       return state;
     });
   }
@@ -138,6 +141,8 @@ class EventReceivers extends React.Component {
 
   removeAction(receiverIndex, actionIndex) {
     this.setState(state => {
+      state.event_receivers[receiverIndex] = Object.assign({}, state.event_receivers[receiverIndex]);
+      state.event_receivers[receiverIndex].event_actions = state.event_receivers[receiverIndex].event_actions.slice();
       const [action] = state.event_receivers[receiverIndex]
         .event_actions
         .splice(actionIndex, 1);
@@ -191,6 +196,16 @@ class EventReceivers extends React.Component {
       </div>
     );
   }
+}
+
+function guid() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+    s4() + '-' + s4() + s4() + s4();
 }
 
 document.addEventListener('DOMContentLoaded', () =>

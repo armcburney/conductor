@@ -24,7 +24,7 @@ class Job < ApplicationRecord
   def request_json
     # Send the id of the current job, plus the information from the job type
     # needed to be able to spawn the job
-    job_type.as_json.merge(id: id, environment_variables: env_var_hash)
+    job_type.as_json.merge(id: id, worker_id: worker_id, job_type_id: job_type_id, environment_variables: env_var_hash)
   end
 
   def env_var_hash

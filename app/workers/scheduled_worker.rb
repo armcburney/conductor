@@ -5,7 +5,7 @@ class ScheduledWorker
   attr_reader :receiver
 
   def perform(id)
-    @receiver = Receiver.find_by(id)
+    @receiver = EventReceiver.find_by(id)
     return unless receiver
     schedule_job
   end

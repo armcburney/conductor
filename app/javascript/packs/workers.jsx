@@ -68,6 +68,7 @@ class Worker extends React.Component {
   }
 
   renderJob(job) {
+    console.log(this.props.jobTypes);
     return (
       <div
         className={`job ${job.id === this.props.selected ? 'selected' : ''}`}
@@ -115,6 +116,7 @@ class Workers extends React.Component {
 
     this.selectJob = this.selectJob.bind(this);
     this.healthcheck = this.healthcheck.bind(this);
+    this.spawn = this.spawn.bind(this);
     this.deleteWorker = this.deleteWorker.bind(this);
     this.setHideDeleted = this.setHideDeleted.bind(this);
   }
@@ -127,6 +129,14 @@ class Workers extends React.Component {
     this.setState(state => {
       const worker = state.workers.find(w => w.id == data.id);
       Object.assign(worker, data);
+      return state;
+    });
+  }
+
+  spawn(data) {
+    this.setState(state => {
+      const worker = state.workers.find(w => w.id == data.worker_id);
+      worker.jobs.push(data);
       return state;
     });
   }
@@ -194,6 +204,7 @@ class Workers extends React.Component {
           console.log(`worker_info.${w.id}`);
           const channel = dispatcher.subscribe_private(`worker_info.${w.id}`);
           channel.bind('worker_info.healthcheck', this.healthcheck);
+          channel.bind('worker_info.spawn', this.spawn);
         });
 
         console.log(json);

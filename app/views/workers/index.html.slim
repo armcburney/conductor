@@ -1,5 +1,8 @@
 h1 Workers
 
+javascript:
+  window.current_user_id = #{current_user.id};
+
 h2 Connected Workers
 .container id="workers"
 = javascript_pack_tag "workers"

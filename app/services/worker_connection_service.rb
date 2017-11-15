@@ -8,6 +8,8 @@ class WorkerConnectionService
 
   def connect(connection)
     subscribe_to_worker_channel(connection)
+    worker.user.info_channel.trigger(:worker_connect, worker.as_json, namespace: :user)
+    Rails.logger.info "Sent worker_connect to #{worker.user.id}"
   end
 
   private

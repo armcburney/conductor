@@ -27,6 +27,8 @@ class EventReceiver < ApplicationRecord
   private
 
   def create_event_dispatcher!
+    return unless job_type
+
     job_type.jobs.each do |job|
       EventDispatcher.first_or_create(event_receiver: self, job: job)
     end

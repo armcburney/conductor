@@ -36,4 +36,8 @@ Rails.application.configure do
   end
 
   config.active_record.dump_schema_after_migration = false
+
+  Sidekiq.configure_client do |config|
+    config.redis = { :size => 1 }
+  end
 end

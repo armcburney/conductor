@@ -38,7 +38,7 @@ class WebsocketConnection():
             except websockets.exceptions.ConnectionClosed as e:
                 if reconnect_count >= 10:
                     # Failed to reconnect 10 times, abort.
-                    logger.panic('Failed to establish websocket connection, aborting.')
+                    logger.critical('Failed to establish websocket connection, aborting.')
                     raise e
                 logger.debug('sleeping before reconnecting websocket...')
                 await asyncio.sleep(0.1 * (1 << reconnect_count)) # Exponential backoff

@@ -38,6 +38,6 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   Sidekiq.configure_client do |config|
-    config.redis = { :size => 1 }
+    config.redis = { size: 1, url: ENV["REDISTOGO_URL"] }
   end
 end

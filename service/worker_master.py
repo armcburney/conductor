@@ -293,6 +293,7 @@ class WorkerManager():
                 # print stack trace
                 # Try to recover
                 traceback.print_exc()
+                raise
 
             finally:
                 # If we have retried the max amount of times,

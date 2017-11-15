@@ -1,24 +1,3 @@
 p#notice = notice
 
-p
-  strong Stdout:
-  = @job.stdout
-p
-  strong Stderr:
-  = @job.stderr
-p
-  strong Status:
-  = @job.status
-p
-  strong Return code:
-  = @job.return_code
-p
-  strong Worker:
-  = @job.worker
-p
-  strong Job type:
-  = @job.job_type
-
-= link_to 'Edit', edit_job_path(@job)
-'  |
-= link_to 'Back', jobs_path
+= link_to 'Back', workers_path

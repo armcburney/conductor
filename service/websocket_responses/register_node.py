@@ -5,7 +5,7 @@ class RegisterNodeResponse(Response):
     worker.registered
     """
 
-    def __init__(self, id):
+    def __init__(self, id, **kwargs):
         self.node_id = id
 
     @classmethod

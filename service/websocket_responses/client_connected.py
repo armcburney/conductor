@@ -4,7 +4,7 @@ class ClientConnectedResponse(Response):
     """
     client_connected command from server
     """
-    def __init__(self, id, channel, user_id, success, result, token, server_token):
+    def __init__(self, id, channel, user_id, success, result, token, server_token, **kwargs):
         self.node_id = id
         self.node_channel = channel
         self.user_id = user_id

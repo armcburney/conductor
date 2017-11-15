@@ -5,7 +5,7 @@ class SpawnResponse(Response):
     worker.spawn
     """
 
-    def __init__(self, id, script, working_directory, environment_variables, timeout, name, user_id, created_at, updated_at):
+    def __init__(self, id, script, working_directory, environment_variables, timeout, name, user_id, created_at, updated_at, **kwargs):
         self.id = id
         self.script = script
         self.working_directory = working_directory

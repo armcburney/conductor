@@ -281,7 +281,7 @@ class WorkerManager():
                 logger.info("Shutting down node.")
                 sys.exit(0)
 
-            except (WebsocketConnectionError, websockets.exceptions.ConnectionClosed) :
+            except (WebsocketConnectionError, websockets.exceptions.ConnectionClosed, websockets.exceptions.InvalidStatusCode) :
                 # print stack trace
                 traceback.print_exc()
 

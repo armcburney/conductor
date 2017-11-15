@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171105131300) do
+ActiveRecord::Schema.define(version: 20171114232131) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -34,6 +34,7 @@ ActiveRecord::Schema.define(version: 20171105131300) do
     t.datetime "updated_at",                   null: false
     t.integer  "job_type_id"
     t.string   "type",              limit: 20, null: false
+    t.text     "email_body"
     t.index ["event_receiver_id"], name: "index_event_actions_on_event_receiver_id", using: :btree
     t.index ["job_type_id"], name: "index_event_actions_on_job_type_id", using: :btree
   end

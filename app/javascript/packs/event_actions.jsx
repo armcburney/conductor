@@ -8,7 +8,7 @@ class EventAction extends React.Component {
     this.state = {};
 
     this.DATA_FIELDS =
-      ['email_address', 'webhook_url', 'webhook_body', 'job_type_id', 'type'];
+      ['email_address', 'email_body', 'webhook_url', 'webhook_body', 'job_type_id', 'type'];
 
     [
       'save',
@@ -47,8 +47,9 @@ class EventAction extends React.Component {
   nullState() {
     return {
       loading: false,
-      type: 'EmailAction',
+      type: 'Email',
       email_address: null,
+      email_body: null,
       webhook_url: null,
       webhook_body: null,
       job_type_id: null
@@ -99,12 +100,16 @@ class EventAction extends React.Component {
   renderForm() {
     switch (this.props.type) {
       case 'Email':
-        return (
-          <div className='field'>
-            <label>Email</label>
+        return [
+          <div key='1' className='field'>
+            <label>Address</label>
             <input type='text' value={this.props.email_address || ''} onChange={this.updateEmailAddress} />
+          </div>,
+          <div key='2' className='field'>
+            <label>Body</label>
+            <textarea value={this.props.email_body || ''} onChange={this.updateEmailBody} />
           </div>
-        );
+        ];
       case 'Webhook':
         return [
           <div key='1' className='field'>

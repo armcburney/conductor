@@ -14,7 +14,7 @@ class ScheduledWorker
 
   def schedule_job(id)
     if worker
-      @job = Job.new(job_type: receiver.job_type, worker: worker, status: "DISPATCHED")
+      @job = Job.create(job_type: receiver.job_type, worker: worker, status: "DISPATCHED")
     else
       ScheduledWorker.perform_at(Worker::RETRY_TIME.seconds.from_now, id)
     end

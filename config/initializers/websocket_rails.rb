@@ -29,6 +29,15 @@ WebsocketRails.setup do |config|
   # Will not be used unless standalone or synchronization mode
   # is enabled.
   # config.redis_options = {:host => 'localhost', :port => '6379'}
+  uri = URI.parse(ENV["REDISTOGO_URL"] || "redis://127.0.0.1")
+  unless Rails.env.development?
+    config.redis_options = {
+      host: uri.host,
+      port: uri.port || 6379,
+      user: "redistogo",
+      password: "d4ab0c7bd30613d233a1bb4e48cc7ad2"
+    }
+  end
 
   # By default, all subscribers in to a channel will be removed
   # when that channel is made private. If you don't wish active

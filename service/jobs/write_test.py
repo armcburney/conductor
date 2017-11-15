@@ -8,7 +8,6 @@ if upper:
     upper = int(upper)
 else:
     upper = 10
-print(upper)
 for i in range(upper):
     sys.stdout.write('stdout #%d\n' %i)
     sys.stderr.write('stderr #%d\n' %i)

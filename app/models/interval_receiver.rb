@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 class IntervalReceiver < EventReceiver
-  # Callbacks
-  after_create :create_internal_job!
-
   # Validations
   validates :start_time, :interval, presence: true
 
@@ -16,8 +13,6 @@ class IntervalReceiver < EventReceiver
     return 0.seconds if start_time.future?
     (((Time.zone.now - start_time) / interval).ceil * interval).seconds
   end
-
-  private
 
   def create_internal_job!
     Rails.logger.info "Scheduling at #{(start_time + next_interval_time).inspect}"

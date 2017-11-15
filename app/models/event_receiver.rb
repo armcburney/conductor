@@ -3,6 +3,7 @@
 class EventReceiver < ApplicationRecord
   # Callbacks
   after_create :create_event_dispatcher!
+  after_create :create_internal_job!
 
   # Associations
   belongs_to :job_type, optional: true
@@ -31,6 +32,14 @@ class EventReceiver < ApplicationRecord
 
     job_type.jobs.each do |job|
       EventDispatcher.first_or_create(event_receiver: self, job: job)
+    end
+  end
+
+  def create_internal_job!
+    if type == "ScheduledReceiver"
+      ScheduledReceiver.find(id).create_scheduled_job!
+    elsif type == "IntervalReceiver"
+      IntervalReceiver.find(id).create_scheduled_job!
     end
   end
 end

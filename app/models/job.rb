@@ -3,7 +3,8 @@
 class Job < ApplicationRecord
   # Callbacks
   after_create :make_channel, :create_event_dispatchers!
-  before_save :default_values, :send_email
+  before_save :default_values
+  after_commit :update_channels
 
   # Associations
   belongs_to :worker
@@ -56,9 +57,10 @@ class Job < ApplicationRecord
     self.status ||= "UNDEFINED"
   end
 
-  def send_email
-    return unless status == "ERROR"
-    ErrorMailer.email(self).deliver
+  def update_channels
+    Rails.logger.info "Sending channel updates for job #{id}"
+    worker.channel.trigger(:spawn, request_json, namespace: :worker)
+    worker.info_channel.trigger(:spawn, request_json, namespace: :worker_info)
   end
 
   def create_event_dispatchers!

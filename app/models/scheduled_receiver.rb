@@ -12,8 +12,6 @@ class ScheduledReceiver < EventReceiver
     true
   end
 
-  private
-
   def create_scheduled_job!
     ScheduledWorker.perform_at(Worker::RETRY_TIME.seconds.from_now, id)
   end

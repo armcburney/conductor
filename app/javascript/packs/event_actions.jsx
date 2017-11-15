@@ -5,8 +5,6 @@ class EventAction extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
-
     this.DATA_FIELDS =
       ['email_address', 'email_body', 'webhook_url', 'webhook_body', 'job_type_id', 'type'];
 
@@ -14,7 +12,7 @@ class EventAction extends React.Component {
       'save',
       'remove',
       'cancel',
-      'updateType'
+      'updateType',
     ].forEach(fn => this[fn] = this[fn].bind(this));
 
     this.DATA_FIELDS.slice(0, this.DATA_FIELDS.length-1).forEach(property => {
@@ -29,14 +27,14 @@ class EventAction extends React.Component {
   }
 
   componentWillReceiveProps(props) {
-    if (props.updated_at != this.props.updated_at) {
+    if (props.updated_at != this.props.updated_at || props.guid != this.props.guid) {
       this.reset(props);
     }
   }
 
   reset(props) {
     this.props.update(state => {
-      state = Object.assign({}, state, this.nullState());
+      state = Object.assign({}, props, state, this.nullState());
       state.dirty = props.id === null;
 
       this.DATA_FIELDS.forEach(field => state[field] = props[field] || state[field]);
@@ -52,7 +50,7 @@ class EventAction extends React.Component {
       email_body: null,
       webhook_url: null,
       webhook_body: null,
-      job_type_id: null
+      job_type_id: this.props.job_types[0].id
     };
   }
 
@@ -94,7 +92,11 @@ class EventAction extends React.Component {
   }
 
   className() {
-    return `entity ${this.props.dirty ? 'dirty' : ''} ${this.props.loading ? 'loading' : ''}`;
+    return `entity ${this.dirty() ? 'dirty' : ''} ${this.props.loading ? 'loading' : ''}`;
+  }
+
+  dirty() {
+    return this.props.dirty || this.props.id === null;
   }
 
   renderForm() {
@@ -150,7 +152,6 @@ class EventAction extends React.Component {
             <label>Type:</label>
             <select value={this.props.type} onChange={this.updateType}>
               <option value='Email'>Send an email</option>
-              <option value='Webhook'>Send a webhook</option>
               <option value='SpawnJob'>Spawn another job</option>
             </select>
           </div>
@@ -164,7 +165,7 @@ class EventAction extends React.Component {
 export default function EventActions(props) {
   return (
     <div className='actions-list'>
-    {props.actions.map(
+    {props.actions && props.actions.map(
       (action, index) =>
         <EventAction
           key={index}

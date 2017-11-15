@@ -59,8 +59,7 @@ export default class Receiver extends React.Component {
       job_type_id: null,
       regex: null,
       stream: 'stdout',
-      return_code: 0,
-      event_actions: []
+      return_code: 0
     };
   }
 
@@ -78,17 +77,31 @@ export default class Receiver extends React.Component {
   }
 
   componentWillReceiveProps(props) {
-    if (props.updated_at != this.props.updated_at) {
-      this.reset(props);
-    }
-    this.setState(state => {
-      state.event_actions = props.event_actions.map(a => cloneDeep(a));
+    const updateActions = () => this.setState(state => {
+      state = Object.assign({}, state);
+      state.event_actions = state.event_actions.slice(0, props.event_actions.length);
+      for (let i = 0; i < props.event_actions.length; i++) {
+        const existing = state.event_actions[i];
+        const updated = props.event_actions[i];
+        if (!existing || existing.id != updated.id || existing.guid != updated.guid) {
+          state.event_actions[i] = cloneDeep(updated);
+        } else {
+          state.event_actions[i] = Object.assign({}, existing, updated);
+        }
+      }
       return state;
     });
+
+    if (props.updated_at != this.props.updated_at) {
+      return this.reset(props, updateActions);
+    } else {
+      updateActions();
+    }
   }
 
-  reset(props) {
+  reset(props, callback) {
     this.setState(state => {
+      const event_actions = state.event_actions;
       state = Object.assign({}, state, this.nullState());
       state.dirty = props.id === null;
       state.type = props.type || state.type;
@@ -99,10 +112,10 @@ export default class Receiver extends React.Component {
       state.regex = props.regex;
       state.stream = props.stream;
       state.return_code = props.return_code;
-      state.event_actions = cloneDeep(props.event_actions);
+      state.event_actions = cloneDeep(event_actions || props.event_actions);
 
       return state;
-    });
+    }, callback);
   }
 
   cancelUpdate() {
@@ -117,23 +130,17 @@ export default class Receiver extends React.Component {
     this.props.delete(this.props.index);
   }
 
-  save() {
+  save(callback) {
     this.setState({loading: true}, () => {
-      this.props.save(this.props.index, this.stateToRequest());
+      this.props.save(this.props.index, this.stateToRequest(), callback);
     });
-  }
-
-  saveWithActions() {
-    this.setState({loading: true}, () => this.props.save(
-      this.props.index,
-      Object.assign(this.stateToRequest(), {event_actions_attributes: this.props.event_actions})
-    ));
   }
 
   updateType(event) {
     const type = event.target.value;
     this.setState(state => {
-      state = Object.assign({}, state, this.nullState(), {type, dirty: true});
+      const event_actions = state.event_actions;
+      state = Object.assign({}, state, this.nullState(), {type, event_actions, dirty: true});
 
       if (['RegexReceiver', 'TimeoutReceiver', 'ReturnCodeReceiver'].includes(type)) {
         state.job_type_id = this.props.job_types[0].id;
@@ -147,19 +154,19 @@ export default class Receiver extends React.Component {
   }
 
   saveAction(actionIndex, data) {
-    data = Object.assign(data, {event_receiver_id: this.props.id});
+    const runSave = () => this.props.saveAction(
+      this.props.index,
+      actionIndex,
+      Object.assign(data, {event_receiver_id: this.props.id})
+    );
 
-    // If this receiver hasn't been saved yet, so save both at once
+    // If this receiver hasn't been saved yet, save receiver first
     if (this.props.id === null) {
-      this.saveWithActions();
+      this.save(runSave);
 
     // Otherwise, save the action immediately
     } else {
-      this.props.saveAction(
-        this.props.index,
-        actionIndex,
-        data
-      );
+      runSave();
     }
   }
 

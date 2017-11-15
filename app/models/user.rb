@@ -10,4 +10,16 @@ class User < ApplicationRecord
   has_many :event_receivers
   has_many :jobs, through: :job_types
   has_many :api_keys
+
+  after_create :make_info_channel
+
+  def info_channel
+    WebsocketRails["user.#{id}"]
+  end
+
+  private
+
+  def make_info_channel
+    info_channel.make_private
+  end
 end

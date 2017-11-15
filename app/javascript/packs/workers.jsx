@@ -117,6 +117,7 @@ class Workers extends React.Component {
     this.selectJob = this.selectJob.bind(this);
     this.healthcheck = this.healthcheck.bind(this);
     this.spawn = this.spawn.bind(this);
+    this.workerConnect = this.workerConnect.bind(this);
     this.deleteWorker = this.deleteWorker.bind(this);
     this.setHideDeleted = this.setHideDeleted.bind(this);
   }
@@ -134,10 +135,40 @@ class Workers extends React.Component {
   }
 
   spawn(data) {
+    fetch('/job_types.json', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Cache': 'no-cache'
+      },
+      credentials: 'include'
+    })
+      .then(res => res.json())
+      .then(json => {
+        this.setState(state => {
+          const worker = state.workers.find(w => w.id == data.worker_id);
+          worker.jobs.unshift(data);
+
+          state.jobTypes = {};
+          json.forEach(jobType => {
+            state.jobTypes[jobType.id] = jobType;
+          }); 
+          return state;
+        });
+      });
+  }
+
+  workerConnect(data) {
+    console.log(data);
     this.setState(state => {
-      const worker = state.workers.find(w => w.id == data.worker_id);
-      worker.jobs.unshift(data);
+      Object.assign(data, {jobs: []});
+      state.workers.unshift(data);
       return state;
+    }, () => {
+      const channel = dispatcher.subscribe_private(`worker_info.${data.id}`);
+      channel.bind('worker_info.healthcheck', this.healthcheck);
+      channel.bind('worker_info.spawn', this.spawn);
     });
   }
 
@@ -174,6 +205,10 @@ class Workers extends React.Component {
   }
 
   componentWillMount() {
+    console.log(window.current_user_id);
+    const userChannel = dispatcher.subscribe_private(`user.${window.current_user_id}`);
+    userChannel.bind('user.worker_connect', this.workerConnect);
+
     fetch('/workers.json', {
       method: 'GET',
       headers: {

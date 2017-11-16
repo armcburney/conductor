@@ -18,7 +18,7 @@
     width: 1501px;
     margin-right: -1px;
     background-image: url("/background.png");
-    animation: scroll 10s linear infinite;
+    animation: scroll 40s linear infinite;
     -webkit-backface-visibility: hidden;
     -webkit-transform-style: preserve-3d;
     animation-fill-mode: forwards;
@@ -30,6 +30,15 @@
     right: 50%;
     margin-right: -270px;
     z-index: 2;
+
+    @media all and (max-width: 900px) {
+      transform: scale(0.8) translateY(6px);
+    }
+
+    @media all and (max-width: 500px) {
+      margin-right: 0;
+      right: 0;
+    }
   }
 
   h1 {
@@ -40,7 +49,11 @@
     text-align: center;
     z-index: 2;
     max-width: none;
-    font-size: 80px;
+    font-size: 6em;
+
+    @media all and (max-width: 500px) {
+      font-size: 4em;
+    }
   }
 }
 

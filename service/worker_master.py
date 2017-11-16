@@ -277,14 +277,14 @@ class WorkerManager():
 
                 # connects to websocket on host
                 async with websockets.connect(self.service_host) as websocket:
-                    await self.register_and_process(websocket, reconnect)
                     timeout = 10
+                    await self.register_and_process(websocket, reconnect)
 
             except Kill:
                 logger.info("Shutting down node.")
                 sys.exit(0)
 
-            except (WebsocketConnectionError, websockets.exceptions.ConnectionClosed, websockets.exceptions.InvalidStatusCode) :
+            except:
                 # print stack trace
                 traceback.print_exc()
 
@@ -292,11 +292,6 @@ class WorkerManager():
                 logger.info("Error occured, sleeping for %s seconds before trying to reconnect", timeout)
                 time.sleep(timeout)
                 timeout = min(timeout << 1, 1000)
-
-            except:
-                # print stack trace
-                traceback.print_exc()
-                raise
 
             finally:
                 # If we have retried the max amount of times,

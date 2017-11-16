@@ -1,8 +1,7 @@
 #home
+- if current_user
   h1 Conductor
   hr
-
-- if current_user
   h2 How to create a worker
   ol
     li
@@ -35,6 +34,13 @@
   javascript:
     hljs.initHighlightingOnLoad();
 - else
+  #background-container
+    h1 Conductor
+    img#train src="/train.png"
+    #background-tiles
+      #background-scroll
+      #background-scroll
+      #background-scroll
   .row
     .col-1-1
       h2 Features

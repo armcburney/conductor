@@ -2,9 +2,8 @@
 
 class Job < ApplicationRecord
   # Callbacks
-  after_create :make_channel, :create_event_dispatchers!
+  after_create :make_channel, :create_event_dispatchers!, :update_channels
   before_save :default_values
-  after_commit :update_channels
 
   # Associations
   belongs_to :worker

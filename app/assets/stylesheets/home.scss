@@ -1,0 +1,67 @@
+#background-container {
+  height: 500px;
+  width: 100%;
+  flex: 1;
+  background-color: blue;
+  margin-top: -2rem;
+  overflow: hidden;
+  position: relative;
+  
+  #background-tiles {
+    width: 4501px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  #background-scroll {
+    height: 500px;
+    width: 1501px;
+    margin-right: -1px;
+    background-image: url("/background.png");
+    animation: scroll 40s linear infinite;
+    -webkit-backface-visibility: hidden;
+    -webkit-transform-style: preserve-3d;
+    animation-fill-mode: forwards;
+  }
+
+  #train {
+    position: absolute;
+    top: 323px;
+    right: 50%;
+    margin-right: -270px;
+    z-index: 2;
+
+    @media all and (max-width: 900px) {
+      transform: scale(0.8) translateY(6px);
+    }
+
+    @media all and (max-width: 500px) {
+      margin-right: 0;
+      right: 0;
+    }
+  }
+
+  h1 {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 2;
+    max-width: none;
+    font-size: 6em;
+
+    @media all and (max-width: 500px) {
+      font-size: 4em;
+    }
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-1500px);
+  }
+}

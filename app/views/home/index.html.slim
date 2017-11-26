@@ -39,48 +39,8 @@
       #background-scroll
       #background-scroll
       #background-scroll
+
   .row
-    .col-1-1
-      h2 Features
-
-    .col-1-3
-      = image_tag "users.png", size: 50
-      h3
-        b Create
-      p Create user accounts for your team
-
-    .col-1-3
-      = image_tag "note.png", size: 50
-      h3
-        b Register
-      p Register worker machines for users
-
-    .col-1-3
-      = image_tag "schedule.png", size: 50
-      h3
-        b Schedule
-      p Create jobs to be scheduled on worker machines
-
-    .col-1-1
-      h2 What is Conductor?
-      p Conductor is a distributed job scheduler and management system. The availability of cheap computing resources, often not even present in the same physical location, now means that many instances of a program one may want to run are no longer local to one's own personal computer. There exist systems to systematically distribute applications across servers, but these typically require a large amount of setup and are optimized for production systems with large loads (i.e. map-reduce systems) rather than manually triggered jobs consisting of smaller periodic tasks where an individual may want to check up on the status frequently. Conductor allows you to manage jobs on a cluster of machines from a centralized web app and get notifications based on job status. The web format allows usage from any web connected device. Coordination is done in the cloud, so if a client disconnects, jobs will still execute properly. A user can view job output and logs from this web console and specify certain reactive behaviour based on the status of a job, such as notification or retrying of failed jobs.
-
-    .col-1-1
-      h2 Why Conductor?
-
-    .row
-      ul
-        li Allows you to execute jobs on remote machines.
-        li Allows you to specify retry logic on job failure.
-        li Allows you to provide conditional execution of jobs, based on:
-
-        ul
-          li Time events (cron-like functionality)
-          li Return codes
-          li Output matches a regex
-
-        li Allows you to provide notifications to users based on:
-        ul
-          li Job status
-          li Output matching a regex
-          li Control and monitor job execution through a user interface.
+    = render "home/includes/features"
+    = render "home/includes/what"
+    = render "home/includes/why"

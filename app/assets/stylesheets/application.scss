@@ -6,6 +6,7 @@
 
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,400italic);
 
+@import "checkbox";
 @import "variables";
 @import "react-datetime";
 
@@ -26,6 +27,10 @@ body {
   padding: 0;
 }
 
+hr.small {
+  margin: 40px auto;
+  width: 40%;
+}
 *::selection {
   background: $accent;
 }
@@ -37,6 +42,7 @@ nav, ul, .row, .container, pre {
   @include top-level-centered;
 }
 ul {
+  list-style: none;
   padding-left: 5rem;
 }
 h1 {
@@ -86,6 +92,7 @@ section:nth-child(odd), section.odd {
 .row {
   flex-wrap: wrap;
   max-width: 64rem;
+  margin: 0 auto;
   padding: 0;
   display:flex;
 }
@@ -424,12 +431,32 @@ a.nav-link--toggle {
   width: 33%;
 }
 .col-1-1 {
-  text-align: center;
   width: 100%;
+
+  h2 {
+    text-align: center;
+  }
+
+  p {
+    text-align: justify;
+  }
+}
+#footer {
+  color: #bbb;
+  margin: 0 0 -2rem;
+  width: 100%;
+
+  .light-bg {
+    background: #333;
+  }
+
+  .dark-bg {
+    background: #2c2b2b;
+  }
 }
 @media all and (max-width: 1000px) {
-    .col-1-3 {
-        text-align: center;
-        width: 100%;
-    }
+  .col-1-3 {
+    text-align: center;
+    width: 100%;
+  }
 }

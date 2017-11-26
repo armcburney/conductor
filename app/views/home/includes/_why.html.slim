@@ -7,25 +7,29 @@
     li
       .roundedCheckbox
         input checked="checked" type="checkbox" value="None" /
-        label for="slideTwo"
+        label
       | Allows you to execute jobs on remote machines.
     li
       .roundedCheckbox
         input checked="checked" type="checkbox" value="None" /
-        label for="slideTwo"
+        label
       | Allows you to specify retry logic on job failure.
     li
       .roundedCheckbox
         input checked="checked" type="checkbox" value="None" /
-        label for="slideTwo"
+        label
       | Allows you to provide conditional execution of jobs, based on:
 
     ul
-      li Time events (cron-like functionality)
-      li Return codes
-      li Output matches a regex
+      li - Time events (cron-like functionality)
+      li - Return codes
+      li - Output matches a regex
 
-    li Allows you to provide notifications to users based on:
+    li
+      .roundedCheckbox
+        input checked="checked" type="checkbox" value="None" /
+        label
+      | Allows you to provide notifications to users based on:
     ul
       li Job status
       li Output matching a regex

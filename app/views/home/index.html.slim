@@ -2,45 +2,13 @@
 - if current_user
   h1 Conductor
   hr
-  h2 How to create a worker
-  ol
-    li
-      h3 Navigate to service directory <span class="code">/service/</span>
-    li
-      h3 Create sandboxed virtual environment (OPTIONAL)
-      pre
-        code.bash virtualenv -p YOUR_PATH_TO_PYTHON3.6 .
-                  . bin/activate # activate the virtualenv
-
-    li
-      h3 Install requirements
-      pre
-        code.bash
-          | pip install -r requirements.txt
-
-    li
-      h3 Create an <a href="/workers#api_keys">API key</a>
-
-    li
-      h3 Provision a worker
-      pre
-        code.bash
-          | python worker_master.py --token="YOUR_API_KEY"
-
-  script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"
-  link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/tomorrow-night.min.css"
-  javascript:
-    hljs.initHighlightingOnLoad();
+  = render "home/includes/how"
 - else
-  #background-container
-    h1 Conductor
-    img#train src="/train.png"
-    #background-tiles
-      #background-scroll
-      #background-scroll
-      #background-scroll
+  = render "home/includes/background"
 
   .row
     = render "home/includes/features"
     = render "home/includes/what"
     = render "home/includes/why"
+
+= render "shared/hljs"

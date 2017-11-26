@@ -1,0 +1,29 @@
+#footer {
+    color: #bbb;
+    margin: 0 0 -2rem;
+    width: 100%;
+
+    .col-1-3 {
+        .items {
+            padding: 0 1em;
+        }
+    }
+    .col-1-3.left {
+        text-align: left;
+    }
+    .col-1-3.right {
+        text-align: right;
+    }
+
+    .light-bg, .dark-bg {
+        padding: 2em 0;
+    }
+
+    .light-bg {
+        background: #333;
+    }
+
+    .dark-bg {
+        background: #2c2b2b;
+    }
+}

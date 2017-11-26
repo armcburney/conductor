@@ -45,6 +45,13 @@ nav, ul, .row, .container, pre {
 ul {
   list-style: none;
   padding-left: 5rem;
+
+  li {
+    padding: 1em 0;
+  }
+  ul li {
+    padding: 0;
+  }
 }
 h1 {
   font-size: 3em;

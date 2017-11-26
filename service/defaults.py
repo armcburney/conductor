@@ -1,1 +1,1 @@
-DEFAULT_SERVER="conductor-se464.herokuapp.com/websocket"
+DEFAULT_SERVER="ws://conductor-se464.herokuapp.com/websocket"

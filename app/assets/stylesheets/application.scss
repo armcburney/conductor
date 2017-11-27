@@ -6,6 +6,8 @@
 
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,400italic);
 
+@import "checkbox";
+@import "footer";
 @import "variables";
 @import "react-datetime";
 
@@ -26,8 +28,12 @@ body {
   padding: 0;
 }
 
+hr.small {
+  margin: 40px auto;
+  width: 40%;
+}
 *::selection {
-  background: $accent;
+  background: $primary;
 }
 h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12 {
   @include OpenSansLight;
@@ -37,7 +43,15 @@ nav, ul, .row, .container, pre {
   @include top-level-centered;
 }
 ul {
+  list-style: none;
   padding-left: 5rem;
+
+  li {
+    padding: 1em 0;
+  }
+  ul li {
+    padding: 0;
+  }
 }
 h1 {
   font-size: 3em;
@@ -66,7 +80,7 @@ h10+p, h11+p, h12+p, p+p {
 h2 {
   font-size: 2.5em;
   padding-top: 1em;
-  padding-bottom: 0.8em;
+  padding-bottom: 0;
 }
 section, header, footer, .row, nav, iframe {
   display: flex;
@@ -86,6 +100,7 @@ section:nth-child(odd), section.odd {
 .row {
   flex-wrap: wrap;
   max-width: 64rem;
+  margin: 0 auto;
   padding: 0;
   display:flex;
 }
@@ -311,6 +326,9 @@ textarea, select {
 .centered {
   text-align: center;
 }
+.justified {
+  text-align: justify;
+}
 p img {
   max-width: 100%;
 }
@@ -424,12 +442,16 @@ a.nav-link--toggle {
   width: 33%;
 }
 .col-1-1 {
-  text-align: center;
   width: 100%;
+
+  h2 {
+    text-align: center;
+  }
 }
+
 @media all and (max-width: 1000px) {
-    .col-1-3 {
-        text-align: center;
-        width: 100%;
-    }
+  .col-1-3 {
+    text-align: center;
+    width: 100%;
+  }
 }

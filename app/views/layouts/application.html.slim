@@ -19,7 +19,10 @@ html
     = javascript_include_tag "application"
 
   body
-    = render "shared/nav"
-    section
-      = yield
-    = render "shared/footer"
+    #main
+      = render "shared/nav"
+      section
+        = yield
+        #push
+    #bottom
+      = render "shared/footer"

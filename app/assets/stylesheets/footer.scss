@@ -1,5 +1,17 @@
+@import "variables";
+
+#main {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin: 0px auto $negFooterHeight;
+}
+#push {
+  height: $footerHeight;
+}
 #footer {
   color: #bbb;
+  height: $footerHeight;
   margin: 0 0 -2rem;
   width: 100%;
 

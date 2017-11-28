@@ -68,6 +68,7 @@ class Worker extends React.Component {
   }
 
   renderJob(job) {
+    console.log(this.props.jobTypes);
     return (
       <div
         className={`job ${job.id === this.props.selected ? 'selected' : ''}`}
@@ -119,7 +120,6 @@ class Workers extends React.Component {
     this.workerConnect = this.workerConnect.bind(this);
     this.deleteWorker = this.deleteWorker.bind(this);
     this.setHideDeleted = this.setHideDeleted.bind(this);
-    this.scrollToBottom = this.scrollToBottom.bind(this);
   }
 
   setHideDeleted(event) {
@@ -160,6 +160,7 @@ class Workers extends React.Component {
   }
 
   workerConnect(data) {
+    console.log(data);
     this.setState(state => {
       Object.assign(data, {jobs: []});
       state.workers.unshift(data);
@@ -169,11 +170,6 @@ class Workers extends React.Component {
       channel.bind('worker_info.healthcheck', this.healthcheck);
       channel.bind('worker_info.spawn', this.spawn);
     });
-  }
-
-  scrollToBottom() {
-    this.jobDiv = this.jobDiv || document.querySelector('.selected-job');
-    this.jobDiv.scrollTop = this.jobDiv.scrollHeight;
   }
 
   selectJob(id) {
@@ -200,7 +196,7 @@ class Workers extends React.Component {
         if (state[stream] === null) state[stream] = '';
         state[stream] += addition;
         return state;
-      }, this.scrollToBottom));
+      }));
     });
     this.channel.bind('job.return_code', rc => this.setState(state => {
       state.returnCode = rc;
@@ -209,6 +205,7 @@ class Workers extends React.Component {
   }
 
   componentWillMount() {
+    console.log(window.current_user_id);
     const userChannel = dispatcher.subscribe_private(`user.${window.current_user_id}`);
     userChannel.bind('user.worker_connect', this.workerConnect);
 
@@ -239,10 +236,13 @@ class Workers extends React.Component {
         }
 
         json.workers.forEach(w => {
+          console.log(`worker_info.${w.id}`);
           const channel = dispatcher.subscribe_private(`worker_info.${w.id}`);
           channel.bind('worker_info.healthcheck', this.healthcheck);
           channel.bind('worker_info.spawn', this.spawn);
         });
+
+        console.log(json);
       })
       .catch(e => console.error(e));
   }

@@ -10,6 +10,7 @@ end
 ruby "2.4.1"
 
 gem "coffee-rails"
+gem "compass-rails"
 gem "devise"
 gem "dotenv-rails"
 gem "faye-websocket", "0.10.0"

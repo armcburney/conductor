@@ -8,7 +8,8 @@ $mid: #aaa;
 $accent: #F07C6C;
 $accent-light: #F39E8E;
 $dark: #111;
-
+$footerHeight: 237px;
+$negFooterHeight: -237px;
 
 @mixin top-level-centered {
   box-sizing: border-box;

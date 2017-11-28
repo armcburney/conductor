@@ -1,0 +1,27 @@
+h2 How to create a worker
+ol
+  li
+    h3 Navigate to service directory <span class="code">/service/</span>
+  li
+    h3 Create sandboxed virtual environment (OPTIONAL)
+    pre
+      code.bash
+        | virtualenv -p YOUR_PATH_TO_PYTHON3.6 .
+        br
+        | . bin/activate # activate the virtualenv
+
+  li
+    h3 Install requirements
+    pre
+      code.bash
+        | pip install -r requirements.txt
+
+  li
+    h3 Create an <a href="/workers#api_keys">API key</a>
+
+  li
+    h3 Provision a worker
+    p In order to provision a new node, start up <span class="code">worker_master.py</span> with the provided api token. See <span class="code">service/dev_scripts/test_live.sh</span> for an example.
+    pre
+      code.bash
+        | python worker_master.py --token="YOUR_API_KEY"
